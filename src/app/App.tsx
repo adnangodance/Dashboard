@@ -50,6 +50,7 @@ import {
   LogOut,
   Flag,
   Send,
+  Snowflake,
 } from "lucide-react";
 
 import img430 from "@/imports/ScriptlinkrxDashboard/9b6fa0a3b334659006bcf39e91b4da387a7b4cf0.png";
@@ -479,7 +480,7 @@ function Sidebar({
       </div>
 
       <div className="mt-auto" />
-      <SidebarSupportVersion />
+      <SidebarSupportVersion onNavigate={onNavigate} />
       <div className="pb-3 pt-4">
         <UserChip onNavigate={onNavigate} onLogout={onLogout} appTheme={appTheme} setAppTheme={setAppTheme} extraVariants={extraVariants} setExtraVariants={setExtraVariants} />
       </div>
@@ -487,7 +488,7 @@ function Sidebar({
   );
 }
 
-function SidebarSupportVersion() {
+function SidebarSupportVersion({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const supportContacts = [
     { name: "Shayne", role: "Head Operator", phone: "917-274-7648", avatar: supportShayne },
     { name: "Zee", role: "CEO", phone: "(646)-617-9881", avatar: supportZee },
@@ -521,6 +522,18 @@ function SidebarSupportVersion() {
         </span>
         <ChevronsUpDown size={15} className="shrink-0 text-[#8c948f]" />
       </button>
+      <div className="mt-2 rounded-[18px] border border-white/70 bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)] p-3 shadow-[0_10px_28px_rgba(38,54,45,0.08)]">
+          <h3 className="text-[15px] font-semibold leading-[19px] tracking-[-0.01em] text-[#171A18]">Enable Pay by Clinic</h3>
+          <p className="mt-1.5 text-[11px] leading-[16px] text-[#737A75]">Use your clinic’s card for patient purchases.</p>
+          <button
+            type="button"
+            onClick={() => onNavigate("settings")}
+            className="group mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-white px-3 py-2.5 text-[11px] font-semibold text-[#171A18] shadow-[0_3px_12px_rgba(34,46,39,0.06)] transition-transform hover:-translate-y-0.5"
+          >
+            Set up payment
+            <ArrowUpRight size={13} strokeWidth={2} className="transition-transform group-hover:translate-x-0.5" />
+          </button>
+        </div>
     </div>
   );
 }
@@ -1600,7 +1613,7 @@ function OptionPill({
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center border px-5 font-medium transition-colors ${tesla ? "min-h-[68px] w-full rounded-[4px] text-[13px]" : "h-11 rounded-[7px] text-[12px]"} ${
+      className={`relative inline-flex items-center border font-medium transition-colors ${tesla ? "h-10 min-w-[94px] justify-center rounded-[7px] px-3 text-[11px]" : "h-11 rounded-[7px] px-5 text-[12px]"} ${
         selected && tesla
           ? "border-2 border-[#171a20] bg-white text-[#171a20]"
           : tesla
@@ -1614,12 +1627,11 @@ function OptionPill({
           : "border-[#c8c8c8] bg-white text-[#333] hover:border-[#111]/50"
       }`}
     >
-      <span className={`inline-flex items-center gap-1.5 ${(card || tesla) ? "w-full justify-between" : ""}`}>
+      <span className={`inline-flex items-center gap-1.5 ${card ? "w-full justify-between" : ""}`}>
         <span className={tesla ? "text-left" : ""}>
           <span className="block">{label}</span>
-          {tesla && <span className="mt-1 block text-[10px] font-normal text-[#5c5e62]">{selected ? "Current configuration" : "Available option"}</span>}
         </span>
-        {tesla && <span className={`text-[11px] ${selected ? "font-semibold text-[#171a20]" : "font-normal text-[#5c5e62]"}`}>{selected ? "Selected" : "Select"}</span>}
+        {tesla && selected && <CheckCircle2 size={18} strokeWidth={2.2} className="absolute -right-2 -top-2 fill-black text-white" />}
         {(emphasis || card) && selected && <CheckCircle2 size={13} strokeWidth={2} />}
       </span>
     </button>
@@ -1680,7 +1692,7 @@ function ProductDetailPage({
   }, [defaultSize, defaultStrength, product.dosage, product.id, product.pharmacy]);
 
   useEffect(() => {
-    if (!extraVariants) setProductDetailVariant(2);
+    if (!extraVariants) setProductDetailVariant(5);
   }, [extraVariants]);
 
   useLayoutEffect(() => {
@@ -1796,74 +1808,96 @@ function ProductDetailPage({
 
   return (
     <>
-      <div className={productDetailVariant === 5 ? "-m-6 pb-24" : "pl-[15px]"}>
-      <div className={`${productDetailVariant === 5 ? "hidden" : "-mt-4 mb-[39px]"}`}>
-        <h1 className="text-[32px] font-medium leading-tight text-[#111]">Products</h1>
-        <p className="mt-2 text-[11px] font-normal text-[#4b4b4b]">
-          <button onClick={() => onNavigate("products")} className="text-[11px] font-normal hover:underline">Home</button>, <button onClick={() => onNavigate("products")} className="text-[11px] font-normal hover:underline">Catalog</button>, <span className="text-[11px] font-normal">{product.name}</span>
-        </p>
+      <div className="pl-[15px]">
+      <div className="-mt-4 mb-[39px]">
+        <div className="flex items-start gap-3">
+          {productDetailVariant === 5 && (
+            <button
+              type="button"
+              onClick={() => onNavigate("products")}
+              aria-label="Back to catalog"
+              className="mt-0.5 flex size-10 cursor-pointer items-center justify-center rounded-r-[12px] bg-[#f0f1f2] text-[#183229] transition-colors hover:bg-[#e6e8e9]"
+            >
+              <ChevronLeft size={21} strokeWidth={2} />
+            </button>
+          )}
+          <div>
+            <h1 className="text-[32px] font-medium leading-tight text-[#111]">Products</h1>
+            <p className="mt-2 text-[11px] font-normal text-[#4b4b4b]">
+              <button onClick={() => onNavigate("products")} className="text-[11px] font-normal hover:underline">Home</button>, <button onClick={() => onNavigate("products")} className="text-[11px] font-normal hover:underline">Catalog</button>, <span className="text-[11px] font-normal">{product.name}</span>
+            </p>
+          </div>
+        </div>
       </div>
-      {extraVariants && <div className={`${productDetailVariant === 5 ? "sticky top-0 z-40 mb-0 border-b border-[#e5e5e5] bg-white px-6 py-3" : "mb-5"} flex flex-wrap items-center gap-2`}>
+      {extraVariants && <div className="mb-5 flex flex-wrap items-center gap-2">
         <span className="mr-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#777]">Page style</span>
         {([1, 2, 3, 4, 5] as const).map(variant => (
           <button key={variant} onClick={() => setProductDetailVariant(variant)} className={`h-8 rounded-full px-3 text-[11px] font-semibold transition-colors ${productDetailVariant === variant ? "bg-[#111] text-white" : "border border-[#ddd] bg-white text-[#555] hover:border-[#999]"}`}>
-            {variant}. {variant === 1 ? "Apple" : variant === 2 ? "Selection" : variant === 3 ? "Card Selection" : variant === 4 ? "Green" : "Tesla"}
+            {variant}. {variant === 1 ? "Apple" : variant === 2 ? "Selection" : variant === 3 ? "Card Selection" : variant === 4 ? "Green" : "Reference"}
           </button>
         ))}
       </div>}
-      <div className={`grid items-start ${productDetailVariant === 5 ? "max-w-none gap-0 xl:grid-cols-[minmax(0,1.65fr)_minmax(380px,0.78fr)]" : "max-w-[1073px] gap-10 xl:grid-cols-[minmax(0,1.244fr)_minmax(0,1fr)]"}`}>
-        <div className={`min-w-0 ${productDetailVariant === 5 ? "xl:sticky xl:top-[57px]" : ""}`}>
-          <div className={`flex items-center justify-center overflow-hidden ${productDetailVariant === 5 ? "h-[calc(100vh-134px)] min-h-[620px] bg-[#f4f4f4] p-8" : `h-[600px] rounded-[18px] border border-[#e4e4e4] p-16 ${productDetailVariant === 2 ? "bg-[#fbfdfc]" : "bg-[#f8f8f8]"}`}`}>
-            <img src={product.img} alt={product.name} className={`${productDetailVariant === 5 ? "max-h-[72vh] scale-[1.08]" : "max-h-[410px]"} h-full w-full object-contain mix-blend-multiply`} />
+      <div className={`grid max-w-[1180px] items-start gap-10 ${productDetailVariant === 5 ? "xl:grid-cols-[minmax(0,1.1fr)_minmax(480px,0.9fr)]" : "xl:grid-cols-[minmax(0,1.244fr)_minmax(0,1fr)]"}`}>
+        <div className="min-w-0">
+          <div className={`flex h-[600px] items-center justify-center overflow-hidden rounded-[18px] p-16 ${productDetailVariant === 5 ? "bg-[#fafafa]" : `border border-[#e4e4e4] ${productDetailVariant === 2 ? "bg-[#fbfdfc]" : "bg-[#f8f8f8]"}`}`}>
+            <img src={product.img} alt={product.name} className="max-h-[410px] h-full w-full object-contain mix-blend-multiply" />
           </div>
-          <div className={`${productDetailVariant === 5 ? "hidden" : "mt-7 flex"} flex-wrap gap-2`}>
-            {["Sterile", "Refrigerated", "Controlled Substance", "Protect from Light"].map(tag => (
-              <span key={tag} className="rounded-full border border-[#dedede] bg-white px-3.5 py-1.5 text-[12px] font-medium text-[#777] shadow-sm">{tag}</span>
+          <div className="mt-7 flex flex-wrap gap-2">
+            {[
+              { label: "Sterile", icon: Syringe },
+              { label: "Refrigerated", icon: Snowflake },
+              { label: "Controlled Substance", icon: Lock },
+              { label: "Protect from Light", icon: EyeOff },
+            ].map(({ label, icon: Icon }) => (
+              <span key={label} className="inline-flex items-center gap-2 rounded-full border border-[#202020] bg-white px-4 py-2 text-[12px] font-medium text-[#202020]">
+                <Icon size={15} strokeWidth={1.7} />
+                {label}
+              </span>
             ))}
           </div>
         </div>
 
-        <div ref={configurationCardRef} className={`min-w-0 ${productDetailVariant === 5 ? "h-[calc(100vh-134px)] min-h-[620px] overflow-y-auto border-l border-[#e5e5e5] bg-white px-7 pb-28 pt-10 text-[#171a20]" : "-mt-[23px]"}`}>
-          <h1 className={`${productDetailVariant === 5 ? "text-center text-[34px] font-semibold tracking-[-0.02em]" : "text-[30px] font-medium"} leading-tight text-[#111]`}>{product.name}</h1>
-          <p className={`${productDetailVariant === 5 ? "mx-auto mt-1 max-w-[440px] text-center text-[12px]" : "mt-1.5 max-w-[500px] text-[13px]"} leading-[1.45] text-[#8a8a8a]`}>A compounded {product.dosage.toLowerCase()} developed for personalized {product.areaOfTreatment.toLowerCase()} treatment and patient care.</p>
-          <p className={`${productDetailVariant === 5 ? "mt-4 text-center text-[22px]" : "mt-5 text-[25px]"} font-medium text-[#111]`}>${baseProductPrice.toFixed(2)}</p>
+        <div ref={configurationCardRef} className="min-w-0 -mt-[23px]">
+          {productDetailVariant === 5 ? (
+            <h1 className="text-left text-[32px] font-medium leading-tight tracking-[-0.02em] text-[#111]">{product.name}</h1>
+          ) : (
+            <h1 className="text-[30px] font-medium leading-tight text-[#111]">{product.name}</h1>
+          )}
+          <p className="mt-1.5 max-w-[500px] text-[13px] leading-[1.45] text-[#666]">A compounded {product.dosage.toLowerCase()} developed for personalized {product.areaOfTreatment.toLowerCase()} treatment and patient care.</p>
+          <p className="mt-3 text-[25px] font-medium text-[#111]">${baseProductPrice.toFixed(2)}</p>
+          {productDetailVariant === 5 && (
+            <button
+              type="button"
+              onClick={() => onNavigate("support")}
+              className="mt-2 cursor-pointer text-[11px] font-medium text-[#333] underline decoration-[#999] underline-offset-4 transition-colors hover:text-black hover:decoration-black"
+            >
+              Ask a question?
+            </button>
+          )}
 
-          {productDetailVariant === 5 && <>
-            <div className="mt-5 grid grid-cols-3 border-b border-[#d0d1d2] text-center text-[12px] font-medium text-[#5c5e62]">
-              <button className="pb-3">Cash</button>
-              <button className="border-b-2 border-[#171a20] pb-3 text-[#171a20]">Clinic</button>
-              <button className="pb-3">Patient</button>
-            </div>
-            <div className="mt-4 grid grid-cols-3 rounded-[4px] bg-[#f4f4f4] px-3 py-5 text-center">
-              <span><strong className="block text-[18px] font-semibold">90</strong><small className="text-[10px] text-[#5c5e62]">Beyond-use days</small></span>
-              <span><strong className="block text-[18px] font-semibold">1–2</strong><small className="text-[10px] text-[#5c5e62]">Processing days</small></span>
-              <span><strong className="block text-[18px] font-semibold">{product.dosage}</strong><small className="text-[10px] text-[#5c5e62]">Dosage form</small></span>
-            </div>
-          </>}
-
-          <div className={`${productDetailVariant === 5 ? "mt-8 border-0 pt-0" : "mt-2 border-t border-[#ededed] pt-2"}`}>
-            <p className={`${productDetailVariant === 5 ? "mb-3 text-center text-[16px] font-semibold" : "mb-2 text-[12px] font-medium"} text-[#111]`}>{productDetailVariant === 5 ? "Choose Size" : "Size"}</p>
-            <div className={productDetailVariant === 5 ? "grid gap-2" : "flex flex-wrap gap-2"}>
+          <div className={`${productDetailVariant === 5 ? "mt-6" : "mt-2 border-t border-[#ededed] pt-2"}`}>
+            <div className={productDetailVariant === 5 ? "mb-3 flex items-center gap-3" : ""}><p className={`${productDetailVariant === 5 ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>Size</p>{productDetailVariant === 5 && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
+            <div className="flex flex-wrap gap-2">
               {(product.dosage === "Gel" ? ["15g Tube", "30g Tube", "60g Tube"] : product.dosage === "Capsule" ? ["30 Capsules", "60 Capsules", "90 Capsules"] : ["1 (5mL) Vial", "1 (10mL) Vial", "1 (30mL) Vial"]).map(option => <OptionPill key={option} label={option} selected={size === option} onClick={() => setSize(option)} emphasis={productDetailVariant === 2} card={productDetailVariant === 3} tesla={productDetailVariant === 5} tone={productDetailVariant === 4 ? "green" : "apple"} />)}
             </div>
           </div>
 
-          <div className={`${productDetailVariant === 5 ? "mt-8 border-0 pt-0" : "mt-3 border-t border-[#ededed] pt-2"}`}>
-            <p className={`${productDetailVariant === 5 ? "mb-3 text-center text-[16px] font-semibold" : "mb-2 text-[12px] font-medium"} text-[#111]`}>{productDetailVariant === 5 ? "Choose Strength" : "Strength"}</p>
-            <div className={productDetailVariant === 5 ? "grid gap-2" : "flex flex-wrap gap-2"}>
+          <div className={`${productDetailVariant === 5 ? "mt-5" : "mt-3 border-t border-[#ededed] pt-2"}`}>
+            <div className={productDetailVariant === 5 ? "mb-3 flex items-center gap-3" : ""}><p className={`${productDetailVariant === 5 ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>Strength</p>{productDetailVariant === 5 && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
+            <div className="flex flex-wrap gap-2">
               {[defaultStrength, product.dosage === "Gel" ? "0.05%" : "1mg/mL"].filter((option, index, list) => list.indexOf(option) === index).map(option => <OptionPill key={option} label={option} selected={strength === option} onClick={() => setStrength(option)} emphasis={productDetailVariant === 2} card={productDetailVariant === 3} tesla={productDetailVariant === 5} tone={productDetailVariant === 4 ? "green" : "apple"} />)}
             </div>
           </div>
 
-          <div className={`${productDetailVariant === 5 ? "mt-8 border-0 pt-0" : "mt-3 border-t border-[#ededed] pt-2"}`}>
-            <p className={`${productDetailVariant === 5 ? "mb-3 text-center text-[16px] font-semibold" : "mb-2 text-[12px] font-medium"} text-[#111]`}>{productDetailVariant === 5 ? `Choose ${product.dosage === "Injection" ? "Injection Type" : "Form"}` : product.dosage === "Injection" ? "Injection Type" : "Form"}</p>
-            <div className={productDetailVariant === 5 ? "grid gap-2" : "flex flex-wrap gap-2"}>
+          <div className={`${productDetailVariant === 5 ? "mt-5" : "mt-3 border-t border-[#ededed] pt-2"}`}>
+            <div className={productDetailVariant === 5 ? "mb-3 flex items-center gap-3" : ""}><p className={`${productDetailVariant === 5 ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>{product.dosage === "Injection" ? "Injection Type" : "Form"}</p>{productDetailVariant === 5 && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
+            <div className="flex flex-wrap gap-2">
               {(product.dosage === "Injection" ? ["Subcutaneous", "Intramuscular"] : [product.dosage]).map(option => <OptionPill key={option} label={option} selected={injType === option} onClick={() => setInjType(option)} emphasis={productDetailVariant === 2} card={productDetailVariant === 3} tesla={productDetailVariant === 5} tone={productDetailVariant === 4 ? "green" : "apple"} />)}
             </div>
           </div>
 
-          <div className={`${productDetailVariant === 5 ? "mt-8 border-0 pt-0" : "mt-3 border-t border-[#ededed] pt-2"}`}>
-            <p className={`${productDetailVariant === 5 ? "mb-3 text-center text-[16px] font-semibold" : "mb-2 text-[12px] font-medium"} text-[#111]`}>{productDetailVariant === 5 ? "Choose Pharmacy" : "Pharmacy"}</p>
+          <div className={`${productDetailVariant === 5 ? "mt-5" : "mt-3 border-t border-[#ededed] pt-2"}`}>
+            <div className={productDetailVariant === 5 ? "mb-3 flex items-center gap-3" : ""}><p className={`${productDetailVariant === 5 ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>Pharmacy</p>{productDetailVariant === 5 && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
             <div className="space-y-2">
               {pharmacies.slice(0, 2).map(option => {
                 const selected = pharmacy === option.name;
@@ -1875,7 +1909,8 @@ function ProductDetailPage({
                   ? "border-2 border-[#171a20] bg-white"
                   : "border-[#183229] bg-[#eef7f2] shadow-[0_8px_18px_rgba(24,50,41,0.08)]";
                 return (
-                  <button key={option.name} onClick={() => setPharmacy(option.name)} className={`grid w-full grid-cols-[minmax(0,1fr)_90px] items-center border px-3 text-left transition-colors ${productDetailVariant === 5 ? "min-h-[76px] rounded-[4px] py-4" : "rounded-[8px] py-3"} ${selected && productDetailVariant === 2 ? "border-[#183229] bg-[#183229] text-white shadow-[0_8px_18px_rgba(24,50,41,0.16)]" : selected ? outlineSelected : "border-[#bdbdbd] bg-white hover:border-[#555]"}`}>
+                  <button key={option.name} onClick={() => setPharmacy(option.name)} className={`relative grid w-full grid-cols-[minmax(0,1fr)_90px] items-center border px-3 text-left transition-colors ${productDetailVariant === 5 ? "min-h-[58px] rounded-[8px] py-2.5" : "rounded-[8px] py-3"} ${selected && productDetailVariant === 2 ? "border-[#183229] bg-[#183229] text-white shadow-[0_8px_18px_rgba(24,50,41,0.16)]" : selected ? outlineSelected : "border-[#bdbdbd] bg-white hover:border-[#555]"}`}>
+                    {selected && productDetailVariant === 5 && <CheckCircle2 size={18} strokeWidth={2.2} className="absolute -right-2 -top-2 fill-black text-white" />}
                     <span className="min-w-0">
                       <span className={`flex items-center gap-1.5 truncate text-[12px] font-medium ${selected && productDetailVariant === 2 ? "text-white" : "text-[#111]"}`}>
                         {selected && productDetailVariant === 2 && <CheckCircle2 size={13} className="shrink-0 text-white" />}
@@ -1893,17 +1928,18 @@ function ProductDetailPage({
             </div>
           </div>
 
-          <div className="mt-4 border-t border-[#ededed] pt-4">
-            <p className="text-[12px] font-medium text-[#111]">Shipping</p>
-            <p className="mt-1 text-[12px] text-[#252525]">Choose where to ship the prescription</p>
+          <div className={productDetailVariant === 5 ? "mt-5" : "mt-4 border-t border-[#ededed] pt-4"}>
+            {productDetailVariant === 5 ? <div className="mb-3 flex items-center gap-3"><p className="shrink-0 text-[12px] font-medium text-[#111]">Shipping</p><span className="h-px flex-1 bg-[#e5e5e5]" /></div> : <><p className="text-[12px] font-medium text-[#111]">Shipping</p><p className="mt-1 text-[12px] text-[#252525]">Choose where to ship the prescription</p></>}
             <div className="mt-3 flex flex-wrap gap-2">
-              <button disabled={selectedPatientCount > 1} onClick={() => selectShippingChoice("patient")} className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[11px] font-semibold transition-colors ${selectedPatientCount > 1 ? "cursor-not-allowed border-[#e0e2e1] bg-[#f7f7f6] text-[#a7aaa8] opacity-70" : shippingChoice === "patient" && productDetailVariant === 2 ? "border-[#183229] bg-[#183229] text-white shadow-[0_8px_18px_rgba(24,50,41,0.16)]" : shippingChoice === "patient" ? (productDetailVariant === 4 ? "border-2 border-[#00B53F] bg-white text-[#202020] shadow-[0_0_0_3px_rgba(0,181,63,0.10)]" : productDetailVariant === 1 ? "border-[3px] border-[#4485FF] bg-white text-[#202020]" : productDetailVariant === 5 ? "border-2 border-[#171a20] bg-white text-[#171a20]" : "border-[#183229] bg-[#eef7f2] text-[#183229]") : "border-[#d8dedd] bg-white text-[#6f7782]"}`}>
+              <button disabled={selectedPatientCount > 1} onClick={() => selectShippingChoice("patient")} className={`relative inline-flex h-9 items-center gap-2 border px-3 text-[11px] font-semibold transition-colors ${productDetailVariant === 5 ? "rounded-[7px]" : "rounded-full"} ${selectedPatientCount > 1 ? "cursor-not-allowed border-[#e0e2e1] bg-[#f7f7f6] text-[#a7aaa8] opacity-70" : shippingChoice === "patient" && productDetailVariant === 2 ? "border-[#183229] bg-[#183229] text-white shadow-[0_8px_18px_rgba(24,50,41,0.16)]" : shippingChoice === "patient" ? (productDetailVariant === 4 ? "border-2 border-[#00B53F] bg-white text-[#202020] shadow-[0_0_0_3px_rgba(0,181,63,0.10)]" : productDetailVariant === 1 ? "border-[3px] border-[#4485FF] bg-white text-[#202020]" : productDetailVariant === 5 ? "border-2 border-[#171a20] bg-white text-[#171a20]" : "border-[#183229] bg-[#eef7f2] text-[#183229]") : "border-[#d8dedd] bg-white text-[#6f7782]"}`}>
                 {shippingChoice === "patient" && productDetailVariant === 2 && <CheckCircle2 size={13} />}
-                Ship to Patient <User size={13} />
+                {shippingChoice === "patient" && productDetailVariant === 5 && <CheckCircle2 size={18} strokeWidth={2.2} className="absolute -right-2 -top-2 fill-black text-white" />}
+                Ship to Patient
               </button>
-              <button onClick={() => selectShippingChoice("clinic")} className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[11px] font-semibold transition-colors ${shippingChoice === "clinic" && productDetailVariant === 2 ? "border-[#183229] bg-[#183229] text-white shadow-[0_8px_18px_rgba(24,50,41,0.16)]" : shippingChoice === "clinic" ? (productDetailVariant === 4 ? "border-2 border-[#00B53F] bg-white text-[#202020] shadow-[0_0_0_3px_rgba(0,181,63,0.10)]" : productDetailVariant === 1 ? "border-[3px] border-[#4485FF] bg-white text-[#202020]" : productDetailVariant === 5 ? "border-2 border-[#171a20] bg-white text-[#171a20]" : "border-[#183229] bg-[#eef7f2] text-[#183229]") : "border-[#d8dedd] bg-white text-[#6f7782]"}`}>
+              <button onClick={() => selectShippingChoice("clinic")} className={`relative inline-flex h-9 items-center gap-2 border px-3 text-[11px] font-semibold transition-colors ${productDetailVariant === 5 ? "rounded-[7px]" : "rounded-full"} ${shippingChoice === "clinic" && productDetailVariant === 2 ? "border-[#183229] bg-[#183229] text-white shadow-[0_8px_18px_rgba(24,50,41,0.16)]" : shippingChoice === "clinic" ? (productDetailVariant === 4 ? "border-2 border-[#00B53F] bg-white text-[#202020] shadow-[0_0_0_3px_rgba(0,181,63,0.10)]" : productDetailVariant === 1 ? "border-[3px] border-[#4485FF] bg-white text-[#202020]" : productDetailVariant === 5 ? "border-2 border-[#171a20] bg-white text-[#171a20]" : "border-[#183229] bg-[#eef7f2] text-[#183229]") : "border-[#d8dedd] bg-white text-[#6f7782]"}`}>
                 {shippingChoice === "clinic" && productDetailVariant === 2 && <CheckCircle2 size={13} />}
-                Ship to Clinic <Building2 size={13} />
+                {shippingChoice === "clinic" && productDetailVariant === 5 && <CheckCircle2 size={18} strokeWidth={2.2} className="absolute -right-2 -top-2 fill-black text-white" />}
+                Ship to Clinic
               </button>
             </div>
             <p className="mt-2 text-[10px] text-[#7a837f]">{shippingChoice === "clinic" ? "You can select multiple patients for one clinic shipment." : "You can select one patient for this shipment."}</p>
@@ -2006,7 +2042,7 @@ function ProductDetailPage({
         </div>
       </div>
 
-      <section className={`${productDetailVariant === 5 ? "hidden" : "mt-8"} max-w-[1073px] overflow-hidden rounded-[12px] border border-[#e8e3df] bg-white`}>
+      <section className="mt-8 max-w-[1180px] overflow-hidden rounded-[12px] border border-[#e8e3df] bg-white">
         <div className="overflow-x-auto border-b border-[#e8e3df] px-5 sm:px-6">
           <div className="flex min-w-max gap-7" role="tablist" aria-label="Product information">
             {[
@@ -2117,18 +2153,6 @@ function ProductDetailPage({
         </div>
       </section>
       </div>
-      {productDetailVariant === 5 && (
-        <div className="fixed inset-x-0 bottom-0 z-50 flex min-h-[76px] items-center justify-between gap-5 border-t border-[#d0d1d2] bg-white px-6 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.06)] lg:pl-[220px]">
-          <div className="min-w-0">
-            <p className="truncate text-[15px] font-semibold text-[#171a20]">{product.name}</p>
-            <p className="mt-0.5 truncate text-[10px] text-[#5c5e62]">{size} · {strength} · {selectedPharmacy.name}</p>
-          </div>
-          <div className="flex shrink-0 items-center gap-6">
-            <div className="text-right"><p className="text-[19px] font-semibold text-[#171a20]">${selectedPharmacy.price.toFixed(2)}</p><p className="text-[9px] text-[#5c5e62]">Estimated total</p></div>
-            <button onClick={addToCart} disabled={selectedPatientCount === 0} className="h-11 min-w-[150px] rounded-[4px] bg-[#3e6ae1] px-7 text-[12px] font-semibold text-white transition-colors hover:bg-[#3457b2] disabled:cursor-not-allowed disabled:bg-[#a7b7df]">Order Now</button>
-          </div>
-        </div>
-      )}
       {createPatientOpen && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/30 p-4 backdrop-blur-[2px]">
           <button className="absolute inset-0 cursor-default" onClick={() => setCreatePatientOpen(false)} aria-label="Close create patient" />
