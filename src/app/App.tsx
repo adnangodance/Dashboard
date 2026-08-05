@@ -936,21 +936,21 @@ function FigmaCard({
         {/* Price — mt-21.91 pushes it below the name in the stacking grid */}
         <div
           className="col-1 flex flex-col justify-center relative row-1 text-[#1a1a1a]"
-          style={{ marginTop: 21.91, height: 10.917, width: 67.32, fontSize: 7.884, lineHeight: "10.917px" }}
+          style={{ marginTop: 21.91, height: 16, width: 90, fontSize: 12, lineHeight: "16px" }}
         >
           <p>{price}</p>
         </div>
         {/* Name — mt-0, appears at top of this inner grid */}
         <div
           className="col-1 flex flex-col justify-center relative row-1 text-[#1a1a1a]"
-          style={{ marginTop: 0, marginLeft: 0.44, height: 17, fontSize: 13.525, lineHeight: "16.982px", letterSpacing: "-0.279px", width: 172 }}
+          style={{ marginTop: 0, marginLeft: 0.44, height: 18, fontSize: 14, lineHeight: "18px", letterSpacing: "-0.279px", width: 172 }}
         >
           <p>{name}</p>
         </div>
         {/* Pharmacies — mt-42.53 */}
         <div
           className="col-1 flex flex-col justify-center relative row-1 text-[#666]"
-          style={{ marginTop: 42.53, height: 10.917, fontSize: 7.824, lineHeight: "10.917px", width: 105.936 }}
+          style={{ marginTop: 43.5, height: 14, fontSize: 10, lineHeight: "14px", width: 140 }}
         >
           <p className="underline decoration-solid [text-underline-position:from-font] decoration-from-font">{pharmacies} Pharmacies</p>
         </div>
@@ -1251,6 +1251,7 @@ function ProductsPage({
   const [dosages, setDosages] = useState<string[]>([]);
   const [openCatalogFilter, setOpenCatalogFilter] = useState<string | null>(null);
   const [catalogFilterSearch, setCatalogFilterSearch] = useState<Record<string, string>>({});
+  const [catalogSearchOpen, setCatalogSearchOpen] = useState(false);
   const { runWithAppLoader } = useAppLoading();
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -1260,6 +1261,7 @@ function ProductsPage({
         e.preventDefault();
         searchRef.current?.focus();
         searchRef.current?.select();
+        setCatalogSearchOpen(true);
       }
     }
     window.addEventListener("keydown", onKeyDown);
@@ -1345,6 +1347,13 @@ function ProductsPage({
     { label: "Dosage", values: dosages, setValues: setDosages, options: dosageOptions },
   ];
   const selectedCatalogFilterCount = catalogFilters.reduce((count, filter) => count + filter.values.length, 0);
+  const catalogSearchResults = [...POPULAR_CARDS, ...ALL_CARDS]
+    .filter((card, index, cards) => cards.findIndex(item => item.name === card.name && item.pharmacy === card.pharmacy) === index)
+    .filter(card => {
+      const query = search.trim().toLowerCase();
+      return !query || `${card.name} ${card.pharmacy} ${card.areaOfTreatment} ${card.dosage}`.toLowerCase().includes(query);
+    })
+    .slice(0, 5);
   const clearCatalogFilters = () => {
     setShippingStates([]);
     setAreasOfTreatment([]);
@@ -1362,7 +1371,8 @@ function ProductsPage({
       {/* Search + filters bar */}
       <div className="flex items-center gap-[14px] mt-6 mb-5">
         {/* Search box — from Figma import Group1216401138 */}
-        <div className="bg-white border border-[#efefef] rounded-[9px] h-[38px] flex items-center gap-2 px-3 w-[220px] flex-shrink-0">
+        <div className="relative w-[220px] flex-shrink-0">
+        <div className={`bg-white border rounded-[9px] h-[38px] flex items-center gap-2 px-3 transition-colors ${catalogSearchOpen ? "border-[#183229]" : "border-[#efefef]"}`}>
           {/* Magnifier icon — pce98200 */}
           <svg width="14" height="14" viewBox="0 0 18 18" fill="none" className="flex-shrink-0">
             <path d="M16.1489 15.3529L12.6283 11.8331C13.6487 10.608 14.1575 9.03675 14.0489 7.4461C13.9403 5.85545 13.2227 4.3679 12.0452 3.2929C10.8678 2.21791 9.32127 1.63823 7.72733 1.67445C6.13339 1.71068 4.61477 2.36002 3.4874 3.4874C2.36002 4.61477 1.71068 6.13339 1.67445 7.72733C1.63823 9.32127 2.21791 10.8678 3.2929 12.0452C4.3679 13.2227 5.85545 13.9403 7.4461 14.0489C9.03675 14.1575 10.608 13.6487 11.8331 12.6283L15.3529 16.1489C15.4052 16.2011 15.4672 16.2426 15.5355 16.2709C15.6038 16.2991 15.677 16.3137 15.7509 16.3137C15.8248 16.3137 15.898 16.2991 15.9663 16.2709C16.0346 16.2426 16.0966 16.2011 16.1489 16.1489C16.2011 16.0966 16.2426 16.0346 16.2709 15.9663C16.2991 15.898 16.3137 15.8248 16.3137 15.7509C16.3137 15.677 16.2991 15.6038 16.2709 15.5355C16.2426 15.4672 16.2011 15.4052 16.1489 15.3529ZM2.81339 7.87589C2.81339 6.87462 3.1103 5.89584 3.66658 5.06332C4.22285 4.23079 5.01351 3.58192 5.93856 3.19875C6.86361 2.81558 7.88151 2.71533 8.86354 2.91067C9.84557 3.10601 10.7476 3.58816 11.4556 4.29616C12.1636 5.00417 12.6458 5.90622 12.8411 6.88825C13.0365 7.87028 12.9362 8.88818 12.553 9.81323C12.1699 10.7383 11.521 11.5289 10.6885 12.0852C9.85594 12.6415 8.87716 12.9384 7.87589 12.9384C6.53369 12.9369 5.24689 12.4031 4.29781 11.454C3.34873 10.5049 2.81488 9.21809 2.81339 7.87589Z" fill="#686868"/>
@@ -1371,7 +1381,16 @@ function ProductsPage({
             ref={searchRef}
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setCatalogSearchOpen(true); }}
+            onFocus={() => setCatalogSearchOpen(true)}
+            onBlur={() => window.setTimeout(() => setCatalogSearchOpen(false), 120)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setCatalogSearchOpen(false);
+              if (e.key === "Enter" && catalogSearchResults[0]) {
+                onProductSelect(catalogSearchResults[0]);
+                onNavigate("product-detail");
+              }
+            }}
             placeholder="Search stock or Orders"
             className="flex-1 text-[11px] font-medium font-['Inter',sans-serif] text-black bg-transparent outline-none placeholder:text-[#686868] placeholder:font-medium"
           />
@@ -1381,6 +1400,39 @@ function ProductsPage({
             </svg>
             <span className="text-[12px] text-[#686868] font-['Inter',sans-serif] font-normal">+ F</span>
           </div>
+        </div>
+        {catalogSearchOpen && (
+          <div className="absolute left-0 top-11 z-40 w-[360px] overflow-hidden rounded-[9px] border border-[#dedede] bg-white shadow-[0_14px_34px_rgba(0,0,0,0.12)]">
+            <div className="flex items-center justify-between border-b border-[#ededed] px-3.5 py-2.5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#777]">{search.trim() ? "Search results" : "Popular products"}</p>
+              {search.trim() && <p className="text-[10px] text-[#999]">{catalogSearchResults.length} found</p>}
+            </div>
+            <div className="p-1.5">
+              {catalogSearchResults.map(card => (
+                <button
+                  key={`${card.id}-${card.pharmacy}`}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => { onProductSelect(card); onNavigate("product-detail"); setCatalogSearchOpen(false); }}
+                  className="grid w-full grid-cols-[38px_minmax(0,1fr)_auto] items-center gap-3 rounded-[7px] px-2.5 py-2 text-left transition-colors hover:bg-[#f6f6f5]"
+                >
+                  <span className="flex size-[38px] items-center justify-center overflow-hidden rounded-[6px] bg-[#f7f7f7] p-1"><img src={card.img} alt="" className="size-full object-contain mix-blend-multiply" /></span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-[11px] font-semibold text-[#1a1a1a]">{card.name}</span>
+                    <span className="mt-0.5 block truncate text-[9px] text-[#777]">{card.pharmacy}</span>
+                  </span>
+                  <span className="text-[11px] font-semibold text-[#1a1a1a]">{card.price}</span>
+                </button>
+              ))}
+              {catalogSearchResults.length === 0 && (
+                <div className="px-3 py-6 text-center">
+                  <p className="text-[11px] font-semibold text-[#333]">No products found</p>
+                  <p className="mt-1 text-[10px] text-[#888]">Try a product, pharmacy, or treatment name.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         </div>
 
         {/* Filters */}
@@ -1495,7 +1547,6 @@ function ProductsPage({
       </div>
 
       <div className="mb-5 flex flex-wrap items-center gap-2">
-        <p className="mr-1 text-[10px] font-semibold uppercase tracking-widest text-[#9d9d9d]">Pharmacies (6)</p>
         {PHARMACIES_MULTI.map(pharmacy => {
           const isActive = activePharmacy === pharmacy.name;
           return (
@@ -1675,7 +1726,7 @@ function ProductDetailPage({
   const [expandedPatientIds, setExpandedPatientIds] = useState<Set<number>>(new Set());
   const [addedItemCount, setAddedItemCount] = useState<number | null>(null);
   const [activeInfoTab, setActiveInfoTab] = useState<"overview" | "formula" | "dosage" | "safety">("overview");
-  const [productDetailVariant, setProductDetailVariant] = useState<1 | 2 | 3 | 4 | 5 | 6>(5);
+  const [productDetailVariant, setProductDetailVariant] = useState<1 | 2 | 3 | 4 | 5 | 6>(6);
   const configurationCardRef = useRef<HTMLDivElement>(null);
   const [productCardHeight, setProductCardHeight] = useState(825);
   const { addCartItems } = useCartSummary();
@@ -1696,7 +1747,7 @@ function ProductDetailPage({
   }, [defaultSize, defaultStrength, product.dosage, product.id, product.pharmacy]);
 
   useEffect(() => {
-    if (!extraVariants) setProductDetailVariant(5);
+    if (!extraVariants) setProductDetailVariant(6);
   }, [extraVariants]);
 
   useLayoutEffect(() => {
@@ -2090,24 +2141,28 @@ function ProductDetailPage({
         <div className="px-5 py-6 sm:px-6 lg:px-8">
           {activeInfoTab === "overview" && (
             <div className="max-w-[1050px]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#708078]">Product reference</p>
-              <h2 className="mt-1 text-[20px] font-semibold text-[#1a1a1a]">{product.name}</h2>
-              <div className="mt-4 space-y-3 text-[13px] leading-6 text-[#4f5a55]">
-                <p>{product.name} is a compounded {product.dosage.toLowerCase()} option used in personalized {product.areaOfTreatment.toLowerCase()} protocols. Available configurations may vary by strength, size, administration route, and dispensing pharmacy.</p>
-                <p>The selected pharmacy prepares the medication according to the configuration and patient information supplied with the prescription.</p>
-              </div>
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#777]">Product reference</p>
+              <h2 className="mt-2 text-[20px] font-semibold text-[#1a1a1a]">{product.name}</h2>
+              <p className="mt-4 max-w-[850px] text-[13px] leading-6 text-[#555]">{product.name} is a compounded {product.dosage.toLowerCase()} prepared for personalized {product.areaOfTreatment.toLowerCase()} protocols. The dispensing pharmacy prepares the medication according to the selected configuration and patient prescription.</p>
+
+              <div className="mt-6 border-y border-[#e8e3df]">
+                <div className="grid grid-cols-[120px_minmax(0,1fr)] gap-4 border-b border-[#e8e3df] py-3 sm:grid-cols-[150px_minmax(0,1fr)]">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#888]">Selected configuration</p>
+                  <p className="text-right text-[12px] font-semibold text-[#111]">${configuredPrice.toFixed(2)}</p>
+                </div>
+                <dl className="grid sm:grid-cols-2">
                 {[
-                  ["Item", product.name],
                   ["Strength", strength],
-                  ["Form", product.dosage],
-                  ["Quantity", size],
+                  ["Size", size],
+                  [product.dosage === "Injection" ? "Route" : "Form", injType],
+                  ["Pharmacy", selectedPharmacy.name],
                 ].map(([label, value]) => (
-                  <div key={label} className="rounded-[8px] border border-[#e8e3df] bg-[#fbfaf8] p-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#8c8c8c]">{label}</p>
-                    <p className="mt-1 text-[12px] font-semibold text-[#1a1a1a]">{value}</p>
+                  <div key={label} className="grid grid-cols-[90px_minmax(0,1fr)] gap-3 border-b border-[#eeeae7] py-3 last:border-b-0 sm:odd:border-r sm:odd:pr-5 sm:even:pl-5">
+                    <dt className="text-[10px] text-[#888]">{label}</dt>
+                    <dd className="text-[11px] font-semibold text-[#222]">{value}</dd>
                   </div>
                 ))}
+                </dl>
               </div>
             </div>
           )}
@@ -2583,51 +2638,53 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
                     index,
                   }));
               return (
-                <section key={order.id} onClick={() => onOrderSelect(order)} className="cursor-pointer rounded-[10px] bg-[#FBFBFB] px-7 py-6 transition-colors hover:bg-[#f8f8f7]">
-                  <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="mr-1 text-[15px] font-bold text-[#161a18]">{order.id}</span>
-                      <span className={`inline-flex h-7 items-center gap-1.5 rounded-full px-3.5 text-[11px] font-bold ${order.payMethod === "Pay by Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#D8FFE1] text-[#173d25]"}`}>
-                        {order.payMethod.replace("by", "By")}
-                        <span className={`inline-flex h-5 min-w-[42px] items-center justify-center rounded-full px-2 text-[9px] font-bold capitalize leading-none ${order.payStatus === "PAID" ? "bg-white text-[#173d25]" : "bg-[#B53A2D] text-white"}`}>{order.payStatus.toLowerCase()}</span>
-                      </span>
-                      <span className="inline-flex h-7 items-center rounded-full bg-[#FFF0D8] px-3.5 text-[11px] font-bold text-[#5B3A50]">{labelCase(order.status)}</span>
-                      <span className="inline-flex h-7 items-center rounded-full bg-[#B8FBFF] px-3.5 text-[11px] font-bold text-[#123B3E]">{order.shipMethod.replace("to", "To")}</span>
-                    </div>
-                    <span className="text-[15px] font-semibold text-[#161a18]">{order.total}</span>
+                <section key={order.id} onClick={() => onOrderSelect(order)} className="cursor-pointer rounded-[10px] bg-[#F8F8F8] px-5 py-5 transition-colors hover:bg-[#f6f6f5]">
+                  <div className="mb-2 hidden grid-cols-[minmax(310px,1.05fr)_minmax(260px,1fr)_minmax(240px,0.9fr)_70px] gap-7 px-5 md:grid">
+                    <p className="text-[12px] font-semibold text-[#555]">Prescription</p>
+                    <p className="text-[12px] font-semibold text-[#555]">Patient</p>
+                    <p className="text-[12px] font-semibold text-[#555]">Pharmacy</p>
+                    <span />
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {compactRows.map(({ item, patient, image, index }) => {
                       const trackingBlue = index % 2 === 1;
                       return (
-                        <div key={`${order.id}-${patient.name}-${item.name}-${index}`} className="grid min-h-[108px] items-center gap-7 rounded-[9px] bg-white px-9 py-6 md:grid-cols-[58px_minmax(250px,1.05fr)_minmax(280px,1fr)_minmax(260px,1fr)_70px]">
-                          <div className="flex h-[70px] w-[48px] items-center justify-center overflow-visible">
-                            <img src={image} alt="" className="max-h-[70px] max-w-[48px] object-contain" />
+                        <div key={`${order.id}-${patient.name}-${item.name}-${index}`} className="grid min-h-[122px] items-center gap-7 rounded-[9px] bg-white px-5 py-5 md:grid-cols-[minmax(310px,1.05fr)_minmax(260px,1fr)_minmax(240px,0.9fr)_70px]">
+                          <div className="flex min-w-0 items-center gap-4">
+                            <div className="flex h-[70px] w-[58px] shrink-0 items-center justify-center overflow-visible">
+                              <img src={image} alt="" className="max-h-[70px] max-w-[52px] object-contain" />
+                            </div>
+                            <div className="min-w-0">
+                            <p className="truncate text-[14px] font-semibold text-[#161a18]">{item.name}</p>
+                            <p className="mt-1 truncate text-[12px] text-[#777]">{item.description}</p>
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              <span className="rounded-full bg-[#f3f3f3] px-2 py-1 text-[9px] text-[#555]">Qty {item.qty}</span>
+                              <span className="rounded-full bg-[#f3f3f3] px-2 py-1 text-[9px] text-[#555]">Auth refills {item.authRefills}</span>
+                              <span className="rounded-full bg-[#f3f3f3] px-2 py-1 text-[9px] text-[#555]">Refills left {item.refillsLeft}</span>
+                              <span className="rounded-full bg-[#f3f3f3] px-2 py-1 text-[9px] text-[#555]">Days {item.daysSupply}</span>
+                            </div>
+                            </div>
                           </div>
                           <div className="min-w-0">
-                            <p className="truncate text-[15px] font-bold text-[#161a18]">{item.name}</p>
-                            <p className="mt-2 truncate text-[13px] text-[#777]">{item.description}</p>
+                            <p className="truncate text-[14px] font-medium text-[#161a18]">{patient.name} ({patient.gender})</p>
+                            <p className="mt-1.5 truncate text-[11px] text-[#444]">{patient.phone}</p>
+                            <p className="mt-1 truncate text-[11px] text-[#444]">{patient.address}</p>
                           </div>
                           <div className="min-w-0">
-                            <p className="truncate text-[15px] font-medium text-[#161a18]">{patient.name} ({patient.gender})</p>
-                            <p className="mt-2 truncate text-[12px] text-[#333]">{patient.phone}</p>
-                            <p className="mt-1 truncate text-[12px] text-[#333]">{patient.address}</p>
-                          </div>
-                          <div className="min-w-0">
-                            <p className="truncate text-[14px] font-normal text-[#777]">{item.pharmacy}</p>
-                            <span className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold ${trackingBlue ? "bg-[#F6F6FF] text-[#4169E8]" : "bg-[#ECEBE3] text-[#2f3d35]"}`}>
+                            <p className="truncate text-[12px] font-normal text-[#777]">{item.pharmacy}</p>
+                            <span className={`mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold ${trackingBlue ? "bg-[#F6F6FF] text-[#4169E8]" : "bg-[#ECEBE3] text-[#2f3d35]"}`}>
                               {trackingBlue && <Send size={13} strokeWidth={1.8} />}
                               {labelCase(item.tracking)}
                             </span>
-                            <p className="mt-3 truncate text-[12px] text-[#777]">Qty {item.qty} · Auth refills {item.authRefills} · Refills left {item.refillsLeft} · Days {item.daysSupply}</p>
                           </div>
                           <p className="self-start pt-1 text-right text-[14px] font-semibold text-[#161a18]">{item.price}</p>
                         </div>
                       );
                     })}
                   </div>
-                  <div className="mt-5 flex flex-wrap gap-4 px-1">
+                  <div className="mt-4 flex flex-wrap items-center gap-3 px-1">
+                    <span className="mr-1 text-[15px] font-bold text-[#161a18]">{order.id}</span>
                     <span className="inline-flex h-9 items-center gap-2 rounded-full bg-[#F1F0EF] px-3 text-[12px] font-semibold text-[#183229]">
                       Order Type
                       <span className="inline-flex h-6 items-center rounded-full bg-white px-2.5 text-[11px] font-semibold text-[#111]">{labelCase(order.orderType)}</span>
@@ -2635,6 +2692,16 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
                     <span className="inline-flex h-9 items-center gap-2 rounded-full bg-[#F1F0EF] px-3 text-[12px] font-semibold text-[#183229]">
                       Order Timestamp
                       <span className="inline-flex h-6 items-center rounded-full bg-white px-2.5 text-[11px] font-semibold text-[#111]">{order.timestamp}</span>
+                    </span>
+                    <span className={`inline-flex h-8 items-center gap-2 rounded-full px-3 text-[11px] font-semibold ${order.payMethod === "Pay by Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
+                      {order.payMethod.replace("by", "By")}
+                      <span className={`rounded-full px-2 py-1 text-[8px] font-bold ${order.payStatus === "PAID" ? "bg-white text-[#173d25]" : "bg-[#FF4A87] text-white"}`}>{order.payStatus}</span>
+                    </span>
+                    <span className="inline-flex h-8 items-center rounded-full bg-[#FFF0D8] px-3 text-[11px] font-semibold text-[#5B3A50]">{labelCase(order.status)}</span>
+                    <span className="inline-flex h-8 items-center rounded-full bg-[#20D8DB] px-3 text-[11px] font-semibold text-[#123B3E]">{order.shipMethod.replace("to", "To")}</span>
+                    <span className="ml-auto inline-flex h-9 items-center gap-2 rounded-full bg-[#F1F0EF] px-3 text-[12px] font-semibold text-[#183229]">
+                      Total
+                      <strong className="inline-flex h-6 items-center rounded-full bg-white px-2.5 text-[11px] font-semibold text-[#111]">{order.total}</strong>
                     </span>
                   </div>
                 </section>
