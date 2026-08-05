@@ -23,6 +23,7 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
+  TriangleAlert,
   XCircle,
   Eye,
   Truck,
@@ -1560,12 +1561,14 @@ function ProductsPage({
                   onClick={() => setOpenCatalogFilter(isOpen ? null : label)}
                   className={`flex h-[34px] ${filterWidthClass} cursor-pointer items-center justify-between gap-2 rounded-[5px] border bg-white px-2.5 text-[13px] font-semibold leading-none shadow-[0_1px_2px_rgba(16,24,40,0.08)] transition-colors ${
                     hasSelection
-                      ? "border-[#cfd8d4] text-[#344054]"
+                      ? isShippingState
+                        ? "border-[#9DBBFF] bg-[#F3F7FF] text-[#2563EB]"
+                        : "border-[#cfd8d4] text-[#344054]"
                       : "border-[#d8dee8] text-[#344054] hover:border-[#c7d0dc]"
                   }`}
                 >
                   <span className="min-w-0 truncate">{buttonLabel}</span>
-                  <ChevronsUpDown size={14} strokeWidth={1.8} className="text-[#344054]" />
+                  <ChevronsUpDown size={14} strokeWidth={1.8} className={isShippingState && hasSelection ? "text-[#2563EB]" : "text-[#344054]"} />
                 </button>
 
                 {isOpen && (
@@ -1677,9 +1680,9 @@ function ProductsPage({
               <button
                 key={`${label}-${value}`}
                 onClick={() => setValues(prev => prev.filter(item => item !== value))}
-                className="flex cursor-pointer items-center gap-1.5 rounded-full border border-[#cfe3d7] bg-[#f2f7f4] px-3 py-1.5 text-[12px] font-medium text-[#183229] transition-colors hover:border-[#183229]/40"
+                className="flex cursor-pointer items-center gap-1.5 rounded-full border border-[#9DBBFF] bg-[#F3F7FF] px-3 py-1.5 text-[12px] font-medium text-[#2563EB] transition-colors hover:border-[#2563EB]"
               >
-                <span className="text-[#667085]">{label}:</span>
+                <span className="text-[#4F6FAF]">{label}:</span>
                 {value}
                 <XCircle size={13} strokeWidth={1.8} />
               </button>
@@ -2086,14 +2089,14 @@ function ProductDetailPage({
 
           <div className={`${isReferenceStyle ? "mt-6" : "mt-2 border-t border-[#ededed] pt-2"}`}>
             <div className={isReferenceStyle ? "mb-3 flex items-center gap-3" : ""}><p className={`${isReferenceStyle ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>Size</p>{isReferenceStyle && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 [&>button]:w-full [&>button]:min-w-0">
               {sizeOptions.map(option => <OptionPill key={option} label={option} selected={size === option} onClick={() => setSize(option)} emphasis={productDetailVariant === 2} card={productDetailVariant === 3} tesla={isReferenceStyle} blue={isBlueReference} tone={productDetailVariant === 4 ? "green" : "apple"} />)}
             </div>
           </div>
 
           <div className={`${isReferenceStyle ? "mt-5" : "mt-3 border-t border-[#ededed] pt-2"}`}>
             <div className={isReferenceStyle ? "mb-3 flex items-center gap-3" : ""}><p className={`${isReferenceStyle ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>Strength</p>{isReferenceStyle && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 [&>button]:w-full [&>button]:min-w-0">
               {strengthOptions.map(option => <OptionPill key={option} label={option} subLabel="150mg total" selected={strength === option} onClick={() => setStrength(option)} emphasis={productDetailVariant === 2} card={productDetailVariant === 3} tesla={isReferenceStyle} blue={isBlueReference} tone={productDetailVariant === 4 ? "green" : "apple"} />)}
             </div>
           </div>
@@ -2142,7 +2145,7 @@ function ProductDetailPage({
           <div className={isReferenceStyle ? "mt-5" : "mt-4 border-t border-[#ededed] pt-4"}>
             {isReferenceStyle ? <div className="mb-3 flex items-center gap-3"><p className="shrink-0 text-[12px] font-medium text-[#111]">Shipping</p><span className="h-px flex-1 bg-[#e5e5e5]" /></div> : <><p className="text-[12px] font-medium text-[#111]">Shipping</p><p className="mt-1 text-[12px] text-[#252525]">Choose where to ship the prescription</p></>}
             {selectedPatientCount > 1 && (
-              <p className="mt-2 text-[10px] font-medium leading-[14px] text-[#c2413b]">Ship to Patient is disabled due to multiple patients in cart.</p>
+              <p className="mt-2 flex items-center gap-1.5 text-[10px] font-medium leading-[14px] text-[#c2413b]"><TriangleAlert size={13} strokeWidth={2} className="shrink-0" />Ship to Patient is disabled due to multiple patients in cart.</p>
             )}
             <div className="mt-3 flex flex-wrap gap-2">
               <button disabled={selectedPatientCount > 1} onClick={() => selectShippingChoice("patient")} className={`relative inline-flex h-9 items-center gap-2 border px-3 text-[11px] font-semibold transition-colors ${isReferenceStyle ? "rounded-[7px]" : "rounded-full"} ${selectedPatientCount > 1 ? "cursor-not-allowed border-[#e0e2e1] bg-[#f7f7f6] text-[#a7aaa8] opacity-70" : shippingChoice === "patient" && productDetailVariant === 2 ? "border-[#183229] bg-[#183229] text-white shadow-[0_8px_18px_rgba(24,50,41,0.16)]" : shippingChoice === "patient" ? (productDetailVariant === 4 ? "border-2 border-[#00B53F] bg-white text-[#202020] shadow-[0_0_0_3px_rgba(0,181,63,0.10)]" : productDetailVariant === 1 ? "border-[3px] border-[#4485FF] bg-white text-[#202020]" : isBlueReference ? "border-2 border-[#2563EB] bg-white text-[#171a20]" : isReferenceStyle ? "border-2 border-[#171a20] bg-white text-[#171a20]" : "border-[#183229] bg-[#eef7f2] text-[#183229]") : "border-[#d8dedd] bg-white text-[#6f7782]"}`}>
@@ -2245,7 +2248,7 @@ function ProductDetailPage({
           )}
 
           <button onClick={addToCart} disabled={selectedPatientCount === 0} className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#111] text-[12px] font-medium text-white transition-colors hover:bg-[#28312d] disabled:cursor-not-allowed disabled:bg-[#b8b8b8]">
-            Add {selectedItemCount > 1 ? `${selectedItemCount} items` : "to cart"} <ShoppingCart size={14} strokeWidth={1.5} />
+            {selectedItemCount > 1 ? `Add ${selectedItemCount} items to cart` : "Add to cart"} <ShoppingCart size={14} strokeWidth={1.5} />
           </button>
 
           <div className="mt-3 overflow-hidden rounded-[9px] bg-[#f7f7f7]">
