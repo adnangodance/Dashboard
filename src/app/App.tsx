@@ -1251,7 +1251,6 @@ function ProductsPage({
   const [dosages, setDosages] = useState<string[]>([]);
   const [openCatalogFilter, setOpenCatalogFilter] = useState<string | null>(null);
   const [catalogFilterSearch, setCatalogFilterSearch] = useState<Record<string, string>>({});
-  const [catalogSearchOpen, setCatalogSearchOpen] = useState(false);
   const { runWithAppLoader } = useAppLoading();
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -1261,7 +1260,6 @@ function ProductsPage({
         e.preventDefault();
         searchRef.current?.focus();
         searchRef.current?.select();
-        setCatalogSearchOpen(true);
       }
     }
     window.addEventListener("keydown", onKeyDown);
@@ -1347,13 +1345,6 @@ function ProductsPage({
     { label: "Dosage", values: dosages, setValues: setDosages, options: dosageOptions },
   ];
   const selectedCatalogFilterCount = catalogFilters.reduce((count, filter) => count + filter.values.length, 0);
-  const catalogSearchResults = [...POPULAR_CARDS, ...ALL_CARDS]
-    .filter((card, index, cards) => cards.findIndex(item => item.name === card.name && item.pharmacy === card.pharmacy) === index)
-    .filter(card => {
-      const query = search.trim().toLowerCase();
-      return !query || `${card.name} ${card.pharmacy} ${card.areaOfTreatment} ${card.dosage}`.toLowerCase().includes(query);
-    })
-    .slice(0, 5);
   const clearCatalogFilters = () => {
     setShippingStates([]);
     setAreasOfTreatment([]);
@@ -1371,26 +1362,17 @@ function ProductsPage({
       {/* Search + filters bar */}
       <div className="flex items-center gap-[14px] mt-6 mb-5">
         {/* Search box — from Figma import Group1216401138 */}
-        <div className="relative w-[220px] flex-shrink-0">
-        <div className={`bg-white border rounded-[9px] h-[38px] flex items-center gap-2 px-3 transition-colors ${catalogSearchOpen ? "border-[#183229]" : "border-[#efefef]"}`}>
+        <div className="group w-[220px] flex-shrink-0 transition-all duration-300 ease-out focus-within:w-[310px]">
+        <div className="flex h-[38px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:border-2 focus-within:border-black">
           {/* Magnifier icon — pce98200 */}
-          <svg width="14" height="14" viewBox="0 0 18 18" fill="none" className="flex-shrink-0">
+          <svg width="14" height="14" viewBox="0 0 18 18" fill="none" className="flex-shrink-0 transition-transform duration-300 group-focus-within:scale-110">
             <path d="M16.1489 15.3529L12.6283 11.8331C13.6487 10.608 14.1575 9.03675 14.0489 7.4461C13.9403 5.85545 13.2227 4.3679 12.0452 3.2929C10.8678 2.21791 9.32127 1.63823 7.72733 1.67445C6.13339 1.71068 4.61477 2.36002 3.4874 3.4874C2.36002 4.61477 1.71068 6.13339 1.67445 7.72733C1.63823 9.32127 2.21791 10.8678 3.2929 12.0452C4.3679 13.2227 5.85545 13.9403 7.4461 14.0489C9.03675 14.1575 10.608 13.6487 11.8331 12.6283L15.3529 16.1489C15.4052 16.2011 15.4672 16.2426 15.5355 16.2709C15.6038 16.2991 15.677 16.3137 15.7509 16.3137C15.8248 16.3137 15.898 16.2991 15.9663 16.2709C16.0346 16.2426 16.0966 16.2011 16.1489 16.1489C16.2011 16.0966 16.2426 16.0346 16.2709 15.9663C16.2991 15.898 16.3137 15.8248 16.3137 15.7509C16.3137 15.677 16.2991 15.6038 16.2709 15.5355C16.2426 15.4672 16.2011 15.4052 16.1489 15.3529ZM2.81339 7.87589C2.81339 6.87462 3.1103 5.89584 3.66658 5.06332C4.22285 4.23079 5.01351 3.58192 5.93856 3.19875C6.86361 2.81558 7.88151 2.71533 8.86354 2.91067C9.84557 3.10601 10.7476 3.58816 11.4556 4.29616C12.1636 5.00417 12.6458 5.90622 12.8411 6.88825C13.0365 7.87028 12.9362 8.88818 12.553 9.81323C12.1699 10.7383 11.521 11.5289 10.6885 12.0852C9.85594 12.6415 8.87716 12.9384 7.87589 12.9384C6.53369 12.9369 5.24689 12.4031 4.29781 11.454C3.34873 10.5049 2.81488 9.21809 2.81339 7.87589Z" fill="#686868"/>
           </svg>
           <input
             ref={searchRef}
             type="text"
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setCatalogSearchOpen(true); }}
-            onFocus={() => setCatalogSearchOpen(true)}
-            onBlur={() => window.setTimeout(() => setCatalogSearchOpen(false), 120)}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") setCatalogSearchOpen(false);
-              if (e.key === "Enter" && catalogSearchResults[0]) {
-                onProductSelect(catalogSearchResults[0]);
-                onNavigate("product-detail");
-              }
-            }}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Search stock or Orders"
             className="flex-1 text-[11px] font-medium font-['Inter',sans-serif] text-black bg-transparent outline-none placeholder:text-[#686868] placeholder:font-medium"
           />
@@ -1401,38 +1383,6 @@ function ProductsPage({
             <span className="text-[12px] text-[#686868] font-['Inter',sans-serif] font-normal">+ F</span>
           </div>
         </div>
-        {catalogSearchOpen && (
-          <div className="absolute left-0 top-11 z-40 w-[360px] overflow-hidden rounded-[9px] border border-[#dedede] bg-white shadow-[0_14px_34px_rgba(0,0,0,0.12)]">
-            <div className="flex items-center justify-between border-b border-[#ededed] px-3.5 py-2.5">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#777]">{search.trim() ? "Search results" : "Popular products"}</p>
-              {search.trim() && <p className="text-[10px] text-[#999]">{catalogSearchResults.length} found</p>}
-            </div>
-            <div className="p-1.5">
-              {catalogSearchResults.map(card => (
-                <button
-                  key={`${card.id}-${card.pharmacy}`}
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => { onProductSelect(card); onNavigate("product-detail"); setCatalogSearchOpen(false); }}
-                  className="grid w-full grid-cols-[38px_minmax(0,1fr)_auto] items-center gap-3 rounded-[7px] px-2.5 py-2 text-left transition-colors hover:bg-[#f6f6f5]"
-                >
-                  <span className="flex size-[38px] items-center justify-center overflow-hidden rounded-[6px] bg-[#f7f7f7] p-1"><img src={card.img} alt="" className="size-full object-contain mix-blend-multiply" /></span>
-                  <span className="min-w-0">
-                    <span className="block truncate text-[11px] font-semibold text-[#1a1a1a]">{card.name}</span>
-                    <span className="mt-0.5 block truncate text-[9px] text-[#777]">{card.pharmacy}</span>
-                  </span>
-                  <span className="text-[11px] font-semibold text-[#1a1a1a]">{card.price}</span>
-                </button>
-              ))}
-              {catalogSearchResults.length === 0 && (
-                <div className="px-3 py-6 text-center">
-                  <p className="text-[11px] font-semibold text-[#333]">No products found</p>
-                  <p className="mt-1 text-[10px] text-[#888]">Try a product, pharmacy, or treatment name.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
         </div>
 
         {/* Filters */}
@@ -1553,7 +1503,7 @@ function ProductsPage({
             <button
               key={pharmacy.name}
               onClick={() => setActivePharmacy(pharmacy.name)}
-              className={`flex items-center gap-2 rounded-full border-2 bg-white px-3 py-1.5 text-[12px] font-medium transition-colors ${isActive ? "border-[#183229] text-[#183229]" : "border-[#e0e0e0] text-[#1a1a1a] hover:border-[#183229]/40"}`}
+              className={`flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[12px] font-medium transition-colors ${isActive ? "border-2 border-[#183229] text-[#183229]" : "border-[0.5px] border-black text-[#1a1a1a] hover:border-[#183229]"}`}
             >
               {pharmacy.name}
               <span className={`text-[11px] font-semibold ${isActive ? "text-[#183229]" : "text-[#9d9d9d]"}`}>{pharmacy.count}</span>
@@ -2567,8 +2517,8 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
           <div>
             <p className="text-[13px] text-[#6f7782]">Track payment status, shipping destination, prescriptions, and fulfillment state.</p>
           </div>
-          <div className="flex h-[38px] w-full items-center gap-2 rounded-[9px] border border-[#efefef] bg-white px-3 sm:w-[220px]">
-            <Search size={14} strokeWidth={1.8} className="flex-shrink-0 text-[#686868]" />
+          <div className="group flex h-[38px] w-full items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:border-2 focus-within:border-black sm:w-[220px] sm:focus-within:w-[310px]">
+            <Search size={14} strokeWidth={1.8} className="flex-shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110" />
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -3002,8 +2952,8 @@ function PharmaciesPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       <Header title="Pharmacies" onNavigate={onNavigate} />
 
       <div className="flex items-center gap-3 mb-6">
-        <div className="flex h-[38px] w-[220px] items-center gap-2 rounded-[9px] border border-[#efefef] bg-white px-3">
-          <Search size={14} strokeWidth={1.8} className="shrink-0 text-[#686868]" />
+        <div className="group flex h-[38px] w-[220px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:w-[310px] focus-within:border-2 focus-within:border-black">
+          <Search size={14} strokeWidth={1.8} className="shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110" />
           <input
             className="min-w-0 flex-1 bg-transparent text-[11px] font-medium text-[#1a1a1a] outline-none placeholder:font-medium placeholder:text-[#686868]"
             placeholder="Search pharmacies..."
@@ -3131,8 +3081,8 @@ function SupportPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             <p className="mt-1 text-[11px] text-[#8c8c8c]">Track questions, order issues, and patient requests.</p>
           </div>
           <div className="flex items-center gap-2 max-sm:w-full">
-            <label className="flex h-9 w-[245px] items-center gap-2 rounded-[9px] border border-[#EAE8E1] bg-white px-3 max-sm:flex-1">
-              <Search size={14} className="text-[#858b88]" />
+            <label className="group flex h-9 w-[245px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:w-[310px] focus-within:border-2 focus-within:border-black max-sm:flex-1">
+              <Search size={14} className="text-[#858b88] transition-transform duration-300 group-focus-within:scale-110" />
               <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search tickets" className="min-w-0 flex-1 bg-transparent text-[11px] outline-none placeholder:text-[#aaa]" />
             </label>
             <button className="flex h-9 items-center gap-1.5 rounded-full bg-black px-4 text-[12px] font-medium text-white transition-colors hover:bg-[#252525]">
@@ -3301,7 +3251,7 @@ function PatientDetailsView({ patient, onBack, onEdit }: { patient: typeof PATIE
 
 
       <section ref={ordersSectionRef} className="mt-4 scroll-mt-5 rounded-[14px] bg-[var(--app-soft)] p-5">
-        <div className="flex items-center justify-between"><div><h2 className="text-[16px] font-semibold text-[#202020]">Orders <span className="ml-1 text-[12px] font-normal text-[#999]">({orderedPrescriptions.length + 1})</span></h2><p className="mt-1 text-[10px] text-[#858585]">Prescription and order history</p></div><div className="flex h-[38px] w-[220px] items-center gap-2 rounded-[9px] border border-[#efefef] bg-white px-3"><Search size={14} strokeWidth={1.8} className="shrink-0 text-[#686868]" /><input placeholder="Search orders" className="min-w-0 flex-1 bg-transparent text-[11px] font-medium text-[#1a1a1a] outline-none placeholder:font-medium placeholder:text-[#686868]" /><span className="shrink-0 text-[10px] text-[#686868]">⌘ F</span></div></div>
+        <div className="flex items-center justify-between"><div><h2 className="text-[16px] font-semibold text-[#202020]">Orders <span className="ml-1 text-[12px] font-normal text-[#999]">({orderedPrescriptions.length + 1})</span></h2><p className="mt-1 text-[10px] text-[#858585]">Prescription and order history</p></div><div className="group flex h-[38px] w-[220px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:w-[310px] focus-within:border-2 focus-within:border-black"><Search size={14} strokeWidth={1.8} className="shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110" /><input placeholder="Search orders" className="min-w-0 flex-1 bg-transparent text-[11px] font-medium text-[#1a1a1a] outline-none placeholder:font-medium placeholder:text-[#686868]" /><span className="shrink-0 text-[10px] text-[#686868]">⌘ F</span></div></div>
         {orderedPrescriptions.map((prescription, index) => <article key={`ordered-${prescription.medication}-${index}`} className="mt-3 flex flex-wrap items-center gap-4 rounded-[10px] bg-white px-4 py-4"><div className="flex size-12 items-center justify-center overflow-hidden"><img src={prescription.medication === "NAD+ Injection" ? imgNadInjection : imgAminoQuad} alt="" className="size-12 object-contain mix-blend-multiply" /></div><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><p className="text-[12px] font-semibold text-[#222]">{prescription.medication}</p><span className="rounded-full bg-gradient-to-r from-[#FFE2D2] to-[#FFF45C] px-2 py-1 text-[8px] font-bold text-[#56203B]">Pending approval</span></div><p className="mt-1 text-[10px] text-[#777]">Qty {prescription.qty} · {prescription.days} days · {prescription.refills} refills · {selectedPatientPharmacy}</p></div><p className="text-[13px] font-semibold">${(prescriptionUnitPrice(prescription.medication) * Number(prescription.qty)).toFixed(2)}</p></article>)}
         <article className="mt-3 rounded-[10px] bg-white">
           <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-4"><div className="flex items-center gap-3"><div className="flex size-12 shrink-0 items-center justify-center overflow-hidden bg-white"><img src={imgNadInjection} alt="NAD+ Injection" className="size-12 object-contain mix-blend-multiply" /></div><div><div className="flex items-center gap-2"><p className="text-[12px] font-semibold text-[#222]">NAD+ Injection</p><span className="rounded-full bg-gradient-to-r from-[#FFE2D2] to-[#FFF45C] px-2 py-1 text-[8px] font-bold text-[#56203B]">Pending approval</span></div><p className="mt-1 text-[10px] text-[#777]">Order #449537 · Jul 13, 2026 · Qty 1</p></div></div><div className="flex items-center gap-5"><p className="text-[13px] font-semibold text-[#222]">$74.64</p><button onClick={() => setOrderDetailsOpen(current => !current)} className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#333] hover:underline">{orderDetailsOpen ? "Hide details" : "Show details"}<ChevronDown size={13} className={orderDetailsOpen ? "rotate-180" : ""} /></button></div></div>
@@ -3362,8 +3312,8 @@ function UsersPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
         {/* Search bar */}
         <div className="mb-4">
-          <div className="flex h-[38px] w-[220px] items-center gap-2 rounded-[9px] border border-[#efefef] bg-white px-3">
-            <Search size={14} strokeWidth={1.8} className="flex-shrink-0 text-[#686868]" />
+          <div className="group flex h-[38px] w-[220px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:w-[310px] focus-within:border-2 focus-within:border-black">
+            <Search size={14} strokeWidth={1.8} className="flex-shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -3740,8 +3690,8 @@ function CartModeToolbar({
         </button>
       </div>
 
-      <div className="flex h-9 w-[220px] items-center gap-2 rounded-[9px] border border-[#efefef] bg-white px-3">
-        <Search size={14} strokeWidth={1.8} className="shrink-0 text-[#686868]" />
+      <div className="group flex h-9 w-[220px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:w-[310px] focus-within:border-2 focus-within:border-black">
+        <Search size={14} strokeWidth={1.8} className="shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110" />
         <input
           className="min-w-0 flex-1 bg-transparent text-[11px] font-medium text-[#1a1a1a] outline-none placeholder:text-[#686868]"
           placeholder="Search stock or Orders"
