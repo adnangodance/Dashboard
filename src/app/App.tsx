@@ -1595,6 +1595,7 @@ function OptionPill({
   emphasis,
   card,
   tesla,
+  blue,
   tone = "apple",
 }: {
   label: string;
@@ -1603,6 +1604,7 @@ function OptionPill({
   emphasis?: boolean;
   card?: boolean;
   tesla?: boolean;
+  blue?: boolean;
   tone?: "apple" | "green";
 }) {
   const selectedOutline =
@@ -1615,7 +1617,9 @@ function OptionPill({
       onClick={onClick}
       className={`relative inline-flex items-center border font-medium transition-colors ${tesla ? "h-10 min-w-[94px] justify-center rounded-[7px] px-3 text-[11px]" : "h-11 rounded-[7px] px-5 text-[12px]"} ${
         selected && tesla
-          ? "border-2 border-[#171a20] bg-white text-[#171a20]"
+          ? blue
+            ? "border-2 border-[#2563EB] bg-white text-[#171a20]"
+            : "border-2 border-[#171a20] bg-white text-[#171a20]"
           : tesla
           ? "border border-[#d0d1d2] bg-white text-[#5c5e62] hover:border-[#8e8e8e]"
           : selected && card
@@ -1631,7 +1635,7 @@ function OptionPill({
         <span className={tesla ? "text-left" : ""}>
           <span className="block">{label}</span>
         </span>
-        {tesla && selected && <CheckCircle2 size={18} strokeWidth={2.2} className="absolute -right-2 -top-2 fill-black text-white" />}
+        {tesla && selected && <CheckCircle2 size={18} strokeWidth={2.2} className={`absolute -right-2 -top-2 text-white ${blue ? "fill-[#2563EB]" : "fill-black"}`} />}
         {(emphasis || card) && selected && <CheckCircle2 size={13} strokeWidth={2} />}
       </span>
     </button>
@@ -1671,7 +1675,7 @@ function ProductDetailPage({
   const [expandedPatientIds, setExpandedPatientIds] = useState<Set<number>>(new Set());
   const [addedItemCount, setAddedItemCount] = useState<number | null>(null);
   const [activeInfoTab, setActiveInfoTab] = useState<"overview" | "formula" | "dosage" | "safety">("overview");
-  const [productDetailVariant, setProductDetailVariant] = useState<1 | 2 | 3 | 4 | 5>(5);
+  const [productDetailVariant, setProductDetailVariant] = useState<1 | 2 | 3 | 4 | 5 | 6>(5);
   const configurationCardRef = useRef<HTMLDivElement>(null);
   const [productCardHeight, setProductCardHeight] = useState(825);
   const { addCartItems } = useCartSummary();
@@ -1702,11 +1706,23 @@ function ProductDetailPage({
   }, [cartMode]);
 
   const baseProductPrice = Number.parseFloat(product.price.replace(/[^0-9.]/g, "")) || 35.88;
+  const sizeOptions = product.dosage === "Gel"
+    ? ["15g Tube", "30g Tube", "60g Tube"]
+    : product.dosage === "Capsule"
+    ? ["30 Capsules", "60 Capsules", "90 Capsules"]
+    : ["1 (5mL) Vial", "1 (10mL) Vial", "1 (30mL) Vial"];
+  const strengthOptions = [defaultStrength, product.dosage === "Gel" ? "0.05%" : "1mg/mL"]
+    .filter((option, index, list) => list.indexOf(option) === index);
+  const sizePriceAdjustment = (Math.max(sizeOptions.indexOf(size), 0) - Math.max(sizeOptions.indexOf(defaultSize), 0)) * 10;
+  const strengthPriceAdjustment = (Math.max(strengthOptions.indexOf(strength), 0) - Math.max(strengthOptions.indexOf(defaultStrength), 0)) * 5;
+  const configurationPriceAdjustment = sizePriceAdjustment + strengthPriceAdjustment;
   const pharmacies = [
     { name: product.pharmacy, turnaround: "1-2 business days", price: baseProductPrice },
     { name: product.pharmacy === "Rush Pharmacy FL" ? "Optimal Balance Pharmacy" : "Rush Pharmacy FL", turnaround: "1-2 business days", price: baseProductPrice + 20 },
   ];
   const selectedPharmacy = pharmacies.find(option => option.name === pharmacy) ?? pharmacies[0];
+  const configuredPrice = Math.max(0, selectedPharmacy.price + configurationPriceAdjustment);
+  const priceChangeKey = `${size}-${strength}-${pharmacy}`;
   const selectedPatientCount = selectedPatientIds.size;
   const selectedItemCount = [...selectedPatientIds].reduce((sum, id) => sum + (patientQuantities[id] ?? 1), 0);
   const isMultiPatientOrder = cartMode === "multi" && selectedPatientIds.size > 1;
@@ -1776,7 +1792,7 @@ function ProductDetailPage({
       addCartItems(itemCount, {
         id: product.id,
         name: product.name,
-        price: `$${selectedPharmacy.price.toFixed(2)}`,
+        price: `$${configuredPrice.toFixed(2)}`,
         img: product.img,
         qty: itemCount,
       });
@@ -1789,7 +1805,7 @@ function ProductDetailPage({
         size,
         strength,
         injectionType: injType,
-        unitPrice: selectedPharmacy.price,
+        unitPrice: configuredPrice,
       })));
       setAddedItemCount(itemCount);
       setSize(defaultSize);
@@ -1806,12 +1822,15 @@ function ProductDetailPage({
     });
   }
 
+  const isReferenceStyle = productDetailVariant === 5 || productDetailVariant === 6;
+  const isBlueReference = productDetailVariant === 6;
+
   return (
     <>
       <div className="pl-[15px]">
       <div className="-mt-4 mb-[39px]">
         <div className="flex items-start gap-3">
-          {productDetailVariant === 5 && (
+          {isReferenceStyle && (
             <button
               type="button"
               onClick={() => onNavigate("products")}
@@ -1831,15 +1850,15 @@ function ProductDetailPage({
       </div>
       {extraVariants && <div className="mb-5 flex flex-wrap items-center gap-2">
         <span className="mr-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#777]">Page style</span>
-        {([1, 2, 3, 4, 5] as const).map(variant => (
+        {([1, 2, 3, 4, 5, 6] as const).map(variant => (
           <button key={variant} onClick={() => setProductDetailVariant(variant)} className={`h-8 rounded-full px-3 text-[11px] font-semibold transition-colors ${productDetailVariant === variant ? "bg-[#111] text-white" : "border border-[#ddd] bg-white text-[#555] hover:border-[#999]"}`}>
-            {variant}. {variant === 1 ? "Apple" : variant === 2 ? "Selection" : variant === 3 ? "Card Selection" : variant === 4 ? "Green" : "Reference"}
+            {variant}. {variant === 1 ? "Apple" : variant === 2 ? "Selection" : variant === 3 ? "Card Selection" : variant === 4 ? "Green" : variant === 5 ? "Reference" : "Blue"}
           </button>
         ))}
       </div>}
-      <div className={`grid max-w-[1180px] items-start gap-10 ${productDetailVariant === 5 ? "xl:grid-cols-[minmax(0,1.1fr)_minmax(480px,0.9fr)]" : "xl:grid-cols-[minmax(0,1.244fr)_minmax(0,1fr)]"}`}>
+      <div className={`grid max-w-[1180px] items-start gap-10 ${isReferenceStyle ? "xl:grid-cols-[minmax(0,1.1fr)_minmax(480px,0.9fr)]" : "xl:grid-cols-[minmax(0,1.244fr)_minmax(0,1fr)]"}`}>
         <div className="min-w-0">
-          <div className={`flex h-[600px] items-center justify-center overflow-hidden rounded-[18px] p-16 ${productDetailVariant === 5 ? "bg-[#fafafa]" : `border border-[#e4e4e4] ${productDetailVariant === 2 ? "bg-[#fbfdfc]" : "bg-[#f8f8f8]"}`}`}>
+          <div className={`flex h-[600px] items-center justify-center overflow-hidden rounded-[18px] p-16 ${isReferenceStyle ? "bg-[#fafafa]" : `border border-[#e4e4e4] ${productDetailVariant === 2 ? "bg-[#fbfdfc]" : "bg-[#f8f8f8]"}`}`}>
             <img src={product.img} alt={product.name} className="max-h-[410px] h-full w-full object-contain mix-blend-multiply" />
           </div>
           <div className="mt-7 flex flex-wrap gap-2">
@@ -1858,14 +1877,16 @@ function ProductDetailPage({
         </div>
 
         <div ref={configurationCardRef} className="min-w-0 -mt-[23px]">
-          {productDetailVariant === 5 ? (
+          {isReferenceStyle ? (
             <h1 className="text-left text-[32px] font-medium leading-tight tracking-[-0.02em] text-[#111]">{product.name}</h1>
           ) : (
             <h1 className="text-[30px] font-medium leading-tight text-[#111]">{product.name}</h1>
           )}
           <p className="mt-1.5 max-w-[500px] text-[13px] leading-[1.45] text-[#666]">A compounded {product.dosage.toLowerCase()} developed for personalized {product.areaOfTreatment.toLowerCase()} treatment and patient care.</p>
-          <p className="mt-3 text-[25px] font-medium text-[#111]">${baseProductPrice.toFixed(2)}</p>
-          {productDetailVariant === 5 && (
+          <div key={priceChangeKey} className="mt-3 flex animate-[pulse_600ms_ease-out_1] items-center rounded-[7px]">
+            <p className="text-[25px] font-medium text-[#111]">${configuredPrice.toFixed(2)}</p>
+          </div>
+          {isReferenceStyle && (
             <button
               type="button"
               onClick={() => onNavigate("support")}
@@ -1875,29 +1896,29 @@ function ProductDetailPage({
             </button>
           )}
 
-          <div className={`${productDetailVariant === 5 ? "mt-6" : "mt-2 border-t border-[#ededed] pt-2"}`}>
-            <div className={productDetailVariant === 5 ? "mb-3 flex items-center gap-3" : ""}><p className={`${productDetailVariant === 5 ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>Size</p>{productDetailVariant === 5 && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
+          <div className={`${isReferenceStyle ? "mt-6" : "mt-2 border-t border-[#ededed] pt-2"}`}>
+            <div className={isReferenceStyle ? "mb-3 flex items-center gap-3" : ""}><p className={`${isReferenceStyle ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>Size</p>{isReferenceStyle && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
             <div className="flex flex-wrap gap-2">
-              {(product.dosage === "Gel" ? ["15g Tube", "30g Tube", "60g Tube"] : product.dosage === "Capsule" ? ["30 Capsules", "60 Capsules", "90 Capsules"] : ["1 (5mL) Vial", "1 (10mL) Vial", "1 (30mL) Vial"]).map(option => <OptionPill key={option} label={option} selected={size === option} onClick={() => setSize(option)} emphasis={productDetailVariant === 2} card={productDetailVariant === 3} tesla={productDetailVariant === 5} tone={productDetailVariant === 4 ? "green" : "apple"} />)}
+              {sizeOptions.map(option => <OptionPill key={option} label={option} selected={size === option} onClick={() => setSize(option)} emphasis={productDetailVariant === 2} card={productDetailVariant === 3} tesla={isReferenceStyle} blue={isBlueReference} tone={productDetailVariant === 4 ? "green" : "apple"} />)}
             </div>
           </div>
 
-          <div className={`${productDetailVariant === 5 ? "mt-5" : "mt-3 border-t border-[#ededed] pt-2"}`}>
-            <div className={productDetailVariant === 5 ? "mb-3 flex items-center gap-3" : ""}><p className={`${productDetailVariant === 5 ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>Strength</p>{productDetailVariant === 5 && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
+          <div className={`${isReferenceStyle ? "mt-5" : "mt-3 border-t border-[#ededed] pt-2"}`}>
+            <div className={isReferenceStyle ? "mb-3 flex items-center gap-3" : ""}><p className={`${isReferenceStyle ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>Strength</p>{isReferenceStyle && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
             <div className="flex flex-wrap gap-2">
-              {[defaultStrength, product.dosage === "Gel" ? "0.05%" : "1mg/mL"].filter((option, index, list) => list.indexOf(option) === index).map(option => <OptionPill key={option} label={option} selected={strength === option} onClick={() => setStrength(option)} emphasis={productDetailVariant === 2} card={productDetailVariant === 3} tesla={productDetailVariant === 5} tone={productDetailVariant === 4 ? "green" : "apple"} />)}
+              {strengthOptions.map(option => <OptionPill key={option} label={option} selected={strength === option} onClick={() => setStrength(option)} emphasis={productDetailVariant === 2} card={productDetailVariant === 3} tesla={isReferenceStyle} blue={isBlueReference} tone={productDetailVariant === 4 ? "green" : "apple"} />)}
             </div>
           </div>
 
-          <div className={`${productDetailVariant === 5 ? "mt-5" : "mt-3 border-t border-[#ededed] pt-2"}`}>
-            <div className={productDetailVariant === 5 ? "mb-3 flex items-center gap-3" : ""}><p className={`${productDetailVariant === 5 ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>{product.dosage === "Injection" ? "Injection Type" : "Form"}</p>{productDetailVariant === 5 && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
+          <div className={`${isReferenceStyle ? "mt-5" : "mt-3 border-t border-[#ededed] pt-2"}`}>
+            <div className={isReferenceStyle ? "mb-3 flex items-center gap-3" : ""}><p className={`${isReferenceStyle ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>{product.dosage === "Injection" ? "Injection Type" : "Form"}</p>{isReferenceStyle && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
             <div className="flex flex-wrap gap-2">
-              {(product.dosage === "Injection" ? ["Subcutaneous", "Intramuscular"] : [product.dosage]).map(option => <OptionPill key={option} label={option} selected={injType === option} onClick={() => setInjType(option)} emphasis={productDetailVariant === 2} card={productDetailVariant === 3} tesla={productDetailVariant === 5} tone={productDetailVariant === 4 ? "green" : "apple"} />)}
+              {(product.dosage === "Injection" ? ["Subcutaneous", "Intramuscular"] : [product.dosage]).map(option => <OptionPill key={option} label={option} selected={injType === option} onClick={() => setInjType(option)} emphasis={productDetailVariant === 2} card={productDetailVariant === 3} tesla={isReferenceStyle} blue={isBlueReference} tone={productDetailVariant === 4 ? "green" : "apple"} />)}
             </div>
           </div>
 
-          <div className={`${productDetailVariant === 5 ? "mt-5" : "mt-3 border-t border-[#ededed] pt-2"}`}>
-            <div className={productDetailVariant === 5 ? "mb-3 flex items-center gap-3" : ""}><p className={`${productDetailVariant === 5 ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>Pharmacy</p>{productDetailVariant === 5 && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
+          <div className={`${isReferenceStyle ? "mt-5" : "mt-3 border-t border-[#ededed] pt-2"}`}>
+            <div className={isReferenceStyle ? "mb-3 flex items-center gap-3" : ""}><p className={`${isReferenceStyle ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>Pharmacy</p>{isReferenceStyle && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
             <div className="space-y-2">
               {pharmacies.slice(0, 2).map(option => {
                 const selected = pharmacy === option.name;
@@ -1905,12 +1926,14 @@ function ProductDetailPage({
                   ? "border-2 border-[#00B53F] bg-white shadow-[0_0_0_3px_rgba(0,181,63,0.10)]"
                   : productDetailVariant === 1
                   ? "border-[3px] border-[#4485FF] bg-white"
-                  : productDetailVariant === 5
+                  : isBlueReference
+                  ? "border-2 border-[#2563EB] bg-white"
+                  : isReferenceStyle
                   ? "border-2 border-[#171a20] bg-white"
                   : "border-[#183229] bg-[#eef7f2] shadow-[0_8px_18px_rgba(24,50,41,0.08)]";
                 return (
-                  <button key={option.name} onClick={() => setPharmacy(option.name)} className={`relative grid w-full grid-cols-[minmax(0,1fr)_90px] items-center border px-3 text-left transition-colors ${productDetailVariant === 5 ? "min-h-[58px] rounded-[8px] py-2.5" : "rounded-[8px] py-3"} ${selected && productDetailVariant === 2 ? "border-[#183229] bg-[#183229] text-white shadow-[0_8px_18px_rgba(24,50,41,0.16)]" : selected ? outlineSelected : "border-[#bdbdbd] bg-white hover:border-[#555]"}`}>
-                    {selected && productDetailVariant === 5 && <CheckCircle2 size={18} strokeWidth={2.2} className="absolute -right-2 -top-2 fill-black text-white" />}
+                  <button key={option.name} onClick={() => setPharmacy(option.name)} className={`relative grid w-full grid-cols-[minmax(0,1fr)_90px] items-center border px-3 text-left transition-colors ${isReferenceStyle ? "min-h-[58px] rounded-[8px] py-2.5" : "rounded-[8px] py-3"} ${selected && productDetailVariant === 2 ? "border-[#183229] bg-[#183229] text-white shadow-[0_8px_18px_rgba(24,50,41,0.16)]" : selected ? outlineSelected : "border-[#bdbdbd] bg-white hover:border-[#555]"}`}>
+                    {selected && isReferenceStyle && <CheckCircle2 size={18} strokeWidth={2.2} className={`absolute -right-2 -top-2 text-white ${isBlueReference ? "fill-[#2563EB]" : "fill-black"}`} />}
                     <span className="min-w-0">
                       <span className={`flex items-center gap-1.5 truncate text-[12px] font-medium ${selected && productDetailVariant === 2 ? "text-white" : "text-[#111]"}`}>
                         {selected && productDetailVariant === 2 && <CheckCircle2 size={13} className="shrink-0 text-white" />}
@@ -1919,7 +1942,7 @@ function ProductDetailPage({
                       <span className={`mt-0.5 block text-[9px] ${selected && productDetailVariant === 2 ? "text-white/70" : "text-[#777]"}`}>Beyond use 90 days</span>
                     </span>
                     <span className="text-right">
-                      <span className={`block text-[12px] font-medium ${selected && productDetailVariant === 2 ? "text-white" : "text-[#111]"}`}>${option.price.toFixed(2)}</span>
+                      <span className={`block text-[12px] font-medium ${selected && productDetailVariant === 2 ? "text-white" : "text-[#111]"}`}>${Math.max(0, option.price + configurationPriceAdjustment).toFixed(2)}</span>
                       <span className={`block text-[8px] leading-tight ${selected && productDetailVariant === 2 ? "text-white/70" : "text-[#777]"}`}>1-2 Days<br />Processing</span>
                     </span>
                   </button>
@@ -1928,17 +1951,17 @@ function ProductDetailPage({
             </div>
           </div>
 
-          <div className={productDetailVariant === 5 ? "mt-5" : "mt-4 border-t border-[#ededed] pt-4"}>
-            {productDetailVariant === 5 ? <div className="mb-3 flex items-center gap-3"><p className="shrink-0 text-[12px] font-medium text-[#111]">Shipping</p><span className="h-px flex-1 bg-[#e5e5e5]" /></div> : <><p className="text-[12px] font-medium text-[#111]">Shipping</p><p className="mt-1 text-[12px] text-[#252525]">Choose where to ship the prescription</p></>}
+          <div className={isReferenceStyle ? "mt-5" : "mt-4 border-t border-[#ededed] pt-4"}>
+            {isReferenceStyle ? <div className="mb-3 flex items-center gap-3"><p className="shrink-0 text-[12px] font-medium text-[#111]">Shipping</p><span className="h-px flex-1 bg-[#e5e5e5]" /></div> : <><p className="text-[12px] font-medium text-[#111]">Shipping</p><p className="mt-1 text-[12px] text-[#252525]">Choose where to ship the prescription</p></>}
             <div className="mt-3 flex flex-wrap gap-2">
-              <button disabled={selectedPatientCount > 1} onClick={() => selectShippingChoice("patient")} className={`relative inline-flex h-9 items-center gap-2 border px-3 text-[11px] font-semibold transition-colors ${productDetailVariant === 5 ? "rounded-[7px]" : "rounded-full"} ${selectedPatientCount > 1 ? "cursor-not-allowed border-[#e0e2e1] bg-[#f7f7f6] text-[#a7aaa8] opacity-70" : shippingChoice === "patient" && productDetailVariant === 2 ? "border-[#183229] bg-[#183229] text-white shadow-[0_8px_18px_rgba(24,50,41,0.16)]" : shippingChoice === "patient" ? (productDetailVariant === 4 ? "border-2 border-[#00B53F] bg-white text-[#202020] shadow-[0_0_0_3px_rgba(0,181,63,0.10)]" : productDetailVariant === 1 ? "border-[3px] border-[#4485FF] bg-white text-[#202020]" : productDetailVariant === 5 ? "border-2 border-[#171a20] bg-white text-[#171a20]" : "border-[#183229] bg-[#eef7f2] text-[#183229]") : "border-[#d8dedd] bg-white text-[#6f7782]"}`}>
+              <button disabled={selectedPatientCount > 1} onClick={() => selectShippingChoice("patient")} className={`relative inline-flex h-9 items-center gap-2 border px-3 text-[11px] font-semibold transition-colors ${isReferenceStyle ? "rounded-[7px]" : "rounded-full"} ${selectedPatientCount > 1 ? "cursor-not-allowed border-[#e0e2e1] bg-[#f7f7f6] text-[#a7aaa8] opacity-70" : shippingChoice === "patient" && productDetailVariant === 2 ? "border-[#183229] bg-[#183229] text-white shadow-[0_8px_18px_rgba(24,50,41,0.16)]" : shippingChoice === "patient" ? (productDetailVariant === 4 ? "border-2 border-[#00B53F] bg-white text-[#202020] shadow-[0_0_0_3px_rgba(0,181,63,0.10)]" : productDetailVariant === 1 ? "border-[3px] border-[#4485FF] bg-white text-[#202020]" : isBlueReference ? "border-2 border-[#2563EB] bg-white text-[#171a20]" : isReferenceStyle ? "border-2 border-[#171a20] bg-white text-[#171a20]" : "border-[#183229] bg-[#eef7f2] text-[#183229]") : "border-[#d8dedd] bg-white text-[#6f7782]"}`}>
                 {shippingChoice === "patient" && productDetailVariant === 2 && <CheckCircle2 size={13} />}
-                {shippingChoice === "patient" && productDetailVariant === 5 && <CheckCircle2 size={18} strokeWidth={2.2} className="absolute -right-2 -top-2 fill-black text-white" />}
+                {shippingChoice === "patient" && isReferenceStyle && <CheckCircle2 size={18} strokeWidth={2.2} className={`absolute -right-2 -top-2 text-white ${isBlueReference ? "fill-[#2563EB]" : "fill-black"}`} />}
                 Ship to Patient
               </button>
-              <button onClick={() => selectShippingChoice("clinic")} className={`relative inline-flex h-9 items-center gap-2 border px-3 text-[11px] font-semibold transition-colors ${productDetailVariant === 5 ? "rounded-[7px]" : "rounded-full"} ${shippingChoice === "clinic" && productDetailVariant === 2 ? "border-[#183229] bg-[#183229] text-white shadow-[0_8px_18px_rgba(24,50,41,0.16)]" : shippingChoice === "clinic" ? (productDetailVariant === 4 ? "border-2 border-[#00B53F] bg-white text-[#202020] shadow-[0_0_0_3px_rgba(0,181,63,0.10)]" : productDetailVariant === 1 ? "border-[3px] border-[#4485FF] bg-white text-[#202020]" : productDetailVariant === 5 ? "border-2 border-[#171a20] bg-white text-[#171a20]" : "border-[#183229] bg-[#eef7f2] text-[#183229]") : "border-[#d8dedd] bg-white text-[#6f7782]"}`}>
+              <button onClick={() => selectShippingChoice("clinic")} className={`relative inline-flex h-9 items-center gap-2 border px-3 text-[11px] font-semibold transition-colors ${isReferenceStyle ? "rounded-[7px]" : "rounded-full"} ${shippingChoice === "clinic" && productDetailVariant === 2 ? "border-[#183229] bg-[#183229] text-white shadow-[0_8px_18px_rgba(24,50,41,0.16)]" : shippingChoice === "clinic" ? (productDetailVariant === 4 ? "border-2 border-[#00B53F] bg-white text-[#202020] shadow-[0_0_0_3px_rgba(0,181,63,0.10)]" : productDetailVariant === 1 ? "border-[3px] border-[#4485FF] bg-white text-[#202020]" : isBlueReference ? "border-2 border-[#2563EB] bg-white text-[#171a20]" : isReferenceStyle ? "border-2 border-[#171a20] bg-white text-[#171a20]" : "border-[#183229] bg-[#eef7f2] text-[#183229]") : "border-[#d8dedd] bg-white text-[#6f7782]"}`}>
                 {shippingChoice === "clinic" && productDetailVariant === 2 && <CheckCircle2 size={13} />}
-                {shippingChoice === "clinic" && productDetailVariant === 5 && <CheckCircle2 size={18} strokeWidth={2.2} className="absolute -right-2 -top-2 fill-black text-white" />}
+                {shippingChoice === "clinic" && isReferenceStyle && <CheckCircle2 size={18} strokeWidth={2.2} className={`absolute -right-2 -top-2 text-white ${isBlueReference ? "fill-[#2563EB]" : "fill-black"}`} />}
                 Ship to Clinic
               </button>
             </div>
@@ -1946,7 +1969,7 @@ function ProductDetailPage({
           </div>
 
           <div className="relative mt-6">
-            <button onClick={() => setPatientPickerOpen(current => !current)} className="flex h-11 w-full items-center justify-center rounded-full border border-[#111] bg-white text-[12px] font-medium text-[#111] hover:bg-[#fafafa]">
+            <button onClick={() => setPatientPickerOpen(current => !current)} className="flex h-11 w-full items-center justify-center rounded-full border border-[#111] bg-white text-[12px] font-medium text-[#111] transition-colors hover:bg-[#fafafa]">
               {selectedPatientCount === 0 ? "Choose patient" : shippingChoice === "clinic" ? "Add another patient" : "Change patient"}
             </button>
             {patientPickerOpen && (
