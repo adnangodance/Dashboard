@@ -72,6 +72,9 @@ import imgNadInjection from "@/assets/nad-injection.png";
 import imgOrderAminoQuad from "@/assets/order-amino-quad.png";
 import imgOrderOxytocin from "@/assets/order-oxytocin.png";
 import imgOrderOxytocinAlt from "@/assets/order-oxytocin-alt.png";
+import catalogRefrigeratedIcon from "@/assets/catalog-refrigerated.png";
+import catalogRxIcon from "@/assets/catalog-rx.png";
+import catalogSpecialtyIcon from "@/assets/catalog-specialty.png";
 import landingGlutathione from "@/assets/landing-glutathione.png";
 import landingNadInjection from "@/assets/landing-nad-injection.png";
 import landingTestosterone from "@/assets/landing-testosterone-cypionate.png";
@@ -373,6 +376,8 @@ function Sidebar({
   setAppTheme,
   extraVariants,
   setExtraVariants,
+  oldCatalog,
+  setOldCatalog,
 }: {
   active: Page;
   onNavigate: (p: Page) => void;
@@ -382,6 +387,8 @@ function Sidebar({
   setAppTheme: Dispatch<SetStateAction<AppTheme>>;
   extraVariants: boolean;
   setExtraVariants: Dispatch<SetStateAction<boolean>>;
+  oldCatalog: boolean;
+  setOldCatalog: Dispatch<SetStateAction<boolean>>;
 }) {
   const [favorites, setFavorites] = useState<MenuItem[]>(INITIAL_FAVORITES);
   const [mainMenu, setMainMenu] = useState<MenuItem[]>(INITIAL_MAIN);
@@ -482,7 +489,7 @@ function Sidebar({
       <div className="mt-auto" />
       <SidebarSupportVersion onNavigate={onNavigate} />
       <div className="pb-3 pt-4">
-        <UserChip onNavigate={onNavigate} onLogout={onLogout} appTheme={appTheme} setAppTheme={setAppTheme} extraVariants={extraVariants} setExtraVariants={setExtraVariants} />
+        <UserChip onNavigate={onNavigate} onLogout={onLogout} appTheme={appTheme} setAppTheme={setAppTheme} extraVariants={extraVariants} setExtraVariants={setExtraVariants} oldCatalog={oldCatalog} setOldCatalog={setOldCatalog} />
       </div>
     </aside>
   );
@@ -547,6 +554,8 @@ function UserChip({
   setAppTheme,
   extraVariants,
   setExtraVariants,
+  oldCatalog,
+  setOldCatalog,
 }: {
   onNavigate: (p: Page) => void;
   onLogout: () => void;
@@ -554,6 +563,8 @@ function UserChip({
   setAppTheme: Dispatch<SetStateAction<AppTheme>>;
   extraVariants: boolean;
   setExtraVariants: Dispatch<SetStateAction<boolean>>;
+  oldCatalog: boolean;
+  setOldCatalog: Dispatch<SetStateAction<boolean>>;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const themeOptions: Array<{ value: AppTheme; label: string }> = [
@@ -594,8 +605,22 @@ function UserChip({
                 className={`flex h-9 w-full items-center justify-between rounded-[7px] px-2.5 text-[11px] font-medium transition-colors hover:bg-[var(--app-menu-bg)] ${extraVariants ? "bg-[var(--app-menu-bg)] text-[#183229]" : "text-[#252525]"}`}
               >
                 <span>Extra variants</span>
-                <span className={`relative h-[18px] w-[32px] rounded-full transition-colors ${extraVariants ? "bg-[#00B33C]" : "bg-[#d9dedb]"}`}>
-                  <span className={`absolute top-0.5 size-[14px] rounded-full bg-white transition-transform ${extraVariants ? "translate-x-[16px]" : "translate-x-0.5"}`} />
+                <span className={`relative h-5 w-9 shrink-0 rounded-full border transition-all ${extraVariants ? "border-[#0b7045] bg-[#183229] shadow-[inset_0_1px_2px_rgba(0,0,0,0.18)]" : "border-[#cfd4d1] bg-[#e7eae8]"}`}>
+                  <span className={`absolute left-[2px] top-[2px] size-[14px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.28)] transition-transform duration-200 ${extraVariants ? "translate-x-4" : "translate-x-0"}`} />
+                </span>
+              </button>
+              <button
+                onClick={() => setOldCatalog(current => !current)}
+                className={`flex h-9 w-full items-center justify-between rounded-[7px] px-2.5 text-[11px] font-medium transition-colors hover:bg-[var(--app-menu-bg)] ${oldCatalog ? "bg-[var(--app-menu-bg)] text-[#183229]" : "text-[#252525]"}`}
+                role="switch"
+                aria-checked={oldCatalog}
+              >
+                <span>Old catalog</span>
+                <span className="flex items-center gap-2">
+                  <span className={`min-w-[18px] text-right text-[9px] font-semibold ${oldCatalog ? "text-[#31583f]" : "text-[#929894]"}`}>{oldCatalog ? "On" : "Off"}</span>
+                  <span className={`relative h-6 w-11 shrink-0 rounded-full border transition-all duration-200 ${oldCatalog ? "border-[#0b7045] bg-gradient-to-r from-[#183229] to-[#315f4e] shadow-[inset_0_1px_2px_rgba(0,0,0,0.18),0_0_0_2px_rgba(24,50,41,0.06)]" : "border-[#cfd4d1] bg-[#e7eae8]"}`}>
+                    <span className={`absolute left-[3px] top-[3px] size-4 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.3)] transition-transform duration-200 ease-out ${oldCatalog ? "translate-x-5" : "translate-x-0"}`} />
+                  </span>
                 </span>
               </button>
             </div>
@@ -909,120 +934,131 @@ function FigmaCard({
   heartVariant: "green" | "black" | "none";
   onClick: () => void;
 }) {
+  const [pharmacyMenuOpen, setPharmacyMenuOpen] = useState(false);
+  const cardPharmacies = ["Altin Compounding Pharmacy", "Emerald Pharmacy SandBox", "Partel Sandbox"];
+
   return (
     <div
-      className="grid-cols-[max-content] grid-rows-[max-content] inline-grid place-items-start relative shrink-0 cursor-pointer"
+      className="relative inline-grid shrink-0 cursor-pointer grid-cols-[max-content] grid-rows-[max-content] place-items-start"
       style={{ zoom: 1.3 }}
       onClick={onClick}
     >
-      {/* Card background — sets the cell size */}
-      <div className="bg-gradient-to-b col-1 from-[rgba(247,239,233,0.1)] h-[287.477px] ml-0 mt-0 relative rounded-[12.13px] row-1 to-[rgba(236,229,182,0.1)] w-[205.6px]" />
+      <div className="col-1 row-1 h-[302px] w-[205.6px] rounded-[12.13px] bg-gradient-to-b from-[rgba(247,239,233,0.1)] to-[rgba(236,229,182,0.1)]" />
 
-      {/* RX badge */}
-      {hasRxBadge && (
-        <div className="col-1 relative row-1" style={{ marginLeft: 11.4, marginTop: 17, width: 24.615, height: 16 }}>
-          <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24.6154 16">
-            <rect fill="#E7EEFA" height="16" rx="4.92308" width="24.6154" />
-            <path d={RX_ICON} fill="#1D4289" />
-          </svg>
-        </div>
-      )}
-
-      {/* Product info */}
-      <div
-        className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid place-items-start relative row-1"
-        style={{ marginLeft: 20.62, marginTop: 219.47 }}
-      >
-        {/* Price — mt-21.91 pushes it below the name in the stacking grid */}
-        <div
-          className="col-1 flex flex-col justify-center relative row-1 text-[#1a1a1a]"
-          style={{ marginTop: 21.91, height: 16, width: 90, fontSize: 12, lineHeight: "16px" }}
-        >
-          <p>{price}</p>
-        </div>
-        {/* Name — mt-0, appears at top of this inner grid */}
-        <div
-          className="col-1 flex flex-col justify-center relative row-1 text-[#1a1a1a]"
-          style={{ marginTop: 0, marginLeft: 0.44, height: 18, fontSize: 14, lineHeight: "18px", letterSpacing: "-0.279px", width: 172 }}
-        >
-          <p>{name}</p>
-        </div>
-        {/* Pharmacies — mt-42.53 */}
-        <div
-          className="col-1 flex flex-col justify-center relative row-1 text-[#666]"
-          style={{ marginTop: 43.5, height: 14, fontSize: 10, lineHeight: "14px", width: 140 }}
-        >
-          <p className="underline decoration-solid [text-underline-position:from-font] decoration-from-font">{pharmacies} Pharmacies</p>
-        </div>
-      </div>
-
-      {/* Product image */}
-      <div
-        className="col-1 relative row-1 pointer-events-none"
-        style={{ marginLeft: imgL, marginTop: imgT, width: imgW, height: imgH }}
-      >
+      <div className="pointer-events-none col-1 row-1" style={{ marginLeft: imgL, marginTop: imgT, width: imgW, height: imgH }}>
         <img
           alt={name}
-          className={`absolute inset-0 max-w-none size-full ${imgContain ? "object-contain" : "object-cover"}`}
+          className={`size-full max-w-none ${imgContain ? "object-contain" : "object-cover"}`}
           src={img}
         />
       </div>
 
-      {/* Favorite button — rendered last so it sits on top */}
+      <div className="col-1 row-1" style={{ marginLeft: 20.62, marginTop: 219.47, width: 172 }}>
+        <h3 className="truncate text-[14px] font-medium leading-[18px] tracking-[-0.279px] text-[#1a1a1a]">{name}</h3>
+        <p className="mt-[3px] text-[12px] leading-[16px] text-[#1a1a1a]">{price}</p>
+        <div className="mt-[6px] flex items-center gap-[5px]">
+          <span className="flex size-5 items-center justify-center overflow-hidden">
+            <img src={catalogRefrigeratedIcon} alt="Refrigerated" className="h-[29px] w-[51px] max-w-none object-contain" />
+          </span>
+          <img src={catalogRxIcon} alt="Prescription required" className="h-[18px] w-[21px] object-contain" />
+          <img src={catalogSpecialtyIcon} alt="Specialty medication" className="size-5 object-contain" />
+          <button
+            type="button"
+            className="relative ml-[2px] inline-flex h-5 items-center rounded-[3px] bg-[#f8f5f1] px-2 text-[10px] font-medium text-[#333]"
+            onClick={(event) => { event.stopPropagation(); setPharmacyMenuOpen(current => !current); }}
+            aria-expanded={pharmacyMenuOpen}
+          >
+            {pharmacies > 2 ? `+${pharmacies - 2} Pharmacies` : `${pharmacies} Pharmacies`}
+            {pharmacyMenuOpen && (
+              <span
+                className="absolute bottom-[26px] left-0 z-30 w-[155px] overflow-hidden rounded-[8px] border border-[#e5e5e5] bg-white text-left shadow-[0_7px_18px_rgba(0,0,0,0.10)]"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <span className="block space-y-1 px-3 py-2.5">
+                  {cardPharmacies.map((pharmacyName, index) => (
+                    <span key={pharmacyName} className="flex items-start gap-2 rounded-[5px] py-1.5">
+                      <span className={`mt-0.5 flex size-3.5 shrink-0 items-center justify-center rounded-[3px] text-[5px] font-semibold ${index === 1 ? "bg-[#e8f1d8] text-[#69833b]" : "bg-white text-[#7357ff]"}`}>
+                        {index === 1 ? "E" : "Optimal"}
+                      </span>
+                      <span className="text-[9px] font-medium leading-[13px] text-[#222]">{pharmacyName}</span>
+                    </span>
+                  ))}
+                </span>
+                <span className="block border-t border-[#eeeeee] px-3 py-2 text-[9px] font-medium text-[#222] underline underline-offset-2">3 Pharmacies</span>
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
       {heartVariant !== "none" && (
         <button
-          className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid place-items-start relative row-1 z-10"
+          className="col-1 row-1 z-10 flex size-[27.5px] items-center justify-center rounded-full bg-white shadow-[0_3px_8px_rgba(0,0,0,0.04)]"
           style={{ marginLeft: btnOffsetX, marginTop: 15 }}
           onClick={(e) => { e.stopPropagation(); onFavorite(); }}
           disabled={favoriteLoading}
           aria-busy={favoriteLoading}
+          aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
         >
-          {/* White shadow circle */}
-          <div className="col-1 relative row-1" style={{ width: 27.5, height: 27.5 }}>
-            <div className="absolute" style={{ inset: "-6.9% -20.69% -34.48% -20.69%" }}>
-              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 38.8793 38.8793">
-                <g filter="url(#cardShadow)">
-                  <circle cx="19.4397" cy="15.6466" fill="white" r="13.75" />
-                </g>
-                <defs>
-                  <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="38.8793" id="cardShadow" width="38.8793" x="0" y="0">
-                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                    <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
-                    <feMorphology in="SourceAlpha" operator="dilate" radius="1.89655" result="effect1" />
-                    <feOffset dy="3.7931" />
-                    <feGaussianBlur stdDeviation="1.89655" />
-                    <feComposite in2="hardAlpha" operator="out" />
-                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.02 0" />
-                    <feBlend in2="BackgroundImageFix" mode="normal" result="effect1" />
-                    <feBlend in="SourceGraphic" in2="effect1" mode="normal" result="shape" />
-                  </filter>
-                </defs>
-              </svg>
-            </div>
-          </div>
-          {/* Heart icon */}
           {favoriteLoading ? (
-            <div className="col-1 relative row-1" style={{ marginLeft: 6.2, marginTop: 6.1, width: 15.5, height: 15.5 }}>
-              <Loader2 size={15.5} className="animate-spin text-[#183229]" />
-            </div>
-          ) : heartVariant === "green" ? (
-            /* Filled green heart */
-            <div className="col-1 relative row-1" style={{ marginLeft: 5.7, marginTop: 5.87, width: 16.435, height: 16.435 }}>
-              <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 16.4348 16.4348">
-                <path d={HEART_FILLED} fill="#C5D853" />
-              </svg>
-            </div>
+            <Loader2 size={15.5} className="animate-spin text-[#183229]" />
+          ) : favorited || heartVariant === "green" ? (
+            <Heart size={16} strokeWidth={1.8} className="fill-[#C5D853] text-[#C5D853]" />
           ) : (
-            /* Outline black heart */
-            <div className="col-1 relative row-1" style={{ marginLeft: 7.59, marginTop: 8.53, width: 13.279, height: 11.379 }}>
-              <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 13.279 11.3793">
-                <path d={HEART_OUTLINE} fill="black" />
-              </svg>
-            </div>
+            <Heart size={15} strokeWidth={1.8} className="text-black" />
           )}
         </button>
       )}
     </div>
+  );
+}
+
+function OldCatalogCard({
+  name,
+  price,
+  pharmacies,
+  img,
+  favorited,
+  onFavorite,
+  favoriteLoading = false,
+  heartVariant,
+  onClick,
+}: {
+  name: string;
+  price: string;
+  pharmacies: number;
+  img: string;
+  favorited: boolean;
+  onFavorite: () => void;
+  favoriteLoading?: boolean;
+  heartVariant: "green" | "black" | "none";
+  onClick: () => void;
+}) {
+  return (
+    <article
+      onClick={onClick}
+      className="relative h-[374px] w-[268px] shrink-0 cursor-pointer overflow-hidden rounded-[16px] bg-gradient-to-b from-[rgba(247,239,233,0.22)] to-[rgba(236,229,182,0.20)] transition-transform duration-200 hover:-translate-y-0.5"
+    >
+      <div className="flex h-[276px] items-center justify-center px-7 pt-5">
+        <img src={img} alt={name} className="max-h-[245px] max-w-[205px] object-contain mix-blend-multiply" />
+      </div>
+      <div className="absolute inset-x-0 bottom-0 px-6 pb-6">
+        <h3 className="truncate text-[16px] font-medium leading-5 text-[#1a1a1a]">{name}</h3>
+        <p className="mt-1 text-[14px] text-[#1a1a1a]">{price}</p>
+        <p className="mt-2 text-[12px] text-[#666] underline underline-offset-2">{pharmacies} Pharmacies</p>
+      </div>
+      {heartVariant !== "none" && (
+        <button
+          type="button"
+          onClick={(event) => { event.stopPropagation(); onFavorite(); }}
+          disabled={favoriteLoading}
+          className="absolute right-4 top-4 flex size-9 items-center justify-center rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
+          aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+        >
+          {favoriteLoading ? <Loader2 size={17} className="animate-spin text-[#183229]" /> : <Heart size={18} className={favorited || heartVariant === "green" ? "fill-[#C5D853] text-[#C5D853]" : "text-black"} />}
+        </button>
+      )}
+    </article>
   );
 }
 
@@ -1237,11 +1273,13 @@ function ProductsPage({
   cartMode,
   setCartMode,
   onProductSelect,
+  oldCatalog,
 }: {
   onNavigate: (p: Page) => void;
   cartMode: CartMode;
   setCartMode: (mode: CartMode) => void;
   onProductSelect: (product: CardDef) => void;
+  oldCatalog: boolean;
 }) {
   const { favoriteProductIds, setFavoriteProductIds, favoriteProducts } = useProductFavorites();
   const [search, setSearch] = useState("");
@@ -1280,6 +1318,24 @@ function ProductsPage({
     const fav = favoriteProductIds.has(card.id);
     const heart: "green" | "black" | "none" =
       card.heartVariant === "none" ? "none" : fav ? "green" : "black";
+    if (oldCatalog) {
+      return (
+        <OldCatalogCard
+          key={card.id}
+          name={card.name}
+          price={card.price}
+          pharmacies={card.pharmacies}
+          img={card.img}
+          favorited={fav}
+          onFavorite={() => toggleFav(card.id)}
+          heartVariant={heart}
+          onClick={() => {
+            onProductSelect(card);
+            onNavigate("product-detail");
+          }}
+        />
+      );
+    }
     return (
       <FigmaCard
         key={card.id}
@@ -6751,6 +6807,7 @@ export default function App() {
     return savedTheme === "orange" ? "orange" : "default";
   });
   const [extraVariants, setExtraVariants] = useState(() => window.localStorage.getItem("scriptlinkrx-extra-variants") === "true");
+  const [oldCatalog, setOldCatalog] = useState(() => window.localStorage.getItem("scriptlinkrx-old-catalog") === "true");
   const [page, setPage] = useState<Page>(DEFAULT_PAGE);
   const [cartMode, setCartMode] = useState<CartMode>("single");
   const [multiCartPatientIds, setMultiCartPatientIds] = useState<number[]>([]);
@@ -6794,6 +6851,10 @@ export default function App() {
   useEffect(() => {
     window.localStorage.setItem("scriptlinkrx-extra-variants", String(extraVariants));
   }, [extraVariants]);
+
+  useEffect(() => {
+    window.localStorage.setItem("scriptlinkrx-old-catalog", String(oldCatalog));
+  }, [oldCatalog]);
 
   useEffect(() => {
     if (!chatOpen) return;
@@ -6961,6 +7022,7 @@ export default function App() {
             cartMode={cartMode}
             setCartMode={setCartMode}
             onProductSelect={setSelectedProduct}
+            oldCatalog={oldCatalog}
           />
         );
       case "favorites":
@@ -6992,6 +7054,7 @@ export default function App() {
             cartMode={cartMode}
             setCartMode={setCartMode}
             onProductSelect={setSelectedProduct}
+            oldCatalog={oldCatalog}
           />
         );
     }
@@ -7075,7 +7138,7 @@ export default function App() {
         <ProductFavoritesContext.Provider value={{ favoriteProductIds, setFavoriteProductIds, favoriteProducts }}>
           <div className={`app-theme app-theme-${appTheme} flex h-screen overflow-hidden bg-[var(--app-soft-hover)] font-['Inter',sans-serif]`}>
             {/* Sidebar Navigation */}
-            <Sidebar active={page} onNavigate={setPage} cartPage={cartPage} onLogout={() => {}} appTheme={appTheme} setAppTheme={setAppTheme} extraVariants={extraVariants} setExtraVariants={setExtraVariants} />
+            <Sidebar active={page} onNavigate={setPage} cartPage={cartPage} onLogout={() => {}} appTheme={appTheme} setAppTheme={setAppTheme} extraVariants={extraVariants} setExtraVariants={setExtraVariants} oldCatalog={oldCatalog} setOldCatalog={setOldCatalog} />
 
             {/* Main content area */}
             <main className="app-main-scroll h-screen min-w-0 flex-1 overflow-y-scroll p-3 pl-1.5">
