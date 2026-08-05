@@ -538,7 +538,11 @@ function SidebarSupportVersion({ onNavigate }: { onNavigate: (p: Page) => void }
           <p className="mt-1.5 text-[11px] leading-[16px] text-[#737A75]">Use your clinic’s card for patient purchases.</p>
           <button
             type="button"
-            onClick={() => onNavigate("settings")}
+            onClick={() => {
+              window.sessionStorage.setItem("open-payment-setup", "true");
+              window.dispatchEvent(new Event("open-payment-setup"));
+              onNavigate("settings");
+            }}
             className="group mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-white px-3 py-2.5 text-[11px] font-semibold text-[#171A18] shadow-[0_3px_12px_rgba(34,46,39,0.06)] transition-transform hover:-translate-y-0.5"
           >
             Set up payment
@@ -1791,7 +1795,7 @@ function OptionPill({
       <span className={`inline-flex items-center gap-1.5 ${card ? "w-full justify-between" : ""}`}>
         <span className={tesla ? "text-left" : ""}>
           <span className="block">{label}</span>
-          {subLabel && <span className="mt-0.5 block rounded-full bg-[#f3f3f3] px-1.5 py-0.5 text-[9px] font-normal leading-[11px] text-[#444]">{subLabel}</span>}
+          {subLabel && <span className="mt-0.5 block rounded-full bg-[#f3f3f3] px-1.5 py-0.5 text-[10px] font-normal leading-[12px] text-[#444]">{subLabel}</span>}
         </span>
         {tesla && selected && <CheckCircle2 size={18} strokeWidth={2.2} className={`absolute -right-2 -top-2 text-white ${blue ? "fill-[#2563EB]" : "fill-black"}`} />}
         {(emphasis || card) && selected && <CheckCircle2 size={13} strokeWidth={2} />}
@@ -1834,7 +1838,6 @@ function ProductDetailPage({
   const [addedItemCount, setAddedItemCount] = useState<number | null>(null);
   const [deliveryState, setDeliveryState] = useState("Florida");
   const [locationMenuOpen, setLocationMenuOpen] = useState(false);
-  const [locationSearch, setLocationSearch] = useState("");
   const [activeInfoTab, setActiveInfoTab] = useState<"overview" | "formula" | "dosage" | "safety">("overview");
   const [productDetailVariant, setProductDetailVariant] = useState<1 | 2 | 3 | 4 | 5 | 6>(6);
   const configurationCardRef = useRef<HTMLDivElement>(null);
@@ -2124,7 +2127,7 @@ function ProductDetailPage({
                         {selected && productDetailVariant === 2 && <CheckCircle2 size={13} className="shrink-0 text-white" />}
                         {option.name}
                       </span>
-                      <span className={`mt-0.5 block text-[9px] ${selected && productDetailVariant === 2 ? "text-white/70" : "text-[#777]"}`}>BUD: 90 Days</span>
+                      <span className={`mt-0.5 block text-[10px] ${selected && productDetailVariant === 2 ? "text-white/70" : "text-[#777]"}`}>BUD: 90 Days</span>
                     </span>
                     <span className="text-right">
                       <span className={`block text-[12px] font-medium ${selected && productDetailVariant === 2 ? "text-white" : "text-[#111]"}`}>${Math.max(0, option.price + configurationPriceAdjustment).toFixed(2)}</span>
@@ -2138,6 +2141,9 @@ function ProductDetailPage({
 
           <div className={isReferenceStyle ? "mt-5" : "mt-4 border-t border-[#ededed] pt-4"}>
             {isReferenceStyle ? <div className="mb-3 flex items-center gap-3"><p className="shrink-0 text-[12px] font-medium text-[#111]">Shipping</p><span className="h-px flex-1 bg-[#e5e5e5]" /></div> : <><p className="text-[12px] font-medium text-[#111]">Shipping</p><p className="mt-1 text-[12px] text-[#252525]">Choose where to ship the prescription</p></>}
+            {selectedPatientCount > 1 && (
+              <p className="mt-2 text-[10px] font-medium leading-[14px] text-[#c2413b]">Ship to Patient is disabled due to multiple patients in cart.</p>
+            )}
             <div className="mt-3 flex flex-wrap gap-2">
               <button disabled={selectedPatientCount > 1} onClick={() => selectShippingChoice("patient")} className={`relative inline-flex h-9 items-center gap-2 border px-3 text-[11px] font-semibold transition-colors ${isReferenceStyle ? "rounded-[7px]" : "rounded-full"} ${selectedPatientCount > 1 ? "cursor-not-allowed border-[#e0e2e1] bg-[#f7f7f6] text-[#a7aaa8] opacity-70" : shippingChoice === "patient" && productDetailVariant === 2 ? "border-[#183229] bg-[#183229] text-white shadow-[0_8px_18px_rgba(24,50,41,0.16)]" : shippingChoice === "patient" ? (productDetailVariant === 4 ? "border-2 border-[#00B53F] bg-white text-[#202020] shadow-[0_0_0_3px_rgba(0,181,63,0.10)]" : productDetailVariant === 1 ? "border-[3px] border-[#4485FF] bg-white text-[#202020]" : isBlueReference ? "border-2 border-[#2563EB] bg-white text-[#171a20]" : isReferenceStyle ? "border-2 border-[#171a20] bg-white text-[#171a20]" : "border-[#183229] bg-[#eef7f2] text-[#183229]") : "border-[#d8dedd] bg-white text-[#6f7782]"}`}>
                 {shippingChoice === "patient" && productDetailVariant === 2 && <CheckCircle2 size={13} />}
@@ -2242,40 +2248,25 @@ function ProductDetailPage({
             Add {selectedItemCount > 1 ? `${selectedItemCount} items` : "to cart"} <ShoppingCart size={14} strokeWidth={1.5} />
           </button>
 
-          <div className="relative mt-3 flex h-12 items-center rounded-[9px] bg-[#f7f7f7] px-4">
-            <MapPin size={18} strokeWidth={1.6} className="mr-2 text-[#111]" />
-            <span className="text-[9px] leading-tight text-[#777]">Delivered to<br /><strong className="text-[11px] font-semibold text-[#111]">{deliveryState}</strong></span>
-            <button onClick={() => setLocationMenuOpen(current => !current)} className="ml-auto text-[10px] font-medium text-[#333] hover:underline">Change Location</button>
+          <div className="mt-3 overflow-hidden rounded-[9px] bg-[#f7f7f7]">
+            <div className="flex h-12 items-center px-4">
+              <MapPin size={18} strokeWidth={1.6} className="mr-2 text-[#111]" />
+              <span className="text-[9px] leading-tight text-[#777]">Delivered to<br /><strong className="text-[11px] font-semibold text-[#111]">{deliveryState}</strong></span>
+              <button onClick={() => setLocationMenuOpen(current => !current)} className="ml-auto text-[10px] font-medium text-[#333] hover:underline">{locationMenuOpen ? "Cancel" : "Change Location"}</button>
+            </div>
             {locationMenuOpen && (
-              <div className="absolute bottom-[54px] right-0 z-30 w-[240px] overflow-hidden rounded-[6px] border border-[#d7dee8] bg-white shadow-[0_18px_40px_rgba(16,24,40,0.16)]">
-                <div className="border-b border-[#e7ebf0] p-2">
-                  <div className="flex h-[34px] items-center gap-2 rounded-[5px] border border-[#cfd8e3] bg-white px-2">
-                    <Search size={15} strokeWidth={1.9} className="text-[#344054]" />
-                    <input
-                      value={locationSearch}
-                      onChange={event => setLocationSearch(event.target.value)}
-                      autoFocus
-                      placeholder="Search state"
-                      className="h-full min-w-0 flex-1 bg-transparent text-[13px] font-medium text-[#344054] outline-none placeholder:text-[#98a2b3]"
-                    />
-                  </div>
-                </div>
-                <div className="max-h-[260px] overflow-y-auto py-1">
-                  {deliveryStates
-                    .filter(state => state.toLowerCase().includes(locationSearch.toLowerCase()))
-                    .map(state => (
-                      <button
-                        key={state}
-                        onClick={() => { setDeliveryState(state); setLocationMenuOpen(false); setLocationSearch(""); }}
-                        className="flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-[13px] font-medium text-[#344054] transition-colors hover:bg-[#f6f8fa]"
-                      >
-                        <span className="flex-1">{state}</span>
-                        {state === deliveryState && <CheckCircle2 size={14} strokeWidth={2.4} className="fill-[#475467] text-white" />}
-                      </button>
-                    ))}
-                  {deliveryStates.filter(state => state.toLowerCase().includes(locationSearch.toLowerCase())).length === 0 && (
-                    <div className="px-4 py-3 text-[13px] font-medium text-[#98a2b3]">No results</div>
-                  )}
+              <div className="border-t border-[#e5e5e5] bg-white p-3">
+                <label className="mb-1.5 block text-[10px] font-medium text-[#555]">Delivery state</label>
+                <div className="relative">
+                  <select
+                    value={deliveryState}
+                    onChange={event => { setDeliveryState(event.target.value); setLocationMenuOpen(false); }}
+                    autoFocus
+                    className="h-10 w-full appearance-none rounded-[7px] border border-[#cfd3d8] bg-white px-3 pr-9 text-[12px] font-medium text-[#222] outline-none transition-colors focus:border-[#2563EB]"
+                  >
+                    {deliveryStates.map(state => <option key={state}>{state}</option>)}
+                  </select>
+                  <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#555]" />
                 </div>
               </div>
             )}
@@ -3607,15 +3598,28 @@ function UsersPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 // ─── Settings ─────────────────────────────────────────────────────────────────
 
 function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
-  const [activeTab, setActiveTab] = useState("Business Account");
+  const shouldOpenPaymentSetup = () => window.sessionStorage.getItem("open-payment-setup") === "true";
+  const [activeTab, setActiveTab] = useState(() => shouldOpenPaymentSetup() ? "Pay by Clinic" : "Business Account");
   const [payByClinicTab, setPayByClinicTab] = useState<"cards" | "ach">("cards");
-  const [creditCardOpen, setCreditCardOpen] = useState(false);
+  const [creditCardOpen, setCreditCardOpen] = useState(() => shouldOpenPaymentSetup());
   const [cardType, setCardType] = useState("Visa");
   const [cardAuthorized, setCardAuthorized] = useState(true);
   const [cardSaving, setCardSaving] = useState(false);
   const [savedClinicCard, setSavedClinicCard] = useState(false);
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const signatureDrawingRef = useRef(false);
+
+  useEffect(() => {
+    window.sessionStorage.removeItem("open-payment-setup");
+    const openPaymentSetup = () => {
+      setActiveTab("Pay by Clinic");
+      setPayByClinicTab("cards");
+      setCreditCardOpen(true);
+      window.sessionStorage.removeItem("open-payment-setup");
+    };
+    window.addEventListener("open-payment-setup", openPaymentSetup);
+    return () => window.removeEventListener("open-payment-setup", openPaymentSetup);
+  }, []);
 
   useEffect(() => {
     if (!creditCardOpen) return;
