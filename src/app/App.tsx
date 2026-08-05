@@ -1751,6 +1751,7 @@ function OptionPill({
   card,
   tesla,
   blue,
+  subLabel,
   tone = "apple",
 }: {
   label: string;
@@ -1760,6 +1761,7 @@ function OptionPill({
   card?: boolean;
   tesla?: boolean;
   blue?: boolean;
+  subLabel?: string;
   tone?: "apple" | "green";
 }) {
   const selectedOutline =
@@ -1770,7 +1772,7 @@ function OptionPill({
   return (
     <button
       onClick={onClick}
-      className={`relative inline-flex items-center border font-medium transition-colors ${tesla ? "h-10 min-w-[94px] justify-center rounded-[7px] px-3 text-[11px]" : "h-11 rounded-[7px] px-5 text-[12px]"} ${
+      className={`relative inline-flex items-center border font-medium transition-colors ${subLabel ? "h-[46px] min-w-[102px] justify-center rounded-[7px] px-2 text-[12px]" : tesla ? "h-10 min-w-[94px] justify-center rounded-[7px] px-3 text-[12px]" : "h-11 rounded-[7px] px-5 text-[12px]"} ${
         selected && tesla
           ? blue
             ? "border-2 border-[#2563EB] bg-white text-[#171a20]"
@@ -1789,6 +1791,7 @@ function OptionPill({
       <span className={`inline-flex items-center gap-1.5 ${card ? "w-full justify-between" : ""}`}>
         <span className={tesla ? "text-left" : ""}>
           <span className="block">{label}</span>
+          {subLabel && <span className="mt-0.5 block rounded-full bg-[#f3f3f3] px-1.5 py-0.5 text-[9px] font-normal leading-[11px] text-[#444]">{subLabel}</span>}
         </span>
         {tesla && selected && <CheckCircle2 size={18} strokeWidth={2.2} className={`absolute -right-2 -top-2 text-white ${blue ? "fill-[#2563EB]" : "fill-black"}`} />}
         {(emphasis || card) && selected && <CheckCircle2 size={13} strokeWidth={2} />}
@@ -1829,6 +1832,9 @@ function ProductDetailPage({
   const [patientQuantities, setPatientQuantities] = useState<Record<number, number>>({});
   const [expandedPatientIds, setExpandedPatientIds] = useState<Set<number>>(new Set());
   const [addedItemCount, setAddedItemCount] = useState<number | null>(null);
+  const [deliveryState, setDeliveryState] = useState("Florida");
+  const [locationMenuOpen, setLocationMenuOpen] = useState(false);
+  const [locationSearch, setLocationSearch] = useState("");
   const [activeInfoTab, setActiveInfoTab] = useState<"overview" | "formula" | "dosage" | "safety">("overview");
   const [productDetailVariant, setProductDetailVariant] = useState<1 | 2 | 3 | 4 | 5 | 6>(6);
   const configurationCardRef = useRef<HTMLDivElement>(null);
@@ -1861,21 +1867,37 @@ function ProductDetailPage({
   }, [cartMode]);
 
   const baseProductPrice = Number.parseFloat(product.price.replace(/[^0-9.]/g, "")) || 35.88;
-  const sizeOptions = product.dosage === "Gel"
-    ? ["15g Tube", "30g Tube", "45g Tube", "60g Tube", "90g Pump"]
+  const deliveryStates = [
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware",
+    "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky",
+    "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri",
+    "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York",
+    "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island",
+    "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+    "West Virginia", "Wisconsin", "Wyoming",
+  ];
+  const sizeCatalog = product.dosage === "Gel"
+    ? ["10g Tube", "15g Tube", "20g Tube", "30g Tube", "45g Tube", "60g Tube", "75g Tube", "90g Tube", "15g Pump", "30g Pump", "45g Pump", "60g Pump", "75g Pump", "90g Pump", "120g Pump"]
     : product.dosage === "Capsule"
-    ? ["30 Capsules", "45 Capsules", "60 Capsules", "90 Capsules", "120 Capsules"]
-    : ["1 (1mL) Vial", "1 (2mL) Vial", "1 (5mL) Vial", "1 (10mL) Vial", "1 (30mL) Vial"];
-  const strengthOptions = [
-    defaultStrength,
-    ...(product.dosage === "Gel"
-      ? ["0.01%", "0.025%", "0.05%", "0.075%", "0.1%"]
-      : product.dosage === "Capsule"
-      ? ["5mg", "10mg", "25mg", "50mg", "100mg"]
-      : ["1mg/mL", "2.5mg/mL", "5mg/mL", "10mg/mL", "20mg/mL"]),
-  ]
+    ? ["15 Capsules", "20 Capsules", "30 Capsules", "40 Capsules", "45 Capsules", "50 Capsules", "60 Capsules", "75 Capsules", "90 Capsules", "100 Capsules", "120 Capsules", "150 Capsules", "180 Capsules", "240 Capsules", "360 Capsules"]
+    : ["1 (1mL) Vial", "1 (2mL) Vial", "1 (3mL) Vial", "1 (5mL) Vial", "1 (10mL) Vial", "1 (15mL) Vial", "1 (20mL) Vial", "1 (30mL) Vial", "2 (2mL) Vials", "2 (5mL) Vials", "2 (10mL) Vials", "3 (5mL) Vials", "4 (2mL) Vials", "5 (1mL) Vials", "6 (1mL) Vials"];
+  const strengthCatalog = product.dosage === "Gel"
+    ? ["0.005%", "0.01%", "0.015%", "0.02%", "0.025%", "0.03%", "0.04%", "0.05%", "0.06%", "0.075%", "0.08%", "0.1%", "0.125%", "0.15%", "0.2%"]
+    : product.dosage === "Capsule"
+    ? ["2.5mg", "5mg", "7.5mg", "10mg", "12.5mg", "15mg", "20mg", "25mg", "30mg", "40mg", "50mg", "75mg", "100mg", "150mg", "200mg"]
+    : ["0.5mg/mL", "1mg/mL", "2mg/mL", "2.5mg/mL", "5mg/mL", "7.5mg/mL", "10mg/mL", "12.5mg/mL", "15mg/mL", "20mg/mL", "25mg/mL", "30mg/mL", "40mg/mL", "50mg/mL", "100mg/mL"];
+  const rotateOptions = (options: string[], offset: number) => [
+    ...options.slice(offset % options.length),
+    ...options.slice(0, offset % options.length),
+  ];
+  const sizeOptionCount = 10 + ((product.id * 7) % 6);
+  const strengthOptionCount = 10 + ((product.id * 11 + 3) % 6);
+  const sizeOptions = [defaultSize, ...rotateOptions(sizeCatalog, product.id * 3)]
     .filter((option, index, list) => list.indexOf(option) === index)
-    .slice(0, 5);
+    .slice(0, sizeOptionCount);
+  const strengthOptions = [defaultStrength, ...rotateOptions(strengthCatalog, product.id * 5)]
+    .filter((option, index, list) => list.indexOf(option) === index)
+    .slice(0, strengthOptionCount);
   const sizePriceAdjustment = (Math.max(sizeOptions.indexOf(size), 0) - Math.max(sizeOptions.indexOf(defaultSize), 0)) * 10;
   const strengthPriceAdjustment = (Math.max(strengthOptions.indexOf(strength), 0) - Math.max(strengthOptions.indexOf(defaultStrength), 0)) * 5;
   const configurationPriceAdjustment = sizePriceAdjustment + strengthPriceAdjustment;
@@ -2068,8 +2090,8 @@ function ProductDetailPage({
 
           <div className={`${isReferenceStyle ? "mt-5" : "mt-3 border-t border-[#ededed] pt-2"}`}>
             <div className={isReferenceStyle ? "mb-3 flex items-center gap-3" : ""}><p className={`${isReferenceStyle ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>Strength</p>{isReferenceStyle && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
-            <div className="flex flex-wrap gap-2">
-              {strengthOptions.map(option => <OptionPill key={option} label={option} selected={strength === option} onClick={() => setStrength(option)} emphasis={productDetailVariant === 2} card={productDetailVariant === 3} tesla={isReferenceStyle} blue={isBlueReference} tone={productDetailVariant === 4 ? "green" : "apple"} />)}
+            <div className="flex flex-wrap gap-1.5">
+              {strengthOptions.map(option => <OptionPill key={option} label={option} subLabel="150mg total" selected={strength === option} onClick={() => setStrength(option)} emphasis={productDetailVariant === 2} card={productDetailVariant === 3} tesla={isReferenceStyle} blue={isBlueReference} tone={productDetailVariant === 4 ? "green" : "apple"} />)}
             </div>
           </div>
 
@@ -2102,11 +2124,11 @@ function ProductDetailPage({
                         {selected && productDetailVariant === 2 && <CheckCircle2 size={13} className="shrink-0 text-white" />}
                         {option.name}
                       </span>
-                      <span className={`mt-0.5 block text-[9px] ${selected && productDetailVariant === 2 ? "text-white/70" : "text-[#777]"}`}>Beyond use 90 days</span>
+                      <span className={`mt-0.5 block text-[9px] ${selected && productDetailVariant === 2 ? "text-white/70" : "text-[#777]"}`}>BUD: 90 Days</span>
                     </span>
                     <span className="text-right">
                       <span className={`block text-[12px] font-medium ${selected && productDetailVariant === 2 ? "text-white" : "text-[#111]"}`}>${Math.max(0, option.price + configurationPriceAdjustment).toFixed(2)}</span>
-                      <span className={`block text-[8px] leading-tight ${selected && productDetailVariant === 2 ? "text-white/70" : "text-[#777]"}`}>1-2 Days<br />Processing</span>
+                      <span className={`mt-0.5 block whitespace-nowrap text-[10px] leading-tight ${selected && productDetailVariant === 2 ? "text-white/70" : "text-[#777]"}`}>1–2 Days Processing</span>
                     </span>
                   </button>
                 );
@@ -2120,12 +2142,12 @@ function ProductDetailPage({
               <button disabled={selectedPatientCount > 1} onClick={() => selectShippingChoice("patient")} className={`relative inline-flex h-9 items-center gap-2 border px-3 text-[11px] font-semibold transition-colors ${isReferenceStyle ? "rounded-[7px]" : "rounded-full"} ${selectedPatientCount > 1 ? "cursor-not-allowed border-[#e0e2e1] bg-[#f7f7f6] text-[#a7aaa8] opacity-70" : shippingChoice === "patient" && productDetailVariant === 2 ? "border-[#183229] bg-[#183229] text-white shadow-[0_8px_18px_rgba(24,50,41,0.16)]" : shippingChoice === "patient" ? (productDetailVariant === 4 ? "border-2 border-[#00B53F] bg-white text-[#202020] shadow-[0_0_0_3px_rgba(0,181,63,0.10)]" : productDetailVariant === 1 ? "border-[3px] border-[#4485FF] bg-white text-[#202020]" : isBlueReference ? "border-2 border-[#2563EB] bg-white text-[#171a20]" : isReferenceStyle ? "border-2 border-[#171a20] bg-white text-[#171a20]" : "border-[#183229] bg-[#eef7f2] text-[#183229]") : "border-[#d8dedd] bg-white text-[#6f7782]"}`}>
                 {shippingChoice === "patient" && productDetailVariant === 2 && <CheckCircle2 size={13} />}
                 {shippingChoice === "patient" && isReferenceStyle && <CheckCircle2 size={18} strokeWidth={2.2} className={`absolute -right-2 -top-2 text-white ${isBlueReference ? "fill-[#2563EB]" : "fill-black"}`} />}
-                Ship to Patient
+                <User size={13} strokeWidth={1.8} /> Ship to Patient
               </button>
               <button onClick={() => selectShippingChoice("clinic")} className={`relative inline-flex h-9 items-center gap-2 border px-3 text-[11px] font-semibold transition-colors ${isReferenceStyle ? "rounded-[7px]" : "rounded-full"} ${shippingChoice === "clinic" && productDetailVariant === 2 ? "border-[#183229] bg-[#183229] text-white shadow-[0_8px_18px_rgba(24,50,41,0.16)]" : shippingChoice === "clinic" ? (productDetailVariant === 4 ? "border-2 border-[#00B53F] bg-white text-[#202020] shadow-[0_0_0_3px_rgba(0,181,63,0.10)]" : productDetailVariant === 1 ? "border-[3px] border-[#4485FF] bg-white text-[#202020]" : isBlueReference ? "border-2 border-[#2563EB] bg-white text-[#171a20]" : isReferenceStyle ? "border-2 border-[#171a20] bg-white text-[#171a20]" : "border-[#183229] bg-[#eef7f2] text-[#183229]") : "border-[#d8dedd] bg-white text-[#6f7782]"}`}>
                 {shippingChoice === "clinic" && productDetailVariant === 2 && <CheckCircle2 size={13} />}
                 {shippingChoice === "clinic" && isReferenceStyle && <CheckCircle2 size={18} strokeWidth={2.2} className={`absolute -right-2 -top-2 text-white ${isBlueReference ? "fill-[#2563EB]" : "fill-black"}`} />}
-                Ship to Clinic
+                <Building2 size={13} strokeWidth={1.8} /> Ship to Clinic
               </button>
             </div>
             <p className="mt-2 text-[10px] text-[#7a837f]">{shippingChoice === "clinic" ? "You can select multiple patients for one clinic shipment." : "You can select one patient for this shipment."}</p>
@@ -2165,13 +2187,13 @@ function ProductDetailPage({
           </div>
 
           {selectedPatientCount > 0 && (
-            <div className="mt-3 overflow-hidden rounded-[11px] border border-[#dfe5e2] bg-white shadow-[0_2px_8px_rgba(24,50,41,0.05)]">
-              <div className="flex items-center justify-between border-b border-[#dfe5e2] bg-[#f1f5f3] px-3.5 py-2.5">
+            <div className="mt-3 overflow-hidden rounded-[11px] border border-[#dbe5f5] bg-white shadow-[0_2px_8px_rgba(37,99,235,0.05)]">
+              <div className="flex items-center justify-between border-b border-[#dbe5f5] bg-[#f3f7ff] px-3.5 py-2.5">
                 <div>
                   <p className="text-[11px] font-semibold text-[#1a1a1a]">Selected patients</p>
                   <p className="mt-0.5 text-[9px] text-[#7a837f]">Set the quantity for each prescription.</p>
                 </div>
-                <span className="rounded-full bg-[#183229] px-2 py-1 text-[9px] font-semibold text-white">{selectedItemCount} item{selectedItemCount === 1 ? "" : "s"}</span>
+                <span className="rounded-full bg-[#2563EB] px-2 py-1 text-[9px] font-semibold text-white">{selectedItemCount} item{selectedItemCount === 1 ? "" : "s"}</span>
               </div>
               <div className="divide-y divide-[#e8ebe9]">
                 {[...selectedPatientIds].map(id => {
@@ -2220,10 +2242,43 @@ function ProductDetailPage({
             Add {selectedItemCount > 1 ? `${selectedItemCount} items` : "to cart"} <ShoppingCart size={14} strokeWidth={1.5} />
           </button>
 
-          <div className="mt-3 flex h-12 items-center rounded-[9px] bg-[#f7f7f7] px-4">
+          <div className="relative mt-3 flex h-12 items-center rounded-[9px] bg-[#f7f7f7] px-4">
             <MapPin size={18} strokeWidth={1.6} className="mr-2 text-[#111]" />
-            <span className="text-[9px] leading-tight text-[#777]">Delivered to<br /><strong className="text-[11px] font-semibold text-[#111]">Florida</strong></span>
-            <button className="ml-auto text-[10px] font-medium text-[#333] hover:underline">Change Location</button>
+            <span className="text-[9px] leading-tight text-[#777]">Delivered to<br /><strong className="text-[11px] font-semibold text-[#111]">{deliveryState}</strong></span>
+            <button onClick={() => setLocationMenuOpen(current => !current)} className="ml-auto text-[10px] font-medium text-[#333] hover:underline">Change Location</button>
+            {locationMenuOpen && (
+              <div className="absolute bottom-[54px] right-0 z-30 w-[240px] overflow-hidden rounded-[6px] border border-[#d7dee8] bg-white shadow-[0_18px_40px_rgba(16,24,40,0.16)]">
+                <div className="border-b border-[#e7ebf0] p-2">
+                  <div className="flex h-[34px] items-center gap-2 rounded-[5px] border border-[#cfd8e3] bg-white px-2">
+                    <Search size={15} strokeWidth={1.9} className="text-[#344054]" />
+                    <input
+                      value={locationSearch}
+                      onChange={event => setLocationSearch(event.target.value)}
+                      autoFocus
+                      placeholder="Search state"
+                      className="h-full min-w-0 flex-1 bg-transparent text-[13px] font-medium text-[#344054] outline-none placeholder:text-[#98a2b3]"
+                    />
+                  </div>
+                </div>
+                <div className="max-h-[260px] overflow-y-auto py-1">
+                  {deliveryStates
+                    .filter(state => state.toLowerCase().includes(locationSearch.toLowerCase()))
+                    .map(state => (
+                      <button
+                        key={state}
+                        onClick={() => { setDeliveryState(state); setLocationMenuOpen(false); setLocationSearch(""); }}
+                        className="flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-[13px] font-medium text-[#344054] transition-colors hover:bg-[#f6f8fa]"
+                      >
+                        <span className="flex-1">{state}</span>
+                        {state === deliveryState && <CheckCircle2 size={14} strokeWidth={2.4} className="fill-[#475467] text-white" />}
+                      </button>
+                    ))}
+                  {deliveryStates.filter(state => state.toLowerCase().includes(locationSearch.toLowerCase())).length === 0 && (
+                    <div className="px-4 py-3 text-[13px] font-medium text-[#98a2b3]">No results</div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -3557,6 +3612,82 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const [creditCardOpen, setCreditCardOpen] = useState(false);
   const [cardType, setCardType] = useState("Visa");
   const [cardAuthorized, setCardAuthorized] = useState(true);
+  const [cardSaving, setCardSaving] = useState(false);
+  const [savedClinicCard, setSavedClinicCard] = useState(false);
+  const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
+  const signatureDrawingRef = useRef(false);
+
+  useEffect(() => {
+    if (!creditCardOpen) return;
+    const frame = window.requestAnimationFrame(() => {
+      const canvas = signatureCanvasRef.current;
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = rect.width * ratio;
+      canvas.height = rect.height * ratio;
+      const context = canvas.getContext("2d");
+      if (!context) return;
+      context.scale(ratio, ratio);
+      context.lineCap = "round";
+      context.lineJoin = "round";
+      context.lineWidth = 2;
+      context.strokeStyle = "#171717";
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [creditCardOpen]);
+
+  function signaturePoint(event: React.PointerEvent<HTMLCanvasElement>) {
+    const canvas = signatureCanvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: Math.max(0, Math.min(event.clientX - rect.left, rect.width)),
+      y: Math.max(0, Math.min(event.clientY - rect.top, rect.height)),
+    };
+  }
+
+  function startSignature(event: React.PointerEvent<HTMLCanvasElement>) {
+    const canvas = signatureCanvasRef.current;
+    const context = canvas?.getContext("2d");
+    if (!canvas || !context) return;
+    signatureDrawingRef.current = true;
+    canvas.setPointerCapture(event.pointerId);
+    const point = signaturePoint(event);
+    context.beginPath();
+    context.moveTo(point.x, point.y);
+  }
+
+  function drawSignature(event: React.PointerEvent<HTMLCanvasElement>) {
+    if (!signatureDrawingRef.current) return;
+    const canvas = signatureCanvasRef.current;
+    const context = canvas?.getContext("2d");
+    if (!canvas || !context) return;
+    const point = signaturePoint(event);
+    context.lineTo(point.x, point.y);
+    context.stroke();
+  }
+
+  function stopSignature() {
+    signatureDrawingRef.current = false;
+  }
+
+  function clearSignature() {
+    const canvas = signatureCanvasRef.current;
+    const context = canvas?.getContext("2d");
+    if (!canvas || !context) return;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function saveCreditCard() {
+    if (!cardAuthorized || cardSaving) return;
+    setCardSaving(true);
+    window.setTimeout(() => {
+      setCardSaving(false);
+      setSavedClinicCard(true);
+      setCreditCardOpen(false);
+    }, 1100);
+  }
 
   const tabs = ["Business Account", "Users", "Prescribers", "Pay by Clinic", "Agreements"];
   const users = [
@@ -3722,20 +3853,42 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               >
                 ACH Payout Account
               </button>
-              <button onClick={() => payByClinicTab === "cards" && setCreditCardOpen(true)} className="ml-auto flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
-                <Plus size={15} /> {payByClinicTab === "cards" ? "Add Credit Card" : "Add Bank Account"}
-              </button>
+              {(!savedClinicCard || payByClinicTab === "ach") && (
+                <button onClick={() => payByClinicTab === "cards" && setCreditCardOpen(true)} className="ml-auto flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
+                  <Plus size={15} /> {payByClinicTab === "cards" ? "Add Credit Card" : "Add Bank Account"}
+                </button>
+              )}
             </div>
             {payByClinicTab === "cards" ? (
               <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
-                <div className="flex min-h-[220px] flex-col items-center justify-center rounded-[10px] border border-[#eaeaea] bg-white p-6 text-center">
-                  <Package size={32} strokeWidth={1.5} className="mb-3 text-[#9d9d9d]" />
-                  <p className="text-[14px] font-semibold text-[#1a1a1a]">No credit card found</p>
-                  <p className="mt-2 text-[12px] text-[#8c8c8c]">No credit card yet. Add a credit card to enable Pay by Clinic feature.</p>
-                  <button onClick={() => setCreditCardOpen(true)} className="mt-5 flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
-                    <Plus size={15} /> Add Credit Card
-                  </button>
-                </div>
+                {savedClinicCard ? (
+                  <div className="min-h-[220px] rounded-[10px] border border-[#eaeaea] bg-white p-5">
+                    <div className="flex items-start justify-between gap-4 border-b border-[#eeeeee] pb-4">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-9 w-12 items-center justify-center rounded-[5px] border border-[#dedede] bg-white text-[12px] font-black italic text-[#1434CB]">VISA</span>
+                        <div>
+                          <p className="text-[13px] font-semibold text-[#1a1a1a]">Visa ending in 1234</p>
+                          <p className="mt-1 text-[10px] text-[#888]">Expires 12/29</p>
+                        </div>
+                      </div>
+                      <span className="rounded-full bg-black px-2.5 py-1 text-[9px] font-semibold text-white">Primary</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 py-4 text-[11px]">
+                      <div><p className="text-[#888]">Cardholder</p><p className="mt-1 font-semibold text-[#222]">ScriptLinkRx Clinic</p></div>
+                      <div><p className="text-[#888]">Status</p><p className="mt-1 font-semibold text-[#31583F]">Active</p></div>
+                    </div>
+                    <button type="button" onClick={() => setCreditCardOpen(true)} className="h-8 rounded-[7px] bg-black px-3 text-[11px] font-medium text-white transition-colors hover:bg-[#252525]">Update card</button>
+                  </div>
+                ) : (
+                  <div className="flex min-h-[220px] flex-col items-center justify-center rounded-[10px] border border-[#eaeaea] bg-white p-6 text-center">
+                    <Package size={32} strokeWidth={1.5} className="mb-3 text-[#9d9d9d]" />
+                    <p className="text-[14px] font-semibold text-[#1a1a1a]">No credit card found</p>
+                    <p className="mt-2 text-[12px] text-[#8c8c8c]">No credit card yet. Add a credit card to enable Pay by Clinic feature.</p>
+                    <button onClick={() => setCreditCardOpen(true)} className="mt-5 flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
+                      <Plus size={15} /> Add Credit Card
+                    </button>
+                  </div>
+                )}
                 <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-6">
                   <AlertCircle size={17} className="mb-4 text-[#667085]" />
                   <p className="max-w-[420px] text-[13px] leading-relaxed text-[#667085]">
@@ -3814,72 +3967,69 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       {creditCardOpen && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-[#101512]/35 p-5 backdrop-blur-[2px]">
           <button className="absolute inset-0 cursor-default" onClick={() => setCreditCardOpen(false)} aria-label="Close add credit card" />
-          <section className="relative z-10 max-h-[calc(100vh-40px)] w-full max-w-[620px] overflow-y-auto rounded-[18px] border border-white/70 bg-white shadow-[0_28px_80px_rgba(16,35,27,0.22)]">
-            <div className="flex items-start justify-between border-b border-[#eceeea] px-7 py-6">
-              <div className="flex items-center gap-3">
-                <span className="flex size-10 items-center justify-center rounded-[11px] bg-[#eef4f1] text-[#183229]"><CreditCard size={19} strokeWidth={1.7} /></span>
-                <div>
-                  <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-[#161a18]">Add credit card</h2>
-                  <p className="mt-1 text-[11px] text-[#7d8581]">Securely add a payment method for clinic purchases.</p>
-                </div>
-              </div>
-              <button onClick={() => setCreditCardOpen(false)} className="flex size-8 items-center justify-center rounded-full text-[#7d8581] transition-colors hover:bg-[#f1f3f2] hover:text-[#161a18]" aria-label="Close"><X size={17} /></button>
-            </div>
+          <section className="relative z-10 max-h-[calc(100vh-40px)] w-full max-w-[460px] overflow-y-auto rounded-[8px] bg-white px-5 py-6 shadow-[0_20px_60px_rgba(16,35,27,0.18)]">
+            <h2 className="text-[17px] font-medium text-[#171717]">Add credit card</h2>
 
-            <div className="space-y-6 px-7 py-6">
-              <div>
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="text-[12px] font-semibold text-[#202522]">Card type <span className="text-[#b4473d]">*</span></p>
-                  <span className="text-[10px] text-[#949b97]">Accepted cards</span>
-                </div>
-                <div className="grid grid-cols-4 gap-2 max-sm:grid-cols-2">
-                  {["Visa", "Mastercard", "Discover", "Amex"].map(type => (
-                    <button key={type} type="button" onClick={() => setCardType(type)} className={`flex h-10 items-center justify-center rounded-[9px] border text-[11px] font-semibold transition-all ${cardType === type ? "border-[1.5px] border-[#183229] bg-[#f0f6f3] text-[#183229]" : "border-[#dfe3e0] bg-white text-[#6f7773] hover:border-[#aeb8b3]"}`}>
-                      {type}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-                <label className="col-span-2 max-sm:col-span-1">
-                  <span className="mb-1.5 block text-[11px] font-medium text-[#343a36]">Cardholder name <span className="text-[#b4473d]">*</span></span>
-                  <input placeholder="Name on card" className="h-11 w-full rounded-[10px] border border-[#E1E4E2] bg-white px-3.5 text-[13px] outline-none transition-all placeholder:text-[#b6bbb8] focus:border-[1.5px] focus:border-[#183229] focus:ring-2 focus:ring-[#183229]/5" />
-                </label>
-                <label className="col-span-2 max-sm:col-span-1">
-                  <span className="mb-1.5 block text-[11px] font-medium text-[#343a36]">Card number <span className="text-[#b4473d]">*</span></span>
-                  <div className="flex h-11 items-center rounded-[10px] border border-[#E1E4E2] bg-white px-3.5 transition-all focus-within:border-[1.5px] focus-within:border-[#183229] focus-within:ring-2 focus-within:ring-[#183229]/5">
-                    <input inputMode="numeric" placeholder="1234 1234 1234 1234" className="min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-[#b6bbb8]" />
-                    <span className="ml-3 rounded-[5px] bg-[#f1f3f2] px-2 py-1 text-[9px] font-bold uppercase text-[#52605a]">{cardType}</span>
+            <div className="mt-7 space-y-5">
+              <label className="block">
+                <span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Card Information</span>
+                <div className="flex h-11 items-center rounded-[10px] border border-[#ef8c58] bg-white px-3.5 focus-within:border-[1.5px] focus-within:border-[#e76f32]">
+                  <input inputMode="numeric" placeholder="1234 1234 1234 1234" className="min-w-0 flex-1 bg-transparent text-[12px] outline-none placeholder:text-[#a5a5a5]" />
+                  <div className="ml-2 flex items-center gap-1">
+                    <span className="rounded-[2px] border border-[#d8d8d8] bg-white px-1 text-[9px] font-black italic text-[#1434CB]">VISA</span>
+                    <span className="flex h-[18px] w-[27px] items-center justify-center rounded-[2px] bg-[#171717]"><span className="size-3 rounded-full bg-[#EB001B]" /><span className="-ml-1.5 size-3 rounded-full bg-[#F79E1B] opacity-90" /></span>
+                    <span className="rounded-[2px] bg-[#176BB4] px-1 py-0.5 text-[7px] font-bold leading-[7px] text-white">AM<br />EX</span>
+                    <span className="rounded-[2px] border border-[#d8d8d8] bg-white px-1 text-[6px] font-bold text-[#333]">DISCOVER</span>
                   </div>
+                </div>
+              </label>
+
+              <div className="grid grid-cols-2 gap-3">
+                <label>
+                  <span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Expiration date</span>
+                  <input inputMode="numeric" placeholder="MM/YY" className="h-11 w-full rounded-[10px] border border-[#d7d7d7] bg-white px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black" />
                 </label>
                 <label>
-                  <span className="mb-1.5 block text-[11px] font-medium text-[#343a36]">Expiration date <span className="text-[#b4473d]">*</span></span>
-                  <input inputMode="numeric" placeholder="MM / YY" className="h-11 w-full rounded-[10px] border border-[#E1E4E2] bg-white px-3.5 text-[13px] outline-none transition-all placeholder:text-[#b6bbb8] focus:border-[1.5px] focus:border-[#183229] focus:ring-2 focus:ring-[#183229]/5" />
-                </label>
-                <label>
-                  <span className="mb-1.5 block text-[11px] font-medium text-[#343a36]">Security code <span className="text-[#b4473d]">*</span></span>
-                  <input inputMode="numeric" placeholder="CVC" className="h-11 w-full rounded-[10px] border border-[#E1E4E2] bg-white px-3.5 text-[13px] outline-none transition-all placeholder:text-[#b6bbb8] focus:border-[1.5px] focus:border-[#183229] focus:ring-2 focus:ring-[#183229]/5" />
+                  <span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Security code</span>
+                  <input inputMode="numeric" placeholder="CVC" className="h-11 w-full rounded-[10px] border border-[#d7d7d7] bg-white px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black" />
                 </label>
               </div>
 
-              <label className="flex cursor-pointer items-start gap-3 rounded-[11px] bg-[#f6f8f7] p-4">
-                <input type="checkbox" checked={cardAuthorized} onChange={event => setCardAuthorized(event.target.checked)} className="mt-0.5 size-4 accent-[#183229]" />
-                <span className="text-[11px] leading-[17px] text-[#59615d]">I authorize ScriptLinkRx to charge this card for approved clinic purchases. A new authorization will be required if the card details change.</span>
+              <label className="block">
+                <span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Cardholder name <span className="text-[#b4473d]">*</span></span>
+                <input placeholder="Name on card" className="h-11 w-full rounded-[10px] border border-[#d7d7d7] bg-white px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black" />
               </label>
+
+              <div className="pt-1">
+                <label className="flex cursor-pointer items-center gap-3 text-[11px] text-[#777]">
+                  <input type="checkbox" checked={cardAuthorized} onChange={event => setCardAuthorized(event.target.checked)} className="size-4 accent-black" />
+                  I agree
+                </label>
+                <p className="mt-3 max-w-[390px] text-[11px] leading-[14px] text-[#333]">I authorize ScriptLinkRx to charge this card for approved clinic purchases. A new authorization will be required if the card details change.</p>
+              </div>
 
               <div>
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="text-[11px] font-medium text-[#343a36]">Authorization signature</span>
-                  <button type="button" className="text-[10px] font-semibold text-[#66706b] underline underline-offset-2">Clear</button>
+                  <span className="text-[11px] font-medium text-[#343434]">Sign your authorization:</span>
+                  <button type="button" onClick={clearSignature} className="h-6 rounded-[5px] border border-[#d8d8d8] px-5 text-[10px] font-medium text-[#555]">Clear</button>
                 </div>
-                <div className="flex h-[92px] items-center justify-center rounded-[11px] border border-dashed border-[#ccd2ce] bg-[#fafbfa] text-[11px] text-[#a0a7a3]">Sign here using your mouse or trackpad</div>
+                <div className="h-[105px] overflow-hidden rounded-[10px] border border-[#e0e0e0] bg-[#fafafa]">
+                  <canvas
+                    ref={signatureCanvasRef}
+                    onPointerDown={startSignature}
+                    onPointerMove={drawSignature}
+                    onPointerUp={stopSignature}
+                    onPointerCancel={stopSignature}
+                    className="block size-full touch-none cursor-crosshair"
+                    aria-label="Draw your authorization signature"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-end gap-2 border-t border-[#eceeea] bg-[#fbfcfb] px-7 py-4">
-              <button onClick={() => setCreditCardOpen(false)} className="h-10 rounded-[9px] border border-[#d9dedb] bg-white px-4 text-[12px] font-semibold text-[#4e5652] hover:bg-[#f5f6f5]">Cancel</button>
-              <button disabled={!cardAuthorized} onClick={() => setCreditCardOpen(false)} className="h-10 rounded-[9px] bg-[#171a18] px-6 text-[12px] font-semibold text-white transition-colors hover:bg-[#28302c] disabled:cursor-not-allowed disabled:bg-[#b9bfbc]">Save card</button>
+              <button disabled={!cardAuthorized || cardSaving} onClick={saveCreditCard} className="mt-1 flex h-[52px] w-full items-center justify-center gap-2 rounded-full bg-[#111] text-[13px] font-semibold text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-[#b9b9b9]">
+                {cardSaving && <Loader2 size={15} className="animate-spin" />}
+                {cardSaving ? "Saving…" : "Save"}
+              </button>
             </div>
           </section>
         </div>
