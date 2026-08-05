@@ -378,6 +378,8 @@ function Sidebar({
   setExtraVariants,
   oldCatalog,
   setOldCatalog,
+  pharmacyCatalog,
+  setPharmacyCatalog,
 }: {
   active: Page;
   onNavigate: (p: Page) => void;
@@ -389,6 +391,8 @@ function Sidebar({
   setExtraVariants: Dispatch<SetStateAction<boolean>>;
   oldCatalog: boolean;
   setOldCatalog: Dispatch<SetStateAction<boolean>>;
+  pharmacyCatalog: boolean;
+  setPharmacyCatalog: Dispatch<SetStateAction<boolean>>;
 }) {
   const [favorites, setFavorites] = useState<MenuItem[]>(INITIAL_FAVORITES);
   const [mainMenu, setMainMenu] = useState<MenuItem[]>(INITIAL_MAIN);
@@ -489,7 +493,7 @@ function Sidebar({
       <div className="mt-auto" />
       <SidebarSupportVersion onNavigate={onNavigate} />
       <div className="pb-3 pt-4">
-        <UserChip onNavigate={onNavigate} onLogout={onLogout} appTheme={appTheme} setAppTheme={setAppTheme} extraVariants={extraVariants} setExtraVariants={setExtraVariants} oldCatalog={oldCatalog} setOldCatalog={setOldCatalog} />
+        <UserChip onNavigate={onNavigate} onLogout={onLogout} appTheme={appTheme} setAppTheme={setAppTheme} extraVariants={extraVariants} setExtraVariants={setExtraVariants} oldCatalog={oldCatalog} setOldCatalog={setOldCatalog} pharmacyCatalog={pharmacyCatalog} setPharmacyCatalog={setPharmacyCatalog} />
       </div>
     </aside>
   );
@@ -556,6 +560,8 @@ function UserChip({
   setExtraVariants,
   oldCatalog,
   setOldCatalog,
+  pharmacyCatalog,
+  setPharmacyCatalog,
 }: {
   onNavigate: (p: Page) => void;
   onLogout: () => void;
@@ -565,6 +571,8 @@ function UserChip({
   setExtraVariants: Dispatch<SetStateAction<boolean>>;
   oldCatalog: boolean;
   setOldCatalog: Dispatch<SetStateAction<boolean>>;
+  pharmacyCatalog: boolean;
+  setPharmacyCatalog: Dispatch<SetStateAction<boolean>>;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const themeOptions: Array<{ value: AppTheme; label: string }> = [
@@ -610,7 +618,7 @@ function UserChip({
                 </span>
               </button>
               <button
-                onClick={() => setOldCatalog(current => !current)}
+                onClick={() => setOldCatalog(current => { const next = !current; if (next) setPharmacyCatalog(false); return next; })}
                 className={`flex h-9 w-full items-center justify-between rounded-[7px] px-2.5 text-[11px] font-medium transition-colors hover:bg-[var(--app-menu-bg)] ${oldCatalog ? "bg-[var(--app-menu-bg)] text-[#183229]" : "text-[#252525]"}`}
                 role="switch"
                 aria-checked={oldCatalog}
@@ -620,6 +628,20 @@ function UserChip({
                   <span className={`min-w-[18px] text-right text-[9px] font-semibold ${oldCatalog ? "text-[#31583f]" : "text-[#929894]"}`}>{oldCatalog ? "On" : "Off"}</span>
                   <span className={`relative h-6 w-11 shrink-0 rounded-full border transition-all duration-200 ${oldCatalog ? "border-[#0b7045] bg-gradient-to-r from-[#183229] to-[#315f4e] shadow-[inset_0_1px_2px_rgba(0,0,0,0.18),0_0_0_2px_rgba(24,50,41,0.06)]" : "border-[#cfd4d1] bg-[#e7eae8]"}`}>
                     <span className={`absolute left-[3px] top-[3px] size-4 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.3)] transition-transform duration-200 ease-out ${oldCatalog ? "translate-x-5" : "translate-x-0"}`} />
+                  </span>
+                </span>
+              </button>
+              <button
+                onClick={() => setPharmacyCatalog(current => { const next = !current; if (next) setOldCatalog(false); return next; })}
+                className={`flex h-9 w-full items-center justify-between rounded-[7px] px-2.5 text-[11px] font-medium transition-colors hover:bg-[var(--app-menu-bg)] ${pharmacyCatalog ? "bg-[var(--app-menu-bg)] text-[#183229]" : "text-[#252525]"}`}
+                role="switch"
+                aria-checked={pharmacyCatalog}
+              >
+                <span>Pharmacy cards</span>
+                <span className="flex items-center gap-2">
+                  <span className={`min-w-[18px] text-right text-[9px] font-semibold ${pharmacyCatalog ? "text-[#31583f]" : "text-[#929894]"}`}>{pharmacyCatalog ? "On" : "Off"}</span>
+                  <span className={`relative h-6 w-11 shrink-0 rounded-full border transition-all duration-200 ${pharmacyCatalog ? "border-[#0b7045] bg-gradient-to-r from-[#183229] to-[#315f4e] shadow-[inset_0_1px_2px_rgba(0,0,0,0.18),0_0_0_2px_rgba(24,50,41,0.06)]" : "border-[#cfd4d1] bg-[#e7eae8]"}`}>
+                    <span className={`absolute left-[3px] top-[3px] size-4 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.3)] transition-transform duration-200 ease-out ${pharmacyCatalog ? "translate-x-5" : "translate-x-0"}`} />
                   </span>
                 </span>
               </button>
@@ -1037,7 +1059,7 @@ function OldCatalogCard({
   return (
     <article
       onClick={onClick}
-      className="relative h-[374px] w-[268px] shrink-0 cursor-pointer overflow-hidden rounded-[16px] bg-gradient-to-b from-[rgba(247,239,233,0.22)] to-[rgba(236,229,182,0.20)] transition-transform duration-200 hover:-translate-y-0.5"
+      className="relative h-[374px] w-[268px] shrink-0 cursor-pointer overflow-hidden rounded-[16px] bg-gradient-to-b from-[rgba(247,239,233,0.10)] to-[rgba(236,229,182,0.10)] transition-transform duration-200 hover:-translate-y-0.5"
     >
       <div className="flex h-[276px] items-center justify-center px-7 pt-5">
         <img src={img} alt={name} className="max-h-[245px] max-w-[205px] object-contain mix-blend-multiply" />
@@ -1058,6 +1080,60 @@ function OldCatalogCard({
           {favoriteLoading ? <Loader2 size={17} className="animate-spin text-[#183229]" /> : <Heart size={18} className={favorited || heartVariant === "green" ? "fill-[#C5D853] text-[#C5D853]" : "text-black"} />}
         </button>
       )}
+    </article>
+  );
+}
+
+function PharmacyCatalogCard({
+  name,
+  price,
+  pharmacy,
+  pharmacies,
+  dosage,
+  img,
+  favorited,
+  onFavorite,
+  heartVariant,
+  onClick,
+}: {
+  name: string;
+  price: string;
+  pharmacy: string;
+  pharmacies: number;
+  dosage: string;
+  img: string;
+  favorited: boolean;
+  onFavorite: () => void;
+  heartVariant: "green" | "black" | "none";
+  onClick: () => void;
+}) {
+  return (
+    <article onClick={onClick} className="group relative flex h-[374px] w-[268px] shrink-0 cursor-pointer flex-col overflow-hidden rounded-[16px] border border-[#e7e9e7] bg-white transition-colors hover:border-[#cbd2ce]">
+      <div className="relative flex h-[230px] items-center justify-center bg-[#f7f8f7] px-7 py-5">
+        <img src={img} alt={name} className="max-h-[195px] max-w-[175px] object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-[1.03]" />
+        {heartVariant !== "none" && (
+          <button type="button" onClick={(event) => { event.stopPropagation(); onFavorite(); }} className="absolute right-3.5 top-3.5 flex size-8 items-center justify-center rounded-full border border-[#e5e8e6] bg-white text-[#1c211e]" aria-label={favorited ? "Remove from favorites" : "Add to favorites"}>
+            <Heart size={15} strokeWidth={1.8} className={favorited || heartVariant === "green" ? "fill-[#C5D853] text-[#C5D853]" : ""} />
+          </button>
+        )}
+        <span className="absolute bottom-3 left-3.5 rounded-full bg-white px-2.5 py-1 text-[10px] font-medium text-[#5d6561]">{dosage}</span>
+      </div>
+      <div className="flex flex-1 flex-col px-5 pb-4 pt-4">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="line-clamp-2 text-[15px] font-semibold leading-[20px] tracking-[-0.01em] text-[#171a18]">{name}</h3>
+          <span className="shrink-0 text-[14px] font-semibold text-[#171a18]">{price}</span>
+        </div>
+        <div className="mt-auto rounded-[9px] bg-[#f5f7f6] px-3 py-2.5">
+          <div className="flex items-center gap-2">
+            <span className="flex size-6 shrink-0 items-center justify-center rounded-[6px] bg-white text-[#31583f]"><Building2 size={13} strokeWidth={1.7} /></span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[10px] font-semibold text-[#26302b]">{pharmacy}</p>
+              <p className="mt-0.5 text-[9px] text-[#818985]">Available from {pharmacies} pharmacies</p>
+            </div>
+            <ChevronRight size={13} className="shrink-0 text-[#8a928e]" />
+          </div>
+        </div>
+      </div>
     </article>
   );
 }
@@ -1274,12 +1350,14 @@ function ProductsPage({
   setCartMode,
   onProductSelect,
   oldCatalog,
+  pharmacyCatalog,
 }: {
   onNavigate: (p: Page) => void;
   cartMode: CartMode;
   setCartMode: (mode: CartMode) => void;
   onProductSelect: (product: CardDef) => void;
   oldCatalog: boolean;
+  pharmacyCatalog: boolean;
 }) {
   const { favoriteProductIds, setFavoriteProductIds, favoriteProducts } = useProductFavorites();
   const [search, setSearch] = useState("");
@@ -1318,6 +1396,26 @@ function ProductsPage({
     const fav = favoriteProductIds.has(card.id);
     const heart: "green" | "black" | "none" =
       card.heartVariant === "none" ? "none" : fav ? "green" : "black";
+    if (pharmacyCatalog) {
+      return (
+        <PharmacyCatalogCard
+          key={card.id}
+          name={card.name}
+          price={card.price}
+          pharmacy={card.pharmacy}
+          pharmacies={card.pharmacies}
+          dosage={card.dosage}
+          img={card.img}
+          favorited={fav}
+          onFavorite={() => toggleFav(card.id)}
+          heartVariant={heart}
+          onClick={() => {
+            onProductSelect(card);
+            onNavigate("product-detail");
+          }}
+        />
+      );
+    }
     if (oldCatalog) {
       return (
         <OldCatalogCard
@@ -1559,10 +1657,10 @@ function ProductsPage({
             <button
               key={pharmacy.name}
               onClick={() => setActivePharmacy(pharmacy.name)}
-              className={`flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[12px] font-medium transition-colors ${isActive ? "border-2 border-[#183229] text-[#183229]" : "border-[0.5px] border-black text-[#1a1a1a] hover:border-[#183229]"}`}
+              className={`flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[12px] font-medium transition-colors ${isActive ? "border-2 border-[#2563EB] text-[#2563EB]" : "border-[0.5px] border-black text-[#1a1a1a] hover:border-[#2563EB]"}`}
             >
               {pharmacy.name}
-              <span className={`text-[11px] font-semibold ${isActive ? "text-[#183229]" : "text-[#9d9d9d]"}`}>{pharmacy.count}</span>
+              <span className={`text-[11px] font-semibold ${isActive ? "text-[#2563EB]" : "text-[#9d9d9d]"}`}>{pharmacy.count}</span>
             </button>
           );
         })}
@@ -1764,12 +1862,20 @@ function ProductDetailPage({
 
   const baseProductPrice = Number.parseFloat(product.price.replace(/[^0-9.]/g, "")) || 35.88;
   const sizeOptions = product.dosage === "Gel"
-    ? ["15g Tube", "30g Tube", "60g Tube"]
+    ? ["15g Tube", "30g Tube", "45g Tube", "60g Tube", "90g Pump"]
     : product.dosage === "Capsule"
-    ? ["30 Capsules", "60 Capsules", "90 Capsules"]
-    : ["1 (5mL) Vial", "1 (10mL) Vial", "1 (30mL) Vial"];
-  const strengthOptions = [defaultStrength, product.dosage === "Gel" ? "0.05%" : "1mg/mL"]
-    .filter((option, index, list) => list.indexOf(option) === index);
+    ? ["30 Capsules", "45 Capsules", "60 Capsules", "90 Capsules", "120 Capsules"]
+    : ["1 (1mL) Vial", "1 (2mL) Vial", "1 (5mL) Vial", "1 (10mL) Vial", "1 (30mL) Vial"];
+  const strengthOptions = [
+    defaultStrength,
+    ...(product.dosage === "Gel"
+      ? ["0.01%", "0.025%", "0.05%", "0.075%", "0.1%"]
+      : product.dosage === "Capsule"
+      ? ["5mg", "10mg", "25mg", "50mg", "100mg"]
+      : ["1mg/mL", "2.5mg/mL", "5mg/mL", "10mg/mL", "20mg/mL"]),
+  ]
+    .filter((option, index, list) => list.indexOf(option) === index)
+    .slice(0, 5);
   const sizePriceAdjustment = (Math.max(sizeOptions.indexOf(size), 0) - Math.max(sizeOptions.indexOf(defaultSize), 0)) * 10;
   const strengthPriceAdjustment = (Math.max(strengthOptions.indexOf(strength), 0) - Math.max(strengthOptions.indexOf(defaultStrength), 0)) * 5;
   const configurationPriceAdjustment = sizePriceAdjustment + strengthPriceAdjustment;
@@ -3448,6 +3554,9 @@ function UsersPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const [activeTab, setActiveTab] = useState("Business Account");
   const [payByClinicTab, setPayByClinicTab] = useState<"cards" | "ach">("cards");
+  const [creditCardOpen, setCreditCardOpen] = useState(false);
+  const [cardType, setCardType] = useState("Visa");
+  const [cardAuthorized, setCardAuthorized] = useState(true);
 
   const tabs = ["Business Account", "Users", "Prescribers", "Pay by Clinic", "Agreements"];
   const users = [
@@ -3613,7 +3722,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               >
                 ACH Payout Account
               </button>
-              <button className="ml-auto flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
+              <button onClick={() => payByClinicTab === "cards" && setCreditCardOpen(true)} className="ml-auto flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
                 <Plus size={15} /> {payByClinicTab === "cards" ? "Add Credit Card" : "Add Bank Account"}
               </button>
             </div>
@@ -3623,7 +3732,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                   <Package size={32} strokeWidth={1.5} className="mb-3 text-[#9d9d9d]" />
                   <p className="text-[14px] font-semibold text-[#1a1a1a]">No credit card found</p>
                   <p className="mt-2 text-[12px] text-[#8c8c8c]">No credit card yet. Add a credit card to enable Pay by Clinic feature.</p>
-                  <button className="mt-5 flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
+                  <button onClick={() => setCreditCardOpen(true)} className="mt-5 flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
                     <Plus size={15} /> Add Credit Card
                   </button>
                 </div>
@@ -3702,6 +3811,79 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           )}
         </div>
       </div>
+      {creditCardOpen && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-[#101512]/35 p-5 backdrop-blur-[2px]">
+          <button className="absolute inset-0 cursor-default" onClick={() => setCreditCardOpen(false)} aria-label="Close add credit card" />
+          <section className="relative z-10 max-h-[calc(100vh-40px)] w-full max-w-[620px] overflow-y-auto rounded-[18px] border border-white/70 bg-white shadow-[0_28px_80px_rgba(16,35,27,0.22)]">
+            <div className="flex items-start justify-between border-b border-[#eceeea] px-7 py-6">
+              <div className="flex items-center gap-3">
+                <span className="flex size-10 items-center justify-center rounded-[11px] bg-[#eef4f1] text-[#183229]"><CreditCard size={19} strokeWidth={1.7} /></span>
+                <div>
+                  <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-[#161a18]">Add credit card</h2>
+                  <p className="mt-1 text-[11px] text-[#7d8581]">Securely add a payment method for clinic purchases.</p>
+                </div>
+              </div>
+              <button onClick={() => setCreditCardOpen(false)} className="flex size-8 items-center justify-center rounded-full text-[#7d8581] transition-colors hover:bg-[#f1f3f2] hover:text-[#161a18]" aria-label="Close"><X size={17} /></button>
+            </div>
+
+            <div className="space-y-6 px-7 py-6">
+              <div>
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-[12px] font-semibold text-[#202522]">Card type <span className="text-[#b4473d]">*</span></p>
+                  <span className="text-[10px] text-[#949b97]">Accepted cards</span>
+                </div>
+                <div className="grid grid-cols-4 gap-2 max-sm:grid-cols-2">
+                  {["Visa", "Mastercard", "Discover", "Amex"].map(type => (
+                    <button key={type} type="button" onClick={() => setCardType(type)} className={`flex h-10 items-center justify-center rounded-[9px] border text-[11px] font-semibold transition-all ${cardType === type ? "border-[1.5px] border-[#183229] bg-[#f0f6f3] text-[#183229]" : "border-[#dfe3e0] bg-white text-[#6f7773] hover:border-[#aeb8b3]"}`}>
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
+                <label className="col-span-2 max-sm:col-span-1">
+                  <span className="mb-1.5 block text-[11px] font-medium text-[#343a36]">Cardholder name <span className="text-[#b4473d]">*</span></span>
+                  <input placeholder="Name on card" className="h-11 w-full rounded-[10px] border border-[#E1E4E2] bg-white px-3.5 text-[13px] outline-none transition-all placeholder:text-[#b6bbb8] focus:border-[1.5px] focus:border-[#183229] focus:ring-2 focus:ring-[#183229]/5" />
+                </label>
+                <label className="col-span-2 max-sm:col-span-1">
+                  <span className="mb-1.5 block text-[11px] font-medium text-[#343a36]">Card number <span className="text-[#b4473d]">*</span></span>
+                  <div className="flex h-11 items-center rounded-[10px] border border-[#E1E4E2] bg-white px-3.5 transition-all focus-within:border-[1.5px] focus-within:border-[#183229] focus-within:ring-2 focus-within:ring-[#183229]/5">
+                    <input inputMode="numeric" placeholder="1234 1234 1234 1234" className="min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-[#b6bbb8]" />
+                    <span className="ml-3 rounded-[5px] bg-[#f1f3f2] px-2 py-1 text-[9px] font-bold uppercase text-[#52605a]">{cardType}</span>
+                  </div>
+                </label>
+                <label>
+                  <span className="mb-1.5 block text-[11px] font-medium text-[#343a36]">Expiration date <span className="text-[#b4473d]">*</span></span>
+                  <input inputMode="numeric" placeholder="MM / YY" className="h-11 w-full rounded-[10px] border border-[#E1E4E2] bg-white px-3.5 text-[13px] outline-none transition-all placeholder:text-[#b6bbb8] focus:border-[1.5px] focus:border-[#183229] focus:ring-2 focus:ring-[#183229]/5" />
+                </label>
+                <label>
+                  <span className="mb-1.5 block text-[11px] font-medium text-[#343a36]">Security code <span className="text-[#b4473d]">*</span></span>
+                  <input inputMode="numeric" placeholder="CVC" className="h-11 w-full rounded-[10px] border border-[#E1E4E2] bg-white px-3.5 text-[13px] outline-none transition-all placeholder:text-[#b6bbb8] focus:border-[1.5px] focus:border-[#183229] focus:ring-2 focus:ring-[#183229]/5" />
+                </label>
+              </div>
+
+              <label className="flex cursor-pointer items-start gap-3 rounded-[11px] bg-[#f6f8f7] p-4">
+                <input type="checkbox" checked={cardAuthorized} onChange={event => setCardAuthorized(event.target.checked)} className="mt-0.5 size-4 accent-[#183229]" />
+                <span className="text-[11px] leading-[17px] text-[#59615d]">I authorize ScriptLinkRx to charge this card for approved clinic purchases. A new authorization will be required if the card details change.</span>
+              </label>
+
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-[11px] font-medium text-[#343a36]">Authorization signature</span>
+                  <button type="button" className="text-[10px] font-semibold text-[#66706b] underline underline-offset-2">Clear</button>
+                </div>
+                <div className="flex h-[92px] items-center justify-center rounded-[11px] border border-dashed border-[#ccd2ce] bg-[#fafbfa] text-[11px] text-[#a0a7a3]">Sign here using your mouse or trackpad</div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 border-t border-[#eceeea] bg-[#fbfcfb] px-7 py-4">
+              <button onClick={() => setCreditCardOpen(false)} className="h-10 rounded-[9px] border border-[#d9dedb] bg-white px-4 text-[12px] font-semibold text-[#4e5652] hover:bg-[#f5f6f5]">Cancel</button>
+              <button disabled={!cardAuthorized} onClick={() => setCreditCardOpen(false)} className="h-10 rounded-[9px] bg-[#171a18] px-6 text-[12px] font-semibold text-white transition-colors hover:bg-[#28302c] disabled:cursor-not-allowed disabled:bg-[#b9bfbc]">Save card</button>
+            </div>
+          </section>
+        </div>
+      )}
     </>
   );
 }
@@ -6808,6 +6990,7 @@ export default function App() {
   });
   const [extraVariants, setExtraVariants] = useState(() => window.localStorage.getItem("scriptlinkrx-extra-variants") === "true");
   const [oldCatalog, setOldCatalog] = useState(() => window.localStorage.getItem("scriptlinkrx-old-catalog") === "true");
+  const [pharmacyCatalog, setPharmacyCatalog] = useState(() => window.localStorage.getItem("scriptlinkrx-pharmacy-catalog") === "true");
   const [page, setPage] = useState<Page>(DEFAULT_PAGE);
   const [cartMode, setCartMode] = useState<CartMode>("single");
   const [multiCartPatientIds, setMultiCartPatientIds] = useState<number[]>([]);
@@ -6855,6 +7038,10 @@ export default function App() {
   useEffect(() => {
     window.localStorage.setItem("scriptlinkrx-old-catalog", String(oldCatalog));
   }, [oldCatalog]);
+
+  useEffect(() => {
+    window.localStorage.setItem("scriptlinkrx-pharmacy-catalog", String(pharmacyCatalog));
+  }, [pharmacyCatalog]);
 
   useEffect(() => {
     if (!chatOpen) return;
@@ -7023,6 +7210,7 @@ export default function App() {
             setCartMode={setCartMode}
             onProductSelect={setSelectedProduct}
             oldCatalog={oldCatalog}
+            pharmacyCatalog={pharmacyCatalog}
           />
         );
       case "favorites":
@@ -7055,6 +7243,7 @@ export default function App() {
             setCartMode={setCartMode}
             onProductSelect={setSelectedProduct}
             oldCatalog={oldCatalog}
+            pharmacyCatalog={pharmacyCatalog}
           />
         );
     }
@@ -7138,7 +7327,7 @@ export default function App() {
         <ProductFavoritesContext.Provider value={{ favoriteProductIds, setFavoriteProductIds, favoriteProducts }}>
           <div className={`app-theme app-theme-${appTheme} flex h-screen overflow-hidden bg-[var(--app-soft-hover)] font-['Inter',sans-serif]`}>
             {/* Sidebar Navigation */}
-            <Sidebar active={page} onNavigate={setPage} cartPage={cartPage} onLogout={() => {}} appTheme={appTheme} setAppTheme={setAppTheme} extraVariants={extraVariants} setExtraVariants={setExtraVariants} oldCatalog={oldCatalog} setOldCatalog={setOldCatalog} />
+            <Sidebar active={page} onNavigate={setPage} cartPage={cartPage} onLogout={() => {}} appTheme={appTheme} setAppTheme={setAppTheme} extraVariants={extraVariants} setExtraVariants={setExtraVariants} oldCatalog={oldCatalog} setOldCatalog={setOldCatalog} pharmacyCatalog={pharmacyCatalog} setPharmacyCatalog={setPharmacyCatalog} />
 
             {/* Main content area */}
             <main className="app-main-scroll h-screen min-w-0 flex-1 overflow-y-scroll p-3 pl-1.5">
