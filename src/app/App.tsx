@@ -1822,8 +1822,9 @@ function ProductDetailPage({
   product: CardDef;
   extraVariants: boolean;
 }) {
+  const isCompoundProduct = product.name.includes("/");
   const defaultSize = product.dosage === "Gel" ? "30g Tube" : product.dosage === "Capsule" ? "30 Capsules" : "1 (5mL) Vial";
-  const defaultStrength = product.price.includes("mg") ? product.price : product.dosage === "Gel" ? "0.025%" : "5mg/mL";
+  const defaultStrength = isCompoundProduct ? "15mg/40mg/250mg/mL" : product.price.includes("mg") ? product.price : product.dosage === "Gel" ? "0.025%" : "5mg/mL";
   const [size, setSize] = useState(defaultSize);
   const [strength, setStrength] = useState(defaultStrength);
   const [injType, setInjType] = useState(product.dosage === "Injection" ? "Intramuscular" : product.dosage);
@@ -1891,6 +1892,8 @@ function ProductDetailPage({
     ? ["0.005%", "0.01%", "0.015%", "0.02%", "0.025%", "0.03%", "0.04%", "0.05%", "0.06%", "0.075%", "0.08%", "0.1%", "0.125%", "0.15%", "0.2%"]
     : product.dosage === "Capsule"
     ? ["2.5mg", "5mg", "7.5mg", "10mg", "12.5mg", "15mg", "20mg", "25mg", "30mg", "40mg", "50mg", "75mg", "100mg", "150mg", "200mg"]
+    : isCompoundProduct
+    ? ["5mg/20mg/100mg/mL", "7.5mg/25mg/125mg/mL", "10mg/30mg/150mg/mL", "12.5mg/35mg/200mg/mL", "15mg/40mg/250mg/mL", "17.5mg/45mg/275mg/mL", "20mg/50mg/300mg/mL", "22.5mg/60mg/350mg/mL", "25mg/75mg/400mg/mL", "30mg/80mg/450mg/mL", "35mg/90mg/500mg/mL", "40mg/100mg/550mg/mL", "45mg/110mg/600mg/mL", "50mg/125mg/650mg/mL", "60mg/150mg/750mg/mL"]
     : ["0.5mg/mL", "1mg/mL", "2mg/mL", "2.5mg/mL", "5mg/mL", "7.5mg/mL", "10mg/mL", "12.5mg/mL", "15mg/mL", "20mg/mL", "25mg/mL", "30mg/mL", "40mg/mL", "50mg/mL", "100mg/mL"];
   const rotateOptions = (options: string[], offset: number) => [
     ...options.slice(offset % options.length),
@@ -1904,6 +1907,7 @@ function ProductDetailPage({
   const strengthOptions = [defaultStrength, ...rotateOptions(strengthCatalog, product.id * 5)]
     .filter((option, index, list) => list.indexOf(option) === index)
     .slice(0, strengthOptionCount);
+  const usesWideStrengthCards = strengthOptions.some(option => option.length > 16);
   const sizePriceAdjustment = (Math.max(sizeOptions.indexOf(size), 0) - Math.max(sizeOptions.indexOf(defaultSize), 0)) * 10;
   const strengthPriceAdjustment = (Math.max(strengthOptions.indexOf(strength), 0) - Math.max(strengthOptions.indexOf(defaultStrength), 0)) * 5;
   const configurationPriceAdjustment = sizePriceAdjustment + strengthPriceAdjustment;
@@ -2096,8 +2100,8 @@ function ProductDetailPage({
 
           <div className={`${isReferenceStyle ? "mt-5" : "mt-3 border-t border-[#ededed] pt-2"}`}>
             <div className={isReferenceStyle ? "mb-3 flex items-center gap-3" : ""}><p className={`${isReferenceStyle ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>Strength</p>{isReferenceStyle && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
-            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 [&>button]:w-full [&>button]:min-w-0">
-              {strengthOptions.map(option => <OptionPill key={option} label={option} subLabel="150mg total" selected={strength === option} onClick={() => setStrength(option)} emphasis={productDetailVariant === 2} card={productDetailVariant === 3} tesla={isReferenceStyle} blue={isBlueReference} tone={productDetailVariant === 4 ? "green" : "apple"} />)}
+            <div className={`grid grid-cols-2 gap-1.5 [&>button]:w-full [&>button]:min-w-0 ${usesWideStrengthCards ? "[&>button]:h-[58px]" : "sm:grid-cols-4"}`}>
+              {strengthOptions.map(option => <OptionPill key={option} label={option} subLabel={isCompoundProduct ? "Combined strength" : "150mg total"} selected={strength === option} onClick={() => setStrength(option)} emphasis={productDetailVariant === 2} card={productDetailVariant === 3} tesla={isReferenceStyle} blue={isBlueReference} tone={productDetailVariant === 4 ? "green" : "apple"} />)}
             </div>
           </div>
 
@@ -3777,8 +3781,13 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 activeTab === label ? "bg-[var(--app-menu-bg)] text-[#1a1a1a]" : "text-[#858b88] hover:bg-[var(--app-menu-bg)] hover:text-[#1a1a1a]"
               }`}
             >
-              <Icon size={15} strokeWidth={1.5} />
-              {label}
+              <Icon size={15} strokeWidth={1.5} className="shrink-0" />
+              <span className="min-w-0 flex-1">{label}</span>
+              {label === "Pay by Clinic" && savedClinicCard && (
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white px-2 py-1 text-[9px] font-medium text-[#222]">
+                  Card on file <CheckCircle2 size={14} strokeWidth={2.1} className="text-[#2563EB]" />
+                </span>
+              )}
             </button>
           ))}
         </nav>
