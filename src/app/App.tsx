@@ -974,7 +974,6 @@ function VoucherBanner() {
         <button onClick={copyVoucher} className="hidden h-8 min-w-[126px] items-center justify-between gap-3 rounded-[8px] bg-[#F6F4F8] px-3 text-[10px] font-medium text-[#4F5968] transition-colors hover:bg-[#F0EDF3] sm:inline-flex">
           <span>{copied ? "Copied" : "WELCOME25"}</span>{copied ? <CheckCircle2 size={12} className="text-[#2563EB]" /> : <Copy size={12} strokeWidth={1.8} className="text-[#8A96A8]" />}
         </button>
-        <button className="h-8 rounded-[8px] border border-[#D8DAE0] bg-white px-3 text-[10px] font-semibold text-[#202227] transition-colors hover:bg-[#F7F7F8]">Apply coupon</button>
         <button onClick={() => setDismissed(true)} className="flex size-8 shrink-0 items-center justify-center text-[#717680] transition-colors hover:text-[#222]" aria-label="Dismiss voucher"><X size={14} /></button>
       </div>
     </div>
