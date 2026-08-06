@@ -4247,8 +4247,6 @@ function SinglePatientCartPage({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"patient" | "clinic">("patient");
   const [shipTo, setShipTo] = useState<"patient" | "clinic">("clinic");
-  const [voucherCode, setVoucherCode] = useState("");
-  const [appliedVoucher, setAppliedVoucher] = useState<string | null>(null);
   const [prescriptionDetails, setPrescriptionDetails] = useState<Record<number, { days: string; refills: string; directions: string; reason: string }>>({});
   const visiblePatients = patients.filter(patient =>
     `${patient.name} ${patient.phone} ${patient.address}`.toLowerCase().includes(patientSearch.toLowerCase())
@@ -4284,20 +4282,7 @@ function SinglePatientCartPage({
   const canPreview = allPharmaciesAssigned && prescriptionsComplete;
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
   const shipping = pharmacyGroups.reduce((sum, pharmacy) => sum + (Number(pharmacy.shipping[0].match(/\$(\d+(?:\.\d{2})?)/)?.[1] ?? 0)), 0);
-  const voucherDiscount = appliedVoucher ? Math.min(subtotal * 0.1, 50) : 0;
-  const total = subtotal + shipping - voucherDiscount;
-
-  function applyVoucher() {
-    const normalizedCode = voucherCode.trim().toUpperCase();
-    if (!normalizedCode) return;
-    setVoucherCode(normalizedCode);
-    setAppliedVoucher(normalizedCode);
-  }
-
-  function removeVoucher() {
-    setAppliedVoucher(null);
-    setVoucherCode("");
-  }
+  const total = subtotal + shipping;
 
   function updatePrescriptionDetail(id: number, field: "days" | "refills" | "directions" | "reason", value: string) {
     setPrescriptionDetails(current => ({
@@ -4994,6 +4979,8 @@ function MultiPatientCartPage({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"patient" | "clinic">("patient");
   const [shipTo, setShipTo] = useState<"patient" | "clinic">("clinic");
+  const [voucherCode, setVoucherCode] = useState("");
+  const [appliedVoucher, setAppliedVoucher] = useState<string | null>(null);
   const [prescriptionDetails, setPrescriptionDetails] = useState<Record<number, { days: string; refills: string; directions: string; reason: string }>>({});
   const [prescriptionValidationAttempted, setPrescriptionValidationAttempted] = useState(false);
   const [addedPrescriptionIds, setAddedPrescriptionIds] = useState<Set<number>>(new Set());
@@ -5031,7 +5018,20 @@ function MultiPatientCartPage({
   const subtotal = cartData.patients.flatMap(p => p.items)
     .filter(i => !removed.has(i.id))
     .reduce((sum, i) => sum + i.price * (quantities[i.id] ?? 1), 0);
-  const total = subtotal + shipping;
+  const voucherDiscount = appliedVoucher ? Math.min(subtotal * 0.1, 50) : 0;
+  const total = subtotal + shipping - voucherDiscount;
+
+  function applyVoucher() {
+    const normalizedCode = voucherCode.trim().toUpperCase();
+    if (!normalizedCode) return;
+    setVoucherCode(normalizedCode);
+    setAppliedVoucher(normalizedCode);
+  }
+
+  function removeVoucher() {
+    setAppliedVoucher(null);
+    setVoucherCode("");
+  }
 
   function adjust(id: number, delta: number) {
     setQuantities(prev => ({ ...prev, [id]: Math.max(1, (prev[id] ?? 1) + delta) }));
@@ -5804,8 +5804,7 @@ function MultiPatientCartPage({
                 <ChevronDown size={17} className="rotate-180" />
               </div>
               <div className="mt-3 flex gap-2">
-                <div className={`flex h-[31px] min-w-0 flex-1 items-center rounded-[8px] bg-white px-3 shadow-[inset_0_1px_0_#9E9EA0,inset_-1px_0_0_#9E9EA0,inset_0_-1px_0_#9E9EA0,inset_1px_0_0_#9E9EA0] ${appliedVoucher ? "text-[#315f49] shadow-[inset_0_0_0_1px_#79a98e]" : "focus-within:shadow-[inset_0_0_0_1px_#183229]"}`}>
-                  {appliedVoucher && <CheckCircle2 size={13} className="mr-2 shrink-0" />}
+                <div className={`flex h-[31px] min-w-0 flex-1 items-center rounded-[8px] bg-white px-3 shadow-[inset_0_1px_0_#9E9EA0,inset_-1px_0_0_#9E9EA0,inset_0_-1px_0_#9E9EA0,inset_1px_0_0_#9E9EA0] ${appliedVoucher ? "text-[#202020] shadow-[inset_0_0_0_1px_#93B4FF]" : "focus-within:shadow-[inset_0_0_0_1px_#183229]"}`}>
                   <input
                     value={voucherCode}
                     onChange={event => { setVoucherCode(event.target.value); if (appliedVoucher) setAppliedVoucher(null); }}
@@ -5814,19 +5813,15 @@ function MultiPatientCartPage({
                     className="min-w-0 flex-1 bg-transparent text-[12px] font-medium uppercase outline-none placeholder:normal-case placeholder:text-[#999]"
                   />
                 </div>
-                {appliedVoucher ? (
-                  <button onClick={removeVoucher} className="flex h-[31px] items-center gap-1.5 rounded-full border border-[#cfd8d3] bg-white px-4 text-[11px] font-medium text-[#4f6258] transition-colors hover:bg-[#f5f8f6]"><X size={12} /> Remove</button>
-                ) : (
-                  <button onClick={applyVoucher} disabled={!voucherCode.trim()} className="h-[31px] rounded-full border-0 bg-white px-5 text-[12px] font-medium text-[#666] shadow-[inset_0_1px_0_#9E9EA0,inset_-1px_0_0_#9E9EA0,inset_0_-1px_0_#9E9EA0,inset_1px_0_0_#9E9EA0] transition-colors hover:bg-[#f7f7f7] disabled:cursor-not-allowed disabled:opacity-45">Apply</button>
-                )}
+                <button onClick={applyVoucher} disabled={Boolean(appliedVoucher) || !voucherCode.trim()} className="h-[31px] rounded-full border-0 bg-white px-5 text-[12px] font-medium text-[#666] shadow-[inset_0_1px_0_#9E9EA0,inset_-1px_0_0_#9E9EA0,inset_0_-1px_0_#9E9EA0,inset_1px_0_0_#9E9EA0] transition-colors hover:bg-[#f7f7f7] disabled:cursor-not-allowed disabled:opacity-45">Apply</button>
               </div>
-              {appliedVoucher && <p className="mt-2 text-[10px] font-medium text-[#397052]">Voucher applied — 10% off, up to $50.</p>}
+              {appliedVoucher && <p className="mt-2 text-[10px] font-medium text-[#202020]">Voucher applied — 10% off, up to $50.</p>}
             </div>
 
             <div className="mt-5 space-y-3 text-[12px] text-[#262626]">
               <div className="flex justify-between gap-4"><span>Subtotal</span><span>{"$" + subtotal.toFixed(2)}</span></div>
               <div className="flex justify-between gap-4"><span>Estimated Shipping & Handling</span><span>{"$" + shipping.toFixed(2)}</span></div>
-              {appliedVoucher && <div className="flex justify-between gap-4 font-medium text-[#397052]"><span>Voucher ({appliedVoucher})</span><span>−${voucherDiscount.toFixed(2)}</span></div>}
+              {appliedVoucher && <div className="flex justify-between gap-4 font-medium text-[#2563EB]"><span>Voucher ({appliedVoucher})</span><span>−${voucherDiscount.toFixed(2)}</span></div>}
               <div className="flex justify-between gap-4"><span>Estimated Tax</span><span>—</span></div>
               <div className="flex justify-between gap-4 border-y border-[#ececec] py-4 text-[13px] font-semibold"><span>Total</span><span>{"$" + total.toFixed(2)}</span></div>
             </div>
