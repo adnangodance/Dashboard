@@ -655,10 +655,7 @@ function UserChip({
             <p className="mt-0.5 text-[10px] text-[#7a837f]">Account menu</p>
           </div>
           <div className="p-1.5">
-            <button onClick={() => { onNavigate("dashboard"); setMenuOpen(false); }} className="flex h-9 w-full items-center gap-2 rounded-[7px] px-2.5 text-[12px] font-medium text-[#252525] hover:bg-[var(--app-menu-bg)]">
-              <LayoutDashboard size={15} /> Dashboard
-            </button>
-            <div className="my-1.5 border-t border-[#eceeea] pt-1.5">
+            <div>
               <p className="px-2.5 pb-1 text-[9px] font-semibold uppercase tracking-[0.11em] text-[#8c948f]">Theme</p>
               {themeOptions.map((option) => (
                 <button
@@ -6315,9 +6312,16 @@ function CheckoutPrescriptionPage({ onNavigate }: { onNavigate: (p: Page) => voi
 
 function LoginPage({ onLogin, onRegister, onSingleSignOn }: { onLogin: () => void; onRegister: () => void; onSingleSignOn: () => void }) {
   const [loginRole, setLoginRole] = useState<"provider" | "pharmacy">("provider");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
 
   function submitLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (password !== "12345") {
+      setLoginError("Incorrect password. Please try again.");
+      return;
+    }
+    setLoginError("");
     onLogin();
   }
 
@@ -6354,12 +6358,15 @@ function LoginPage({ onLogin, onRegister, onSingleSignOn }: { onLogin: () => voi
               <div className="mt-2 flex h-[52px] items-center rounded-[8px] border border-[#1a1a1a] bg-white px-4 focus-within:border-[#183229]">
                 <input
                   type="password"
+                  value={password}
+                  onChange={event => { setPassword(event.target.value); if (loginError) setLoginError(""); }}
                   className="min-w-0 flex-1 bg-transparent text-[13px] font-medium text-[#1a1a1a] outline-none placeholder:text-[#6f7782]"
                   placeholder="Password"
                 />
                 <Eye size={17} className="text-[#6f7782]" />
               </div>
             </label>
+            {loginError && <p className="mt-2 text-left text-[11px] font-medium text-[#c94f43]">{loginError}</p>}
             <button type="submit" className="mt-3 flex h-[46px] w-full items-center justify-center rounded-[999px] bg-[#1a1a1a] text-[13px] font-semibold text-white transition-colors hover:bg-[#183229]">
               Continue to log in
             </button>
@@ -6399,6 +6406,221 @@ function LoginPage({ onLogin, onRegister, onSingleSignOn }: { onLogin: () => voi
         </section>
       </div>
     </main>
+  );
+}
+
+function OrganizationSetupPage({ onCreate }: { onCreate: () => void }) {
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [visiblePassword, setVisiblePassword] = useState<"current" | "new" | "confirm" | null>(null);
+
+  function submitOrganization(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (currentPassword !== "12345") {
+      setPasswordError("Current password is incorrect.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setPasswordError("New password must be at least 8 characters long.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match.");
+      return;
+    }
+    setPasswordError("");
+    setCurrentStep(2);
+  }
+
+  const canContinue = currentPassword.length > 0 && newPassword.length >= 8 && confirmPassword.length > 0;
+
+  return (
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white px-6 py-10 font-['Inter',sans-serif] text-[#171717]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(circle_at_50%_0%,rgba(197,216,83,0.28),rgba(217,251,244,0.26)_32%,rgba(255,255,255,0)_72%)]" />
+      <section className="relative w-full max-w-[470px] px-5 py-8">
+        <div className="mx-auto w-full">
+          <div className="mb-5 flex items-center justify-center gap-2.5">
+            <img src={scriptlinkrxLogo} alt="ScriptLinkRx" className="h-[27px] w-8 object-contain" />
+            <span className="font-['Poppins',sans-serif] text-[15px] font-semibold uppercase tracking-wide text-[#183229]">
+              S<span className="lowercase">CRIPTLINKrx</span>
+            </span>
+          </div>
+
+          <div className="rounded-[14px] border border-white/80 bg-white/65 px-7 py-8 shadow-[0_14px_40px_rgba(24,50,41,0.08)] backdrop-blur-[18px] sm:px-9">
+            <div className="text-center">
+              <h1 className="text-[21px] font-semibold tracking-[-0.025em]">Welcome! Let&apos;s get you set up</h1>
+              <p className="mt-1.5 text-[11px] text-[#747c78]">Complete these steps to finish setting up your account</p>
+              <p className="mt-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#3974d8]">Step {currentStep} of 4</p>
+            </div>
+
+            <div className="my-6 h-px bg-[#eceeec]" />
+            {currentStep === 1 ? <>
+              <div className="text-center">
+                <h2 className="text-[17px] font-semibold tracking-[-0.02em]">Set Your Password</h2>
+                <p className="mt-1.5 text-[10px] text-[#767e7a]">Create a secure password for your account. You&apos;ll use this to log in.</p>
+              </div>
+
+              <form onSubmit={submitOrganization} className="mt-5 space-y-3.5">
+              {[
+                { id: "current" as const, label: "Current Password", value: currentPassword, setValue: setCurrentPassword, placeholder: "Enter your current password" },
+                { id: "new" as const, label: "New Password", value: newPassword, setValue: setNewPassword, placeholder: "Enter your new password" },
+                { id: "confirm" as const, label: "Confirm New Password", value: confirmPassword, setValue: setConfirmPassword, placeholder: "Re-enter your new password" },
+              ].map(field => (
+                <label key={field.id} className="block">
+                  <span className="mb-1.5 block text-[11px] font-medium">{field.label} <span className="text-[#b4473d]">*</span></span>
+                  <div className="flex h-10 items-center rounded-[8px] border border-[#d7dcda] bg-white px-3 focus-within:border-[1.5px] focus-within:border-[#183229]">
+                    <input type={visiblePassword === field.id ? "text" : "password"} value={field.value} onChange={event => { field.setValue(event.target.value); if (passwordError) setPasswordError(""); }} placeholder={field.placeholder} className="min-w-0 flex-1 bg-transparent text-[12px] outline-none placeholder:text-[#a3aaa6]" />
+                    <button type="button" onClick={() => setVisiblePassword(current => current === field.id ? null : field.id)} className="text-[#7d8581]" aria-label={`Show ${field.label.toLowerCase()}`}><Eye size={14} /></button>
+                  </div>
+                  {field.id === "new" && <span className="mt-1 block text-[9px] text-[#818985]">Password must be at least 8 characters long</span>}
+                </label>
+              ))}
+
+              {passwordError && <p className="text-[10px] font-medium text-[#c94f43]">{passwordError}</p>}
+              <button type="submit" disabled={!canContinue} className="flex h-10 w-full items-center justify-center rounded-[8px] bg-[#111] text-[12px] font-semibold text-white transition-colors hover:bg-[#183229] disabled:cursor-not-allowed disabled:bg-[#d5d8d6] disabled:text-[#8b918e]">Continue</button>
+              </form>
+            </> : currentStep === 2 ? <>
+              <div className="text-center">
+                <h2 className="text-[17px] font-semibold tracking-[-0.02em]">Confirm Your Profile Details</h2>
+                <p className="mt-1.5 text-[10px] text-[#767e7a]">Please review and confirm your professional information</p>
+              </div>
+
+              <form onSubmit={event => { event.preventDefault(); setCurrentStep(3); }} className="mt-5 space-y-3.5">
+                <div className="grid grid-cols-2 gap-3">
+                  <ProfileField label="First Name" defaultValue="Adnan" required />
+                  <ProfileField label="Last Name" defaultValue="Godanci" required />
+                </div>
+                <ProfileField label="Phone Number" defaultValue="(646)-617-9881" required />
+                <div className="h-px bg-[#eceeec]" />
+                <div className="grid grid-cols-2 gap-3">
+                  <ProfileField label="Address Line 1" defaultValue="123 Main Street" required />
+                  <ProfileField label="Address Line 2" placeholder="Apt, Suite, Floor (optional)" />
+                </div>
+                <div className="grid grid-cols-[1fr_1fr_.8fr] gap-3">
+                  <ProfileField label="City" defaultValue="Bronx" required />
+                  <label className="block">
+                    <span className="mb-1.5 block text-[11px] font-medium">State <span className="text-[#b4473d]">*</span></span>
+                    <select defaultValue="New York" className="h-10 w-full rounded-[8px] border border-[#d7dcda] bg-white px-3 text-[11px] outline-none focus:border-[1.5px] focus:border-[#183229]">
+                      <option>New York</option>
+                      <option>Florida</option>
+                      <option>Texas</option>
+                    </select>
+                  </label>
+                  <ProfileField label="Zipcode" defaultValue="11710" required />
+                </div>
+                <ProfileField label="Fax Number" placeholder="Enter fax (optional)" />
+                <div className="space-y-2 pt-1">
+                  <button type="submit" className="h-10 w-full rounded-[8px] bg-[#111] px-6 text-[11px] font-semibold text-white hover:bg-[#183229]">Continue</button>
+                  <button type="button" onClick={() => setCurrentStep(1)} className="h-9 w-full rounded-[8px] text-[11px] font-semibold text-[#4f5753] hover:bg-white/70 hover:text-[#183229]">Back</button>
+                </div>
+              </form>
+            </> : currentStep === 3 ? <>
+              <div className="text-center">
+                <h2 className="text-[17px] font-semibold tracking-[-0.02em]">Provider Credentials</h2>
+                <p className="mt-1.5 text-[10px] text-[#767e7a]">Please provide your professional credentials</p>
+              </div>
+
+              <form onSubmit={event => { event.preventDefault(); setCurrentStep(4); }} className="mt-5 space-y-3.5">
+                <div className="grid grid-cols-2 gap-3">
+                  <ProfileField label="NPI Number" defaultValue="1770027724" required />
+                  <ProfileField label="License Number" defaultValue="LEA1240812470" required />
+                </div>
+                <ProfileField label="DEA Number" defaultValue="MK5054793" />
+                <div className="space-y-2 pt-1">
+                  <button type="submit" className="h-10 w-full rounded-[8px] bg-[#111] px-6 text-[11px] font-semibold text-white hover:bg-[#183229]">Continue</button>
+                  <button type="button" onClick={() => setCurrentStep(2)} className="h-9 w-full rounded-[8px] text-[11px] font-semibold text-[#4f5753] hover:bg-white/70 hover:text-[#183229]">Back</button>
+                </div>
+              </form>
+            </> : <>
+              <div className="text-center">
+                <h2 className="text-[17px] font-semibold tracking-[-0.02em]">Set Your Digital Signature</h2>
+                <p className="mt-1.5 text-[10px] text-[#767e7a]">Draw your signature below. This will be used on your prescriptions.</p>
+              </div>
+
+              <SignaturePad />
+              <div className="mt-4 space-y-2">
+                <button type="button" onClick={onCreate} className="h-10 w-full rounded-[8px] bg-[#111] px-6 text-[11px] font-semibold text-white hover:bg-[#183229]">Continue</button>
+                <button type="button" onClick={() => setCurrentStep(3)} className="h-9 w-full rounded-[8px] text-[11px] font-semibold text-[#4f5753] hover:bg-white/70 hover:text-[#183229]">Back</button>
+              </div>
+            </>}
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function ProfileField({ label, defaultValue, placeholder, required = false }: { label: string; defaultValue?: string; placeholder?: string; required?: boolean }) {
+  return (
+    <label className="block min-w-0">
+      <span className="mb-1.5 block text-[11px] font-medium">{label} {required && <span className="text-[#b4473d]">*</span>}</span>
+      <input required={required} defaultValue={defaultValue} placeholder={placeholder} className="h-10 w-full rounded-[8px] border border-[#d7dcda] bg-white px-3 text-[11px] outline-none placeholder:text-[#a3aaa6] focus:border-[1.5px] focus:border-[#183229]" />
+    </label>
+  );
+}
+
+function SignaturePad() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const drawingRef = useRef(false);
+
+  function getPoint(event: ReactPointerEvent<HTMLCanvasElement>) {
+    const canvas = event.currentTarget;
+    const bounds = canvas.getBoundingClientRect();
+    return {
+      x: (event.clientX - bounds.left) * (canvas.width / bounds.width),
+      y: (event.clientY - bounds.top) * (canvas.height / bounds.height),
+    };
+  }
+
+  function startDrawing(event: ReactPointerEvent<HTMLCanvasElement>) {
+    const context = event.currentTarget.getContext("2d");
+    if (!context) return;
+    const point = getPoint(event);
+    drawingRef.current = true;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    context.beginPath();
+    context.moveTo(point.x, point.y);
+  }
+
+  function draw(event: ReactPointerEvent<HTMLCanvasElement>) {
+    if (!drawingRef.current) return;
+    const context = event.currentTarget.getContext("2d");
+    if (!context) return;
+    const point = getPoint(event);
+    context.lineWidth = 2.5;
+    context.lineCap = "round";
+    context.lineJoin = "round";
+    context.strokeStyle = "#183229";
+    context.lineTo(point.x, point.y);
+    context.stroke();
+  }
+
+  function clearSignature() {
+    const canvas = canvasRef.current;
+    canvas?.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  return (
+    <div className="mt-5">
+      <div className="mb-1.5 flex items-center justify-between">
+        <span className="text-[11px] font-medium">Sign your signature:</span>
+        <button type="button" onClick={clearSignature} className="rounded-[7px] border border-[#d7dcda] bg-white px-3 py-1 text-[10px] font-medium text-[#4f5753] hover:bg-[#f6f7f6]">Clear</button>
+      </div>
+      <canvas
+        ref={canvasRef}
+        width={720}
+        height={220}
+        onPointerDown={startDrawing}
+        onPointerMove={draw}
+        onPointerUp={() => { drawingRef.current = false; }}
+        onPointerCancel={() => { drawingRef.current = false; }}
+        className="h-[145px] w-full touch-none rounded-[9px] border border-[#d7dcda] bg-white/80"
+        aria-label="Digital signature drawing area"
+      />
+    </div>
   );
 }
 
@@ -7308,7 +7530,7 @@ function LandingPage({ onLoginClick, onRegisterClick, onRequestDemoClick, onCont
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [authView, setAuthView] = useState<"landing" | "login" | "register" | "single-sign-on" | "request-demo" | "contact">("landing");
+  const [authView, setAuthView] = useState<"landing" | "login" | "organization" | "register" | "single-sign-on" | "request-demo" | "contact">("landing");
   const [appTheme, setAppTheme] = useState<AppTheme>(() => {
     const savedTheme = window.localStorage.getItem("scriptlinkrx-theme");
     return savedTheme === "orange" ? "orange" : "default";
@@ -7581,9 +7803,19 @@ export default function App() {
           onRegister={() => setAuthView("register")}
           onSingleSignOn={() => setAuthView("single-sign-on")}
           onLogin={() => {
+            setAuthView("organization");
+          }}
+        />
+      );
+    }
+
+    if (authView === "organization") {
+      return (
+        <OrganizationSetupPage
+          onCreate={() => {
             setIsAuthenticated(true);
             setPlatformTourStep(0);
-            setPage("dashboard");
+            setPage("products");
             setShowPlatformTour(false);
             setPlatformTourTooltipVisible(false);
           }}
@@ -7652,7 +7884,25 @@ export default function App() {
         <ProductFavoritesContext.Provider value={{ favoriteProductIds, setFavoriteProductIds, favoriteProducts }}>
           <div className={`app-theme app-theme-${appTheme} flex h-screen overflow-hidden bg-[var(--app-soft-hover)] font-['Inter',sans-serif]`}>
             {/* Sidebar Navigation */}
-            <Sidebar active={page} onNavigate={setPage} cartPage={cartPage} onLogout={() => {}} appTheme={appTheme} setAppTheme={setAppTheme} extraVariants={extraVariants} setExtraVariants={setExtraVariants} oldCatalog={oldCatalog} setOldCatalog={setOldCatalog} pharmacyCatalog={pharmacyCatalog} setPharmacyCatalog={setPharmacyCatalog} />
+            <Sidebar
+              active={page}
+              onNavigate={setPage}
+              cartPage={cartPage}
+              onLogout={() => {
+                setAuthView("login");
+                setIsAuthenticated(false);
+                setChatOpen(false);
+                setChatMenuOpen(false);
+              }}
+              appTheme={appTheme}
+              setAppTheme={setAppTheme}
+              extraVariants={extraVariants}
+              setExtraVariants={setExtraVariants}
+              oldCatalog={oldCatalog}
+              setOldCatalog={setOldCatalog}
+              pharmacyCatalog={pharmacyCatalog}
+              setPharmacyCatalog={setPharmacyCatalog}
+            />
 
             {/* Main content area */}
             <main className="app-main-scroll h-screen min-w-0 flex-1 overflow-y-scroll p-3 pl-1.5">
