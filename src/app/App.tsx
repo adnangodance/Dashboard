@@ -52,6 +52,7 @@ import {
   Flag,
   Send,
   Snowflake,
+  Copy,
 } from "lucide-react";
 
 import img430 from "@/imports/ScriptlinkrxDashboard/9b6fa0a3b334659006bcf39e91b4da387a7b4cf0.png";
@@ -501,10 +502,23 @@ function Sidebar({
 }
 
 function SidebarSupportVersion({ onNavigate }: { onNavigate: (p: Page) => void }) {
+  const accounts = [
+    { name: "Zee Pharmacy", location: "Bronx, NY" },
+    { name: "Altin Clinic", location: "Queens County, NY" },
+  ];
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState(accounts[0]);
+  const [clinicPaymentEnabled, setClinicPaymentEnabled] = useState(() => window.sessionStorage.getItem("clinic-card-saved") === "true");
   const supportContacts = [
     { name: "Shayne", role: "Head Operator", phone: "917-274-7648", avatar: supportShayne },
     { name: "Zee", role: "CEO", phone: "(646)-617-9881", avatar: supportZee },
   ];
+
+  useEffect(() => {
+    const updateClinicPayment = () => setClinicPaymentEnabled(window.sessionStorage.getItem("clinic-card-saved") === "true");
+    window.addEventListener("clinic-payment-updated", updateClinicPayment);
+    return () => window.removeEventListener("clinic-payment-updated", updateClinicPayment);
+  }, []);
 
   return (
     <div className="border-y border-[#ECEEEA] py-4">
@@ -524,29 +538,57 @@ function SidebarSupportVersion({ onNavigate }: { onNavigate: (p: Page) => void }
           </div>
         ))}
       </div>
-      <button type="button" className="mt-3 flex w-full cursor-pointer items-center gap-2 rounded-[10px] bg-[var(--app-menu-bg)] px-2.5 py-2 text-left transition-colors hover:bg-[#EEF0EF]">
-        <span className="min-w-0 flex-1">
-          <span className="flex min-w-0 items-center gap-1.5">
-            <span className="truncate text-[12px] font-medium leading-[15px] text-[#1f2220]">Zee Pharmacy</span>
-            <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-white text-[9px] font-semibold text-[#5f6662]">5</span>
+      <div className="relative mt-3">
+        <button type="button" onClick={() => setAccountMenuOpen(current => !current)} className="flex w-full cursor-pointer items-center gap-2 rounded-[10px] bg-[var(--app-menu-bg)] px-2.5 py-2 text-left transition-colors hover:bg-[#EEF0EF]" aria-expanded={accountMenuOpen}>
+          <span className="min-w-0 flex-1">
+            <span className="flex min-w-0 items-center gap-1.5">
+              <span className="truncate text-[12px] font-medium leading-[15px] text-[#1f2220]">{selectedAccount.name}</span>
+              <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-white text-[9px] font-semibold text-[#5f6662]">{accounts.length}</span>
+            </span>
+            <span className="block truncate text-[11px] font-normal leading-[14px] text-[#8c948f]">Switch account</span>
           </span>
-          <span className="block truncate text-[11px] font-normal leading-[14px] text-[#8c948f]">Switch pharmacy</span>
-        </span>
-        <ChevronsUpDown size={15} className="shrink-0 text-[#8c948f]" />
-      </button>
-      <div className="mt-2 rounded-[18px] border border-white/70 bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)] p-3 shadow-[0_10px_28px_rgba(38,54,45,0.08)]">
-          <h3 className="text-[15px] font-semibold leading-[19px] tracking-[-0.01em] text-[#171A18]">Enable Pay by Clinic</h3>
-          <p className="mt-1.5 text-[11px] leading-[16px] text-[#737A75]">Use your clinic’s card for patient purchases.</p>
+          <ChevronsUpDown size={15} className="shrink-0 text-[#8c948f]" />
+        </button>
+        {accountMenuOpen && (
+          <div className="absolute bottom-[calc(100%+8px)] left-0 z-50 w-full rounded-[12px] border border-[#E0E4EA] bg-white p-2 shadow-[0_16px_40px_rgba(16,24,40,0.14)]">
+            <p className="px-2.5 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#8A94A6]">Accounts</p>
+            <div className="space-y-1">
+              {accounts.map(account => {
+                const selected = selectedAccount.name === account.name;
+                return (
+                  <button
+                    key={account.name}
+                    type="button"
+                    onClick={() => { setSelectedAccount(account); setAccountMenuOpen(false); }}
+                    className={`flex w-full items-center gap-3 rounded-[9px] px-3 py-2.5 text-left transition-colors ${selected ? "bg-[#F7F8FA]" : "hover:bg-[#F7F8FA]"}`}
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[12px] font-semibold text-[#222]">{account.name}</span>
+                      <span className="mt-0.5 block truncate text-[10px] text-[#7C8491]">{account.location}</span>
+                    </span>
+                    {selected && <CheckCircle2 size={18} strokeWidth={2.2} className="shrink-0 fill-[#2563EB] text-white" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+      <div className={`mt-2 rounded-[18px] border border-white/70 p-3 shadow-[0_10px_28px_rgba(38,54,45,0.08)] ${clinicPaymentEnabled ? "bg-[radial-gradient(circle_at_90%_0%,rgba(219,232,255,0.98),transparent_52%),linear-gradient(145deg,#f8fbff_0%,#edf4ff_100%)]" : "bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)]"}`}>
+          {clinicPaymentEnabled && <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[9px] font-semibold text-[#2563EB]"><CheckCircle2 size={11} strokeWidth={2.2} /> Card updated</span>}
+          <h3 className="text-[15px] font-semibold leading-[19px] tracking-[-0.01em] text-[#171A18]">{clinicPaymentEnabled ? "Pay by Clinic enabled" : "Enable Pay by Clinic"}</h3>
+          <p className="mt-1.5 text-[11px] leading-[16px] text-[#737A75]">{clinicPaymentEnabled ? "Visa ending in 1234 is ready for patient purchases." : "Use your clinic’s card for patient purchases."}</p>
           <button
             type="button"
             onClick={() => {
-              window.sessionStorage.setItem("open-payment-setup", "true");
-              window.dispatchEvent(new Event("open-payment-setup"));
+              const eventName = clinicPaymentEnabled ? "open-payment-overview" : "open-payment-setup";
+              window.sessionStorage.setItem(eventName, "true");
+              window.dispatchEvent(new Event(eventName));
               onNavigate("settings");
             }}
             className="group mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-white px-3 py-2.5 text-[11px] font-semibold text-[#171A18] shadow-[0_3px_12px_rgba(34,46,39,0.06)] transition-transform hover:-translate-y-0.5"
           >
-            Set up payment
+            {clinicPaymentEnabled ? "Manage payment" : "Set up payment"}
             <ArrowUpRight size={13} strokeWidth={2} className="transition-transform group-hover:translate-x-0.5" />
           </button>
         </div>
@@ -903,6 +945,37 @@ function Header({
             <span className="text-[#1a1a1a] font-medium">{breadcrumb[breadcrumb.length - 1]}</span>
           </p>
         )}
+      </div>
+    </div>
+  );
+}
+
+function VoucherBanner() {
+  const [dismissed, setDismissed] = useState(false);
+  const [copied, setCopied] = useState(false);
+  if (dismissed) return null;
+
+  function copyVoucher() {
+    void navigator.clipboard?.writeText("WELCOME25");
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1400);
+  }
+
+  return (
+    <div className="sticky top-0 z-40 mb-2 rounded-[18px] border border-white/80 bg-[linear-gradient(180deg,rgba(248,249,252,0.92),rgba(239,241,245,0.78))] p-2 pb-1.5 shadow-[0_12px_34px_rgba(25,35,55,0.08)] backdrop-blur-xl">
+      <div className="flex items-center gap-3 rounded-[13px] border border-white bg-white/95 px-3 py-2.5 shadow-[0_7px_20px_rgba(30,41,59,0.09)]">
+        <span className="flex size-9 shrink-0 items-center justify-center text-[20px] leading-none">
+          🎁
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[12px] font-semibold text-[#171A1F]">Your $25 coupon is ready <span className="font-normal text-[#7B808A]">· Use code WELCOME25 on your next order.</span></p>
+        </div>
+        <span className="hidden whitespace-nowrap text-[9px] text-[#9297A1] lg:inline-flex">Valid until September 5, 2026 · <strong className="ml-1 font-semibold text-[#2563EB]">Available at checkout</strong></span>
+        <button onClick={copyVoucher} className="hidden h-8 min-w-[126px] items-center justify-between gap-3 rounded-[8px] bg-[#F6F4F8] px-3 text-[10px] font-medium text-[#4F5968] transition-colors hover:bg-[#F0EDF3] sm:inline-flex">
+          <span>{copied ? "Copied" : "WELCOME25"}</span>{copied ? <CheckCircle2 size={12} className="text-[#2563EB]" /> : <Copy size={12} strokeWidth={1.8} className="text-[#8A96A8]" />}
+        </button>
+        <button className="h-8 rounded-[8px] border border-[#D8DAE0] bg-white px-3 text-[10px] font-semibold text-[#202227] transition-colors hover:bg-[#F7F7F8]">Apply coupon</button>
+        <button onClick={() => setDismissed(true)} className="flex size-8 shrink-0 items-center justify-center text-[#717680] transition-colors hover:text-[#222]" aria-label="Dismiss voucher"><X size={14} /></button>
       </div>
     </div>
   );
@@ -1374,6 +1447,7 @@ function ProductsPage({
   const [catalogFilterSearch, setCatalogFilterSearch] = useState<Record<string, string>>({});
   const { runWithAppLoader } = useAppLoading();
   const searchRef = useRef<HTMLInputElement>(null);
+  const catalogFiltersRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -1386,6 +1460,23 @@ function ProductsPage({
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+
+  useEffect(() => {
+    if (!openCatalogFilter) return;
+
+    function closeFilterOnOutsideClick(event: MouseEvent | TouchEvent) {
+      if (!catalogFiltersRef.current?.contains(event.target as Node)) {
+        setOpenCatalogFilter(null);
+      }
+    }
+
+    document.addEventListener("mousedown", closeFilterOnOutsideClick);
+    document.addEventListener("touchstart", closeFilterOnOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", closeFilterOnOutsideClick);
+      document.removeEventListener("touchstart", closeFilterOnOutsideClick);
+    };
+  }, [openCatalogFilter]);
 
   function toggleFav(id: number) {
     runWithAppLoader(() => {
@@ -1519,7 +1610,7 @@ function ProductsPage({
       </div>
 
       {/* Search + filters bar */}
-      <div className="flex items-center gap-[14px] mt-6 mb-5">
+      <div className="flex items-end gap-[14px] mt-6 mb-5">
         {/* Search box — from Figma import Group1216401138 */}
         <div className="group w-[220px] flex-shrink-0 transition-all duration-300 ease-out focus-within:w-[310px]">
         <div className="flex h-[38px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:border-2 focus-within:border-black">
@@ -1545,7 +1636,7 @@ function ProductsPage({
         </div>
 
         {/* Filters */}
-        <div className="ml-auto flex items-center gap-3">
+        <div ref={catalogFiltersRef} className="ml-auto flex items-end gap-3">
           {catalogFilters.map(({ label, values, setValues, options }) => {
             const isOpen = openCatalogFilter === label;
             const hasSelection = values.length > 0;
@@ -1556,7 +1647,10 @@ function ProductsPage({
             const buttonLabel = isShippingState && hasSelection ? values[0] : label;
             const filterWidthClass = isShippingState ? "w-[142px]" : isAreaOfTreatment ? "w-[165px]" : "w-[94px]";
             return (
-              <div key={label} className="relative">
+              <div key={label} className="relative flex flex-col gap-1.5">
+                <span className="px-0.5 text-[10px] font-semibold leading-none text-[#667085]">
+                  {label}
+                </span>
                 <button
                   onClick={() => setOpenCatalogFilter(isOpen ? null : label)}
                   className={`flex h-[34px] ${filterWidthClass} cursor-pointer items-center justify-between gap-2 rounded-[5px] border bg-white px-2.5 text-[13px] font-semibold leading-none shadow-[0_1px_2px_rgba(16,24,40,0.08)] transition-colors ${
@@ -1572,7 +1666,7 @@ function ProductsPage({
                 </button>
 
                 {isOpen && (
-                  <div className={`absolute top-10 z-20 overflow-hidden rounded-[6px] border border-[#d7dee8] bg-white shadow-[0_18px_40px_rgba(16,24,40,0.16)] ${
+                  <div className={`absolute top-[52px] z-20 overflow-hidden rounded-[6px] border border-[#d7dee8] bg-white shadow-[0_18px_40px_rgba(16,24,40,0.16)] ${
                     isDosage ? "right-0 w-[180px]" : isAreaOfTreatment ? "left-0 w-[220px]" : "left-0 w-[240px]"
                   }`}>
                     <div className="border-b border-[#e7ebf0] p-2">
@@ -3606,18 +3700,20 @@ function UsersPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
 function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const shouldOpenPaymentSetup = () => window.sessionStorage.getItem("open-payment-setup") === "true";
-  const [activeTab, setActiveTab] = useState(() => shouldOpenPaymentSetup() ? "Pay by Clinic" : "Business Account");
+  const shouldOpenPaymentOverview = () => window.sessionStorage.getItem("open-payment-overview") === "true";
+  const [activeTab, setActiveTab] = useState(() => shouldOpenPaymentSetup() || shouldOpenPaymentOverview() ? "Pay by Clinic" : "Business Account");
   const [payByClinicTab, setPayByClinicTab] = useState<"cards" | "ach">("cards");
   const [creditCardOpen, setCreditCardOpen] = useState(() => shouldOpenPaymentSetup());
   const [cardType, setCardType] = useState("Visa");
   const [cardAuthorized, setCardAuthorized] = useState(true);
   const [cardSaving, setCardSaving] = useState(false);
-  const [savedClinicCard, setSavedClinicCard] = useState(false);
+  const [savedClinicCard, setSavedClinicCard] = useState(() => window.sessionStorage.getItem("clinic-card-saved") === "true");
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const signatureDrawingRef = useRef(false);
 
   useEffect(() => {
     window.sessionStorage.removeItem("open-payment-setup");
+    window.sessionStorage.removeItem("open-payment-overview");
     const openPaymentSetup = () => {
       setActiveTab("Pay by Clinic");
       setPayByClinicTab("cards");
@@ -3625,7 +3721,17 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       window.sessionStorage.removeItem("open-payment-setup");
     };
     window.addEventListener("open-payment-setup", openPaymentSetup);
-    return () => window.removeEventListener("open-payment-setup", openPaymentSetup);
+    const openPaymentOverview = () => {
+      setActiveTab("Pay by Clinic");
+      setPayByClinicTab("cards");
+      setCreditCardOpen(false);
+      window.sessionStorage.removeItem("open-payment-overview");
+    };
+    window.addEventListener("open-payment-overview", openPaymentOverview);
+    return () => {
+      window.removeEventListener("open-payment-setup", openPaymentSetup);
+      window.removeEventListener("open-payment-overview", openPaymentOverview);
+    };
   }, []);
 
   useEffect(() => {
@@ -3696,6 +3802,8 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
     window.setTimeout(() => {
       setCardSaving(false);
       setSavedClinicCard(true);
+      window.sessionStorage.setItem("clinic-card-saved", "true");
+      window.dispatchEvent(new Event("clinic-payment-updated"));
       setCreditCardOpen(false);
     }, 1100);
   }
@@ -3983,13 +4091,13 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       {creditCardOpen && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-[#101512]/35 p-5 backdrop-blur-[2px]">
           <button className="absolute inset-0 cursor-default" onClick={() => setCreditCardOpen(false)} aria-label="Close add credit card" />
-          <section className="relative z-10 max-h-[calc(100vh-40px)] w-full max-w-[460px] overflow-y-auto rounded-[8px] bg-white px-5 py-6 shadow-[0_20px_60px_rgba(16,35,27,0.18)]">
+          <section className="relative z-10 max-h-[calc(100vh-40px)] w-full max-w-[460px] overflow-y-auto rounded-[8px] bg-white px-5 py-5 shadow-[0_20px_60px_rgba(16,35,27,0.18)]">
             <h2 className="text-[17px] font-medium text-[#171717]">Add credit card</h2>
 
-            <div className="mt-7 space-y-5">
+            <div className="mt-5 space-y-4">
               <label className="block">
                 <span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Card Information</span>
-                <div className="flex h-11 items-center rounded-[10px] border border-[#ef8c58] bg-white px-3.5 focus-within:border-[1.5px] focus-within:border-[#e76f32]">
+                <div className="flex h-10 items-center rounded-[10px] border border-[#ef8c58] bg-white px-3.5 focus-within:border-[1.5px] focus-within:border-[#e76f32]">
                   <input inputMode="numeric" placeholder="1234 1234 1234 1234" className="min-w-0 flex-1 bg-transparent text-[12px] outline-none placeholder:text-[#a5a5a5]" />
                   <div className="ml-2 flex items-center gap-1">
                     <span className="rounded-[2px] border border-[#d8d8d8] bg-white px-1 text-[9px] font-black italic text-[#1434CB]">VISA</span>
@@ -4003,17 +4111,17 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               <div className="grid grid-cols-2 gap-3">
                 <label>
                   <span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Expiration date</span>
-                  <input inputMode="numeric" placeholder="MM/YY" className="h-11 w-full rounded-[10px] border border-[#d7d7d7] bg-white px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black" />
+                  <input inputMode="numeric" placeholder="MM/YY" className="h-10 w-full rounded-[10px] border border-[#d7d7d7] bg-white px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black" />
                 </label>
                 <label>
                   <span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Security code</span>
-                  <input inputMode="numeric" placeholder="CVC" className="h-11 w-full rounded-[10px] border border-[#d7d7d7] bg-white px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black" />
+                  <input inputMode="numeric" placeholder="CVC" className="h-10 w-full rounded-[10px] border border-[#d7d7d7] bg-white px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black" />
                 </label>
               </div>
 
               <label className="block">
                 <span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Cardholder name <span className="text-[#b4473d]">*</span></span>
-                <input placeholder="Name on card" className="h-11 w-full rounded-[10px] border border-[#d7d7d7] bg-white px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black" />
+                <input placeholder="Name on card" className="h-10 w-full rounded-[10px] border border-[#d7d7d7] bg-white px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black" />
               </label>
 
               <div className="pt-1">
@@ -4021,7 +4129,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                   <input type="checkbox" checked={cardAuthorized} onChange={event => setCardAuthorized(event.target.checked)} className="size-4 accent-black" />
                   I agree
                 </label>
-                <p className="mt-3 max-w-[390px] text-[11px] leading-[14px] text-[#333]">I authorize ScriptLinkRx to charge this card for approved clinic purchases. A new authorization will be required if the card details change.</p>
+                <p className="mt-2 max-w-[390px] text-[11px] leading-[14px] text-[#333]">I authorize ScriptLinkRx to charge this card for approved clinic purchases. A new authorization will be required if the card details change.</p>
               </div>
 
               <div>
@@ -4029,7 +4137,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                   <span className="text-[11px] font-medium text-[#343434]">Sign your authorization:</span>
                   <button type="button" onClick={clearSignature} className="h-6 rounded-[5px] border border-[#d8d8d8] px-5 text-[10px] font-medium text-[#555]">Clear</button>
                 </div>
-                <div className="h-[105px] overflow-hidden rounded-[10px] border border-[#e0e0e0] bg-[#fafafa]">
+                <div className="h-[90px] overflow-hidden rounded-[10px] border border-[#e0e0e0] bg-[#fafafa]">
                   <canvas
                     ref={signatureCanvasRef}
                     onPointerDown={startSignature}
@@ -4042,7 +4150,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 </div>
               </div>
 
-              <button disabled={!cardAuthorized || cardSaving} onClick={saveCreditCard} className="mt-1 flex h-[52px] w-full items-center justify-center gap-2 rounded-full bg-[#111] text-[13px] font-semibold text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-[#b9b9b9]">
+              <button disabled={!cardAuthorized || cardSaving} onClick={saveCreditCard} className="mt-1 flex h-[46px] w-full items-center justify-center gap-2 rounded-full bg-[#111] text-[13px] font-semibold text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-[#b9b9b9]">
                 {cardSaving && <Loader2 size={15} className="animate-spin" />}
                 {cardSaving ? "Saving…" : "Save"}
               </button>
@@ -4139,6 +4247,8 @@ function SinglePatientCartPage({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"patient" | "clinic">("patient");
   const [shipTo, setShipTo] = useState<"patient" | "clinic">("clinic");
+  const [voucherCode, setVoucherCode] = useState("");
+  const [appliedVoucher, setAppliedVoucher] = useState<string | null>(null);
   const [prescriptionDetails, setPrescriptionDetails] = useState<Record<number, { days: string; refills: string; directions: string; reason: string }>>({});
   const visiblePatients = patients.filter(patient =>
     `${patient.name} ${patient.phone} ${patient.address}`.toLowerCase().includes(patientSearch.toLowerCase())
@@ -4174,7 +4284,20 @@ function SinglePatientCartPage({
   const canPreview = allPharmaciesAssigned && prescriptionsComplete;
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
   const shipping = pharmacyGroups.reduce((sum, pharmacy) => sum + (Number(pharmacy.shipping[0].match(/\$(\d+(?:\.\d{2})?)/)?.[1] ?? 0)), 0);
-  const total = subtotal + shipping;
+  const voucherDiscount = appliedVoucher ? Math.min(subtotal * 0.1, 50) : 0;
+  const total = subtotal + shipping - voucherDiscount;
+
+  function applyVoucher() {
+    const normalizedCode = voucherCode.trim().toUpperCase();
+    if (!normalizedCode) return;
+    setVoucherCode(normalizedCode);
+    setAppliedVoucher(normalizedCode);
+  }
+
+  function removeVoucher() {
+    setAppliedVoucher(null);
+    setVoucherCode("");
+  }
 
   function updatePrescriptionDetail(id: number, field: "days" | "refills" | "directions" | "reason", value: string) {
     setPrescriptionDetails(current => ({
@@ -5060,8 +5183,19 @@ function MultiPatientCartPage({
                 <Fragment key={item.id}>
                   {isFirstInPharmacy && (
                     <div style={{ backgroundColor: activeCardTheme.shell, borderColor: activeCardTheme.border }} className={(rowIndex === 0 ? "" : "mt-8 ") + `transition-opacity ${hasFocusedOpenForm && !isActivePharmacy ? "opacity-55 hover:opacity-85" : ""} ${cartCardVariant === 3 ? "border-b px-0 pb-3 pt-1" : "rounded-t-[10px] px-5 pb-4 pt-5"}`}>
-                      <div className="flex items-center justify-between gap-4">
+                      <div className="flex flex-wrap items-center justify-between gap-4">
                         <h2 className={cartCardVariant === 3 ? "text-[13px] font-medium text-[#171717]" : "text-[16px] font-medium text-[#171717]"}>{pharmacy} Cart</h2>
+                        <div className="flex items-center gap-3">
+                          <select
+                            value={selectedShipping}
+                            onChange={event => setSelectedShippingByPharmacy(current => ({ ...current, [pharmacy]: Number(event.target.value) }))}
+                            aria-label={`Shipping method for ${pharmacy}`}
+                            className="h-9 rounded-[9px] border border-[#dedede] bg-white px-3 text-[11px] font-medium text-[#262626] outline-none transition-colors focus:border-[#183229]"
+                          >
+                            {cartData.shipping.map((option, index) => <option key={option.label} value={index}>{option.label}</option>)}
+                          </select>
+                          <span className="min-w-[50px] text-right text-[12px] font-semibold text-[#202020]">{"$" + pharmacyShippingTotal.toFixed(2)}</span>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -5653,12 +5787,6 @@ function MultiPatientCartPage({
                         <p className="max-w-[620px] text-[10px] font-medium leading-[16px] text-[#303030]">
                           {multiPatientShipping ? "Multi-patient shipping is supported — one shipping fee covers all patients." : "Multi-patient shipping is not supported — shipping is charged separately for each patient (" + shipmentCount + " shipping fees)."}
                         </p>
-                        <div className="flex items-center gap-3">
-                          <select value={selectedShipping} onChange={event => setSelectedShippingByPharmacy(current => ({ ...current, [pharmacy]: Number(event.target.value) }))} className="h-8 rounded-[6px] border border-[#dedede] bg-white px-3 text-[10px] outline-none">
-                            {cartData.shipping.map((option, index) => <option key={option.label} value={index}>{option.label}</option>)}
-                          </select>
-                          <span className="text-[12px] font-semibold">{"$" + pharmacyShippingTotal.toFixed(2)}</span>
-                        </div>
                       </div>
                     </div>
                   )}
@@ -5676,14 +5804,29 @@ function MultiPatientCartPage({
                 <ChevronDown size={17} className="rotate-180" />
               </div>
               <div className="mt-3 flex gap-2">
-                <input className="h-[31px] min-w-0 flex-1 rounded-[8px] border-0 bg-white px-3 text-[12px] shadow-[inset_0_1px_0_#9E9EA0,inset_-1px_0_0_#9E9EA0,inset_0_-1px_0_#9E9EA0,inset_1px_0_0_#9E9EA0] outline-none focus:shadow-[inset_0_0_0_1px_#183229]" />
-                <button className="h-[31px] rounded-full border-0 bg-white px-5 text-[12px] font-medium text-[#666] shadow-[inset_0_1px_0_#9E9EA0,inset_-1px_0_0_#9E9EA0,inset_0_-1px_0_#9E9EA0,inset_1px_0_0_#9E9EA0] transition-colors hover:bg-[#f7f7f7]">Apply</button>
+                <div className={`flex h-[31px] min-w-0 flex-1 items-center rounded-[8px] bg-white px-3 shadow-[inset_0_1px_0_#9E9EA0,inset_-1px_0_0_#9E9EA0,inset_0_-1px_0_#9E9EA0,inset_1px_0_0_#9E9EA0] ${appliedVoucher ? "text-[#315f49] shadow-[inset_0_0_0_1px_#79a98e]" : "focus-within:shadow-[inset_0_0_0_1px_#183229]"}`}>
+                  {appliedVoucher && <CheckCircle2 size={13} className="mr-2 shrink-0" />}
+                  <input
+                    value={voucherCode}
+                    onChange={event => { setVoucherCode(event.target.value); if (appliedVoucher) setAppliedVoucher(null); }}
+                    onKeyDown={event => { if (event.key === "Enter") applyVoucher(); }}
+                    placeholder="Enter voucher code"
+                    className="min-w-0 flex-1 bg-transparent text-[12px] font-medium uppercase outline-none placeholder:normal-case placeholder:text-[#999]"
+                  />
+                </div>
+                {appliedVoucher ? (
+                  <button onClick={removeVoucher} className="flex h-[31px] items-center gap-1.5 rounded-full border border-[#cfd8d3] bg-white px-4 text-[11px] font-medium text-[#4f6258] transition-colors hover:bg-[#f5f8f6]"><X size={12} /> Remove</button>
+                ) : (
+                  <button onClick={applyVoucher} disabled={!voucherCode.trim()} className="h-[31px] rounded-full border-0 bg-white px-5 text-[12px] font-medium text-[#666] shadow-[inset_0_1px_0_#9E9EA0,inset_-1px_0_0_#9E9EA0,inset_0_-1px_0_#9E9EA0,inset_1px_0_0_#9E9EA0] transition-colors hover:bg-[#f7f7f7] disabled:cursor-not-allowed disabled:opacity-45">Apply</button>
+                )}
               </div>
+              {appliedVoucher && <p className="mt-2 text-[10px] font-medium text-[#397052]">Voucher applied — 10% off, up to $50.</p>}
             </div>
 
             <div className="mt-5 space-y-3 text-[12px] text-[#262626]">
               <div className="flex justify-between gap-4"><span>Subtotal</span><span>{"$" + subtotal.toFixed(2)}</span></div>
               <div className="flex justify-between gap-4"><span>Estimated Shipping & Handling</span><span>{"$" + shipping.toFixed(2)}</span></div>
+              {appliedVoucher && <div className="flex justify-between gap-4 font-medium text-[#397052]"><span>Voucher ({appliedVoucher})</span><span>−${voucherDiscount.toFixed(2)}</span></div>}
               <div className="flex justify-between gap-4"><span>Estimated Tax</span><span>—</span></div>
               <div className="flex justify-between gap-4 border-y border-[#ececec] py-4 text-[13px] font-semibold"><span>Total</span><span>{"$" + total.toFixed(2)}</span></div>
             </div>
@@ -7497,6 +7640,7 @@ export default function App() {
 
             {/* Main content area */}
             <main className="app-main-scroll h-screen min-w-0 flex-1 overflow-y-scroll p-3 pl-1.5">
+              <VoucherBanner />
               <div className="bg-card rounded-[10px] min-h-full p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
                 {renderPage()}
               </div>
