@@ -53,6 +53,20 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: Cancel stale Pages deployment
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STALE_DEPLOYMENT_ID: 6e5004c907f448a540e784b0bf5911658d5bba14
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/pages/deployments/${STALE_DEPLOYMENT_ID}/cancel"
+          sleep 5
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
