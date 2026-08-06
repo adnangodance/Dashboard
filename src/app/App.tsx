@@ -1625,7 +1625,7 @@ function ProductsPage({
       </div>
 
       {/* Search + filters bar */}
-      <div className="flex items-end gap-[14px] mt-6 mb-5">
+      <div className="sticky top-0 z-30 -mx-2 mb-5 flex items-end gap-[14px] border-b border-[#eeeeec] bg-white/95 px-2 py-3 backdrop-blur-sm">
         {/* Search box — from Figma import Group1216401138 */}
         <div className="group w-[220px] flex-shrink-0 transition-all duration-300 ease-out focus-within:w-[310px]">
         <div className="flex h-[38px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:border-2 focus-within:border-black">
@@ -1818,7 +1818,7 @@ function ProductsPage({
         return (
           <section className="mb-6">
             <h2 className="font-['Inter',sans-serif] font-medium text-black text-[18px] mb-4 leading-none">Popular Products</h2>
-            <div className="flex gap-[13px] overflow-x-auto pb-1">
+            <div className="grid justify-items-start gap-[13px] [grid-template-columns:repeat(auto-fit,268px)]">
               {filtered.map(renderCard)}
             </div>
           </section>
@@ -1840,7 +1840,7 @@ function ProductsPage({
               {search && <span className="text-[14px] text-[#9d9d9d] font-normal ml-2">({filtered.length} found)</span>}
             </h2>
             {filtered.length > 0 ? (
-              <div className="flex gap-[13px] overflow-x-auto pb-1">
+              <div className="grid justify-items-start gap-[13px] [grid-template-columns:repeat(auto-fit,268px)]">
                 {filtered.map(renderCard)}
               </div>
             ) : (
