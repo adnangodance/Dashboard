@@ -294,8 +294,6 @@ const INITIAL_MAIN: MenuItem[] = [
   { icon: ShoppingCart, label: "Cart", page: "cart-multi" },
   { icon: Users, label: "Patients", page: "users" },
   { icon: MessageSquare, label: "Support Tickets", page: "support" },
-  { icon: Settings, label: "Settings", page: "settings" },
-  { icon: RefreshCw, label: "Hard Refresh", page: "dashboard" },
 ];
 
 function NavItem({
@@ -493,15 +491,15 @@ function Sidebar({
       </div>
 
       <div className="mt-auto" />
-      <SidebarSupportVersion onNavigate={onNavigate} />
+      <SidebarSupportVersion onNavigate={onNavigate} onLogout={onLogout} />
       <div className="pb-3 pt-4">
-        <UserChip onNavigate={onNavigate} onLogout={onLogout} appTheme={appTheme} setAppTheme={setAppTheme} extraVariants={extraVariants} setExtraVariants={setExtraVariants} oldCatalog={oldCatalog} setOldCatalog={setOldCatalog} pharmacyCatalog={pharmacyCatalog} setPharmacyCatalog={setPharmacyCatalog} />
+        <UserChip onNavigate={onNavigate} appTheme={appTheme} setAppTheme={setAppTheme} extraVariants={extraVariants} setExtraVariants={setExtraVariants} oldCatalog={oldCatalog} setOldCatalog={setOldCatalog} pharmacyCatalog={pharmacyCatalog} setPharmacyCatalog={setPharmacyCatalog} />
       </div>
     </aside>
   );
 }
 
-function SidebarSupportVersion({ onNavigate }: { onNavigate: (p: Page) => void }) {
+function SidebarSupportVersion({ onNavigate, onLogout }: { onNavigate: (p: Page) => void; onLogout: () => void }) {
   const accounts = [
     { name: "Zee Pharmacy", location: "Bronx, NY" },
     { name: "Altin Clinic", location: "Queens County, NY" },
@@ -592,6 +590,11 @@ function SidebarSupportVersion({ onNavigate }: { onNavigate: (p: Page) => void }
             <ArrowUpRight size={13} strokeWidth={2} className="transition-transform group-hover:translate-x-0.5" />
           </button>
         </div>
+      <div className="mt-3 space-y-0.5 border-t border-[#ECEEEA] pt-3">
+        <button onClick={() => onNavigate("settings")} className="flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12px] font-medium text-[#555D59] transition-colors hover:bg-[var(--app-menu-bg)] hover:text-[#1F2220]"><Settings size={15} strokeWidth={1.6} /> Settings</button>
+        <button onClick={() => window.location.reload()} className="flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12px] font-medium text-[#555D59] transition-colors hover:bg-[var(--app-menu-bg)] hover:text-[#1F2220]"><RefreshCw size={15} strokeWidth={1.6} /> Hard Refresh</button>
+        <button onClick={onLogout} className="flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12px] font-medium text-[#555D59] transition-colors hover:bg-[var(--app-menu-bg)] hover:text-[#1F2220]"><LogOut size={15} strokeWidth={1.6} /> Log out</button>
+      </div>
     </div>
   );
 }
@@ -600,7 +603,6 @@ function SidebarSupportVersion({ onNavigate }: { onNavigate: (p: Page) => void }
 
 function UserChip({
   onNavigate,
-  onLogout,
   appTheme,
   setAppTheme,
   extraVariants,
@@ -611,7 +613,6 @@ function UserChip({
   setPharmacyCatalog,
 }: {
   onNavigate: (p: Page) => void;
-  onLogout: () => void;
   appTheme: AppTheme;
   setAppTheme: Dispatch<SetStateAction<AppTheme>>;
   extraVariants: boolean;
@@ -693,29 +694,19 @@ function UserChip({
                 </span>
               </button>
             </div>
-            <button onClick={() => { onLogout(); setMenuOpen(false); }} className="flex h-9 w-full items-center gap-2 rounded-[7px] px-2.5 text-[12px] font-medium text-[#252525] hover:bg-[var(--app-menu-bg)]">
-              <LogOut size={15} /> Log out
-            </button>
           </div>
         </div>
       )}
       <div className="flex h-9 items-center gap-2">
         <button onClick={() => setMenuOpen(current => !current)} className="flex min-w-0 flex-1 items-center gap-2 text-left" aria-expanded={menuOpen} aria-label="Open account menu">
-          <div className="relative flex size-7 shrink-0 items-center justify-center rounded-full bg-[#b9a8ff] text-[#6b46f2]">
-            <span className="text-[12px] font-medium">Z</span>
-            <span className="absolute -right-1.5 -top-1.5 flex min-w-[16px] items-center justify-center rounded-full border-2 border-white bg-[#ef4444] px-1 text-[9px] font-bold leading-[12px] text-white">
-              2
-            </span>
-          </div>
           <span className="flex min-w-0 items-center gap-1.5">
-            <span className="truncate text-[12px] font-medium text-[#181a19]">Hi, Zee</span>
+            <span className="truncate text-[12px] font-medium text-[#181a19]">Hi, Zee Rabushaj, NP</span>
             <img src={userVerifiedIcon} alt="Verified" className="size-3 shrink-0" />
             <span className="shrink-0 rounded-[7px] bg-[var(--app-menu-bg)] px-1.5 py-0.5 text-[10px] font-medium text-[#1f2220]">
               User Verified
             </span>
           </span>
         </button>
-        <button onClick={() => setMenuOpen(current => !current)} className={`flex size-7 shrink-0 flex-col items-center justify-center gap-[3px] rounded-[7px] text-[#5e6460] transition-colors hover:bg-[var(--app-menu-bg)] hover:text-[#111] ${menuOpen ? "bg-[var(--app-menu-bg)] text-[#111]" : ""}`} aria-label="More account options"><span className="size-[3px] rounded-full bg-current" /><span className="size-[3px] rounded-full bg-current" /></button>
       </div>
     </div>
   );
