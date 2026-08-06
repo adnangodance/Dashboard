@@ -74,9 +74,6 @@ import imgNadInjection from "@/assets/nad-injection.png";
 import imgOrderAminoQuad from "@/assets/order-amino-quad.png";
 import imgOrderOxytocin from "@/assets/order-oxytocin.png";
 import imgOrderOxytocinAlt from "@/assets/order-oxytocin-alt.png";
-import catalogRefrigeratedIcon from "@/assets/catalog-refrigerated.png";
-import catalogRxIcon from "@/assets/catalog-rx.png";
-import catalogSpecialtyIcon from "@/assets/catalog-specialty.png";
 import landingGlutathione from "@/assets/landing-glutathione.png";
 import landingNadInjection from "@/assets/landing-nad-injection.png";
 import landingTestosterone from "@/assets/landing-testosterone-cypionate.png";
@@ -530,7 +527,10 @@ function SidebarSupportVersion({ onNavigate, onLogout }: { onNavigate: (p: Page)
               <img src={contact.avatar} alt="" className="size-full object-cover" />
             </div>
             <div className="min-w-0">
-              <p className="truncate text-[13px] font-medium leading-[16px] text-[#1f2220]">{contact.name}</p>
+              <div className="flex min-w-0 items-center gap-2">
+                <p className="shrink-0 text-[13px] font-medium leading-[16px] text-[#1f2220]">{contact.name}</p>
+                <a href={`tel:${contact.phone.replace(/[^+\d]/g, "")}`} className="truncate text-[11px] font-normal text-[#667085] transition-colors hover:text-[#2563EB]">{contact.phone}</a>
+              </div>
               <p className="truncate text-[11px] font-normal leading-[14px] text-[#8c948f]">{contact.role}</p>
             </div>
           </div>
@@ -699,11 +699,14 @@ function UserChip({
       )}
       <div className="flex h-9 items-center gap-2">
         <button onClick={() => setMenuOpen(current => !current)} className="flex min-w-0 flex-1 items-center gap-2 text-left" aria-expanded={menuOpen} aria-label="Open account menu">
-          <span className="flex min-w-0 items-center gap-1.5">
-            <span className="truncate text-[12px] font-medium text-[#181a19]">Hi, Zee Rabushaj, NP</span>
-            <img src={userVerifiedIcon} alt="Verified" className="size-3 shrink-0" />
-            <span className="shrink-0 rounded-[7px] bg-[var(--app-menu-bg)] px-1.5 py-0.5 text-[10px] font-medium text-[#1f2220]">
-              User Verified
+          <span className="min-w-0 flex-1">
+            <span className="flex min-w-0 items-center gap-1.5">
+              <span className="truncate text-[12px] font-normal text-[#181a19]">Hi, Zee Rabushaj</span>
+              <img src={userVerifiedIcon} alt="Verified" className="size-3 shrink-0" />
+              <span className="shrink-0 rounded-[7px] bg-[var(--app-menu-bg)] px-1.5 py-0.5 text-[9px] font-normal text-[#5f6662]">User Verified</span>
+            </span>
+            <span className="mt-0.5 flex items-center gap-1.5">
+              <span className="text-[10px] font-normal text-[#7f8783]">NP</span>
             </span>
           </span>
         </button>
@@ -1043,18 +1046,18 @@ function FigmaCard({
         />
       </div>
 
+      <div className="col-1 row-1 z-10 flex items-center gap-1" style={{ marginLeft: 12, marginTop: 15 }}>
+        <span className="flex h-5 min-w-7 items-center justify-center rounded-[6px] bg-[#EAF2FF] px-1.5 text-[#2563EB]" title="Refrigerated"><Snowflake size={11} strokeWidth={2} /></span>
+        {hasRxBadge && <span className="flex size-5 items-center justify-center rounded-[6px] bg-[#FFF0F0] text-[10px] font-semibold text-[#D84B4B]" title="Controlled">C</span>}
+      </div>
+
       <div className="col-1 row-1" style={{ marginLeft: 20.62, marginTop: 219.47, width: 172 }}>
         <h3 className="truncate text-[14px] font-medium leading-[18px] tracking-[-0.279px] text-[#1a1a1a]">{name}</h3>
         <p className="mt-[3px] text-[12px] leading-[16px] text-[#1a1a1a]">{price}</p>
         <div className="mt-[6px] flex items-center gap-[5px]">
-          <span className="flex size-5 items-center justify-center overflow-hidden">
-            <img src={catalogRefrigeratedIcon} alt="Refrigerated" className="h-[29px] w-[51px] max-w-none object-contain" />
-          </span>
-          <img src={catalogRxIcon} alt="Prescription required" className="h-[18px] w-[21px] object-contain" />
-          <img src={catalogSpecialtyIcon} alt="Specialty medication" className="size-5 object-contain" />
           <button
             type="button"
-            className="relative ml-[2px] inline-flex h-5 items-center rounded-[3px] bg-[#f8f5f1] px-2 text-[10px] font-medium text-[#333]"
+            className="relative inline-flex h-5 items-center rounded-[3px] bg-[#f8f5f1] px-2 text-[10px] font-medium text-[#333]"
             onClick={(event) => { event.stopPropagation(); setPharmacyMenuOpen(current => !current); }}
             aria-expanded={pharmacyMenuOpen}
           >
@@ -1093,7 +1096,7 @@ function FigmaCard({
           {favoriteLoading ? (
             <Loader2 size={15.5} className="animate-spin text-[#183229]" />
           ) : favorited || heartVariant === "green" ? (
-            <Heart size={16} strokeWidth={1.8} className="fill-[#C5D853] text-[#C5D853]" />
+            <Heart size={16} strokeWidth={1.8} className="fill-[#2563EB] text-[#2563EB]" />
           ) : (
             <Heart size={15} strokeWidth={1.8} className="text-black" />
           )}
@@ -1145,7 +1148,7 @@ function OldCatalogCard({
           className="absolute right-4 top-4 flex size-9 items-center justify-center rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
           aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
         >
-          {favoriteLoading ? <Loader2 size={17} className="animate-spin text-[#183229]" /> : <Heart size={18} className={favorited || heartVariant === "green" ? "fill-[#C5D853] text-[#C5D853]" : "text-black"} />}
+          {favoriteLoading ? <Loader2 size={17} className="animate-spin text-[#2563EB]" /> : <Heart size={18} className={favorited || heartVariant === "green" ? "fill-[#2563EB] text-[#2563EB]" : "text-black"} />}
         </button>
       )}
     </article>
@@ -1181,7 +1184,7 @@ function PharmacyCatalogCard({
         <img src={img} alt={name} className="max-h-[195px] max-w-[175px] object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-[1.03]" />
         {heartVariant !== "none" && (
           <button type="button" onClick={(event) => { event.stopPropagation(); onFavorite(); }} className="absolute right-3.5 top-3.5 flex size-8 items-center justify-center rounded-full border border-[#e5e8e6] bg-white text-[#1c211e]" aria-label={favorited ? "Remove from favorites" : "Add to favorites"}>
-            <Heart size={15} strokeWidth={1.8} className={favorited || heartVariant === "green" ? "fill-[#C5D853] text-[#C5D853]" : ""} />
+            <Heart size={15} strokeWidth={1.8} className={favorited || heartVariant === "green" ? "fill-[#2563EB] text-[#2563EB]" : ""} />
           </button>
         )}
         <span className="absolute bottom-3 left-3.5 rounded-full bg-white px-2.5 py-1 text-[10px] font-medium text-[#5d6561]">{dosage}</span>
@@ -1597,6 +1600,11 @@ function ProductsPage({
       {/* Page header — matches Figma layout */}
       <div className="flex items-start justify-between mb-0">
         <h1 className="font-['Inter',sans-serif] font-medium text-[32px] text-black leading-none">Products</h1>
+        <div className="flex items-center gap-5 whitespace-nowrap rounded-[11px] bg-[#F8F8FA] px-4 py-2.5">
+          <span className="inline-flex items-center gap-2 text-[11px] font-medium text-[#4A505A]"><span className="flex size-6 items-center justify-center rounded-full bg-[#EEF4FF] text-[#2563EB]"><Snowflake size={13} strokeWidth={2} /></span> Refrigerated</span>
+          <span className="inline-flex items-center gap-2 text-[11px] font-medium text-[#4A505A]"><span className="flex size-6 items-center justify-center rounded-full bg-[#FFF0F0] text-[11px] font-semibold text-[#D84B4B]">C</span> Controlled</span>
+          <span className="inline-flex items-center gap-2 text-[11px] font-medium text-[#4A505A]"><span className="flex size-6 items-center justify-center rounded-full bg-[#EEF4FF]"><Heart size={13} className="fill-[#2563EB] text-[#2563EB]" /></span> Favorite</span>
+        </div>
       </div>
 
       {/* Search + filters bar */}
@@ -2481,11 +2489,11 @@ function ProductDetailPage({
       </section>
       </div>
       {createPatientOpen && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/30 p-4 backdrop-blur-[2px]">
+        <div className="fixed inset-0 z-[80] flex justify-end bg-black/30 backdrop-blur-[2px]">
           <button className="absolute inset-0 cursor-default" onClick={() => setCreatePatientOpen(false)} aria-label="Close create patient" />
           <form
             onSubmit={event => { event.preventDefault(); setCreatePatientOpen(false); }}
-            className="relative flex max-h-[92vh] w-full max-w-[720px] flex-col overflow-hidden rounded-[16px] border border-[#e4e1dd] bg-white shadow-[0_24px_70px_rgba(0,0,0,0.18)]"
+            className="relative flex h-full w-full max-w-[680px] flex-col overflow-hidden rounded-l-[16px] border-l border-[#e4e1dd] bg-white shadow-[-18px_0_55px_rgba(0,0,0,0.16)]"
           >
             <div className="flex items-center justify-between border-b border-[#ece9e5] px-6 py-5">
               <div>
@@ -2495,7 +2503,7 @@ function ProductDetailPage({
               <button type="button" onClick={() => setCreatePatientOpen(false)} className="flex size-8 items-center justify-center rounded-full text-[#777] hover:bg-[#f4f2ef]" aria-label="Close"><X size={18} /></button>
             </div>
 
-            <div className="overflow-y-auto px-6 py-5">
+            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
               <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
                 {[
                   ["First Name", "firstName", "Write...", "text", true],
@@ -2526,9 +2534,8 @@ function ProductDetailPage({
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 border-t border-[#ece9e5] bg-white px-6 py-4">
-              <button type="button" onClick={() => setCreatePatientOpen(false)} className="h-10 rounded-[8px] border border-[#d5d3cf] bg-white px-5 text-[12px] font-semibold text-[#242424]">Cancel</button>
-              <button type="submit" className="h-10 rounded-[8px] bg-[#111] px-6 text-[12px] font-semibold text-white hover:bg-black">Save Patient</button>
+            <div className="border-t border-[#ece9e5] bg-white px-6 py-4">
+              <button type="submit" className="h-11 w-full rounded-[8px] bg-[#111] px-6 text-[12px] font-semibold text-white hover:bg-black">Save Patient</button>
             </div>
           </form>
         </div>
@@ -2872,6 +2879,7 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
           {filtered.map((order) => {
             if (orderCardVariant === "cart") {
               const orderPatients = "patients" in order ? order.patients : [order.patient];
+              const hasMultiplePatients = orderPatients.length > 1;
               const compactImages = [imgOrderAminoQuad, imgOrderOxytocin, imgOrderOxytocinAlt, imgOrderAminoQuad];
               const compactRows = orderPatients.length > 1
                 ? orderPatients.map((patient, index) => ({
@@ -2892,14 +2900,14 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
                     <p className="text-[12px] font-semibold text-[#555]">Prescription</p>
                     <p className="text-[12px] font-semibold text-[#555]">Patient</p>
                     <p className="text-[12px] font-semibold text-[#555]">Pharmacy</p>
-                    <span />
+                    <p className="text-right text-[12px] font-semibold text-[#555]">Price</p>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className={hasMultiplePatients ? "overflow-hidden rounded-[9px] bg-white" : "space-y-3"}>
                     {compactRows.map(({ item, patient, image, index }) => {
                       const trackingBlue = index % 2 === 1;
                       return (
-                        <div key={`${order.id}-${patient.name}-${item.name}-${index}`} className="grid min-h-[122px] items-center gap-7 rounded-[9px] bg-white px-5 py-5 md:grid-cols-[minmax(310px,1.05fr)_minmax(260px,1fr)_minmax(240px,0.9fr)_70px]">
+                        <div key={`${order.id}-${patient.name}-${item.name}-${index}`} className={`grid items-center gap-7 bg-white px-5 md:grid-cols-[minmax(310px,1.05fr)_minmax(260px,1fr)_minmax(240px,0.9fr)_70px] ${hasMultiplePatients ? "min-h-[104px] py-3" : "min-h-[122px] rounded-[9px] py-5"}`}>
                           <div className="flex min-w-0 items-center gap-4">
                             <div className="flex h-[70px] w-[58px] shrink-0 items-center justify-center overflow-visible">
                               <img src={image} alt="" className="max-h-[70px] max-w-[52px] object-contain" />
@@ -2944,10 +2952,13 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
                     </span>
                     <span className={`inline-flex h-8 items-center gap-2 rounded-full px-3 text-[11px] font-semibold ${order.payMethod === "Pay by Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
                       {order.payMethod.replace("by", "By")}
+                      {order.payMethod === "Pay by Clinic" ? <Building2 size={13} /> : <User size={13} />}
                       <span className={`rounded-full px-2 py-1 text-[8px] font-bold ${order.payStatus === "PAID" ? "bg-white text-[#173d25]" : "bg-[#FF4A87] text-white"}`}>{order.payStatus}</span>
                     </span>
-                    <span className="inline-flex h-8 items-center rounded-full bg-[#FFF0D8] px-3 text-[11px] font-semibold text-[#5B3A50]">{labelCase(order.status)}</span>
-                    <span className="inline-flex h-8 items-center rounded-full bg-[#20D8DB] px-3 text-[11px] font-semibold text-[#123B3E]">{order.shipMethod.replace("to", "To")}</span>
+                    <span className={`inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[11px] font-semibold ${silverStatusPillStyle[order.status] ?? "bg-[#FFC55B] text-[#151515]"}`}>{labelCase(order.status)} {silverStatusIcon(order.status)}</span>
+                    <span className={`inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[11px] font-semibold ${order.shipMethod === "Ship to Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
+                      {order.shipMethod.replace("to", "To")} {order.shipMethod === "Ship to Clinic" ? <Building2 size={13} /> : <User size={13} />}
+                    </span>
                     <span className="ml-auto inline-flex h-9 items-center gap-2 rounded-full bg-[#F1F0EF] px-3 text-[12px] font-semibold text-[#183229]">
                       Total
                       <strong className="inline-flex h-6 items-center rounded-full bg-white px-2.5 text-[11px] font-semibold text-[#111]">{order.total}</strong>
@@ -2974,11 +2985,13 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
                       {labelCase(order.status)} {silverStatusIcon(order.status)}
                     </span>
                   </> : <>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#C5F5DD] to-[#E7F5A5] px-2.5 py-1 text-[11px] font-bold text-[#31583F]">
-                      {labelCase(order.payMethod)}
-                      <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold text-white ${order.payStatus === "PAID" ? "bg-[#31583F]" : "bg-[#7B003B]"}`}>{labelCase(order.payStatus)}</span>
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold ${order.payMethod === "Pay by Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
+                      {labelCase(order.payMethod)} {order.payMethod === "Pay by Clinic" ? <Building2 size={13} /> : <User size={13} />}
+                      <span className={`rounded-full px-2 py-0.5 text-[8px] font-bold ${order.payStatus === "PAID" ? "bg-white text-[#173d25]" : "bg-[#FF4A87] text-white"}`}>{labelCase(order.payStatus)}</span>
                     </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#CADDD9] to-[#E8E5B0] px-2.5 py-1 text-[11px] font-bold text-[#56203B]">{labelCase(order.shipMethod)}</span>
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold ${order.shipMethod === "Ship to Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
+                      {labelCase(order.shipMethod)} {order.shipMethod === "Ship to Clinic" ? <Building2 size={13} /> : <User size={13} />}
+                    </span>
                     <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold tracking-[0.01em] ${statusPillStyle[order.status] ?? "bg-[#56203B] text-white"}`}>{labelCase(order.status)}</span>
                   </>}
                 </div>
@@ -3118,8 +3131,8 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
               <div><p className={compactLabel}>Order Timestamp</p><p className="mt-1 text-[12px] font-semibold text-[#161a18]">{order.timestamp}</p></div>
               <div><p className={compactLabel}>Order ID</p><p className="mt-1 text-[12px] font-semibold text-[#161a18]">{order.id}</p></div>
               <div><p className={compactLabel}>Status</p><span className={`mt-1 inline-flex h-6 items-center rounded-full px-3 text-[10px] font-bold uppercase ${statusBadgeClass}`}>{detailLabelCase(order.status)}</span></div>
-              <div><p className={compactLabel}>Ship To</p><span className="mt-1 inline-flex h-6 items-center gap-1.5 rounded-full bg-[#20D8DB] px-3 text-[10px] font-bold text-[#102c2d]">{detailLabelCase(order.shipMethod)} {order.shipMethod === "Ship to Clinic" ? <Building2 size={12} /> : <User size={12} />}</span></div>
-              <div><p className={compactLabel}>Payment Method</p><span className="mt-1 inline-flex h-6 items-center gap-1.5 rounded-full bg-[#ACEABB] px-3 text-[10px] font-bold text-[#173d25]">{detailLabelCase(order.payMethod)} <User size={12} /><span className={`inline-flex h-4 min-w-[42px] items-center justify-center rounded-full px-2 text-[8px] font-bold uppercase leading-none ${order.payStatus === "PAID" ? "bg-white text-[#173d25]" : "bg-[#FF4A87] text-white"}`}>{order.payStatus}</span></span></div>
+              <div><p className={compactLabel}>Ship To</p><span className={`mt-1 inline-flex h-6 items-center gap-1.5 rounded-full px-3 text-[10px] font-bold ${order.shipMethod === "Ship to Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>{detailLabelCase(order.shipMethod)} {order.shipMethod === "Ship to Clinic" ? <Building2 size={12} /> : <User size={12} />}</span></div>
+              <div><p className={compactLabel}>Payment Method</p><span className={`mt-1 inline-flex h-6 items-center gap-1.5 rounded-full px-3 text-[10px] font-bold ${order.payMethod === "Pay by Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>{detailLabelCase(order.payMethod)} {order.payMethod === "Pay by Clinic" ? <Building2 size={12} /> : <User size={12} />}<span className={`inline-flex h-4 min-w-[42px] items-center justify-center rounded-full px-2 text-[8px] font-bold uppercase leading-none ${order.payStatus === "PAID" ? "bg-white text-[#173d25]" : "bg-[#FF4A87] text-white"}`}>{order.payStatus}</span></span></div>
               <div><p className={compactLabel}>Final Total</p><p className="mt-1 text-[12px] font-bold text-[#161a18]">{order.total}</p></div>
             </div>
             <div className="grid divide-y divide-[#eceeeb] lg:grid-cols-[1.15fr_.85fr] lg:divide-x lg:divide-y-0">
@@ -3474,14 +3487,14 @@ function PatientCreateModal({ open, onClose }: { open: boolean; onClose: () => v
     ["Allergies", "allergies", "Write...", false], ["Email", "email", "Write...", false],
   ] as const;
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/30 p-4 backdrop-blur-[2px]">
+    <div className="fixed inset-0 z-[80] flex justify-end bg-black/30 backdrop-blur-[2px]">
       <button className="absolute inset-0 cursor-default" onClick={onClose} aria-label="Close create patient" />
-      <form onSubmit={event => { event.preventDefault(); onClose(); }} className="relative flex max-h-[92vh] w-full max-w-[720px] flex-col overflow-hidden rounded-[16px] border border-[#e4e1dd] bg-white shadow-[0_24px_70px_rgba(0,0,0,0.18)]">
+      <form onSubmit={event => { event.preventDefault(); onClose(); }} className="relative flex h-full w-full max-w-[680px] flex-col overflow-hidden rounded-l-[16px] border-l border-[#e4e1dd] bg-white shadow-[-18px_0_55px_rgba(0,0,0,0.16)]">
         <div className="flex items-center justify-between border-b border-[#ece9e5] px-6 py-5">
           <div><h2 className="text-[20px] font-semibold text-[#171717]">Create Patient</h2><p className="mt-1 text-[11px] text-[#777]">Enter the patient’s personal and contact information.</p></div>
           <button type="button" onClick={onClose} className="flex size-8 items-center justify-center rounded-full text-[#777] hover:bg-[#f4f2ef]" aria-label="Close"><X size={18} /></button>
         </div>
-        <div className="overflow-y-auto px-6 py-5">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
           <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
             {fields.slice(0, 2).map(([label, name, placeholder, required]) => <label key={name} className="block text-[11px] font-medium text-[#242424]">{label} {required && <span className="text-[#b44b42]">*</span>}<input name={name} required={required} placeholder={placeholder} className={inputClass} /></label>)}
             <label className="block text-[11px] font-medium text-[#242424]">Gender <span className="text-[#b44b42]">*</span><select required defaultValue="" className={inputClass}><option value="" disabled>Select</option><option>Female</option><option>Male</option><option>Other</option></select></label>
@@ -3499,7 +3512,7 @@ function PatientCreateModal({ open, onClose }: { open: boolean; onClose: () => v
             </div>
           </div>
         </div>
-        <div className="flex justify-end gap-2 border-t border-[#ece9e5] px-6 py-4"><button type="button" onClick={onClose} className="h-10 rounded-[8px] border border-[#d5d3cf] px-5 text-[12px] font-semibold">Cancel</button><button type="submit" className="h-10 rounded-[8px] bg-[#111] px-6 text-[12px] font-semibold text-white">Save Patient</button></div>
+        <div className="border-t border-[#ece9e5] px-6 py-4"><button type="submit" className="h-11 w-full rounded-[8px] bg-[#111] px-6 text-[12px] font-semibold text-white">Save Patient</button></div>
       </form>
     </div>
   );
