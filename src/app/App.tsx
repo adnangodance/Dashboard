@@ -497,6 +497,7 @@ function Sidebar({
 }
 
 function SidebarSupportVersion({ onNavigate, onLogout }: { onNavigate: (p: Page) => void; onLogout: () => void }) {
+  const paymentNoticeActive = () => Number(window.sessionStorage.getItem("clinic-card-notice-until") ?? 0) > Date.now();
   const accounts = [
     { name: "Zee Pharmacy", location: "Bronx, NY" },
     { name: "Altin Clinic", location: "Queens County, NY" },
@@ -504,16 +505,30 @@ function SidebarSupportVersion({ onNavigate, onLogout }: { onNavigate: (p: Page)
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(accounts[0]);
   const [clinicPaymentEnabled, setClinicPaymentEnabled] = useState(() => window.sessionStorage.getItem("clinic-card-saved") === "true");
+  const [clinicPaymentNoticeVisible, setClinicPaymentNoticeVisible] = useState(() => paymentNoticeActive());
   const supportContacts = [
     { name: "Shayne", role: "Head Operator", phone: "917-274-7648", avatar: supportShayne },
     { name: "Zee", role: "CEO", phone: "(646)-617-9881", avatar: supportZee },
   ];
 
   useEffect(() => {
-    const updateClinicPayment = () => setClinicPaymentEnabled(window.sessionStorage.getItem("clinic-card-saved") === "true");
+    const updateClinicPayment = () => {
+      setClinicPaymentEnabled(window.sessionStorage.getItem("clinic-card-saved") === "true");
+      setClinicPaymentNoticeVisible(paymentNoticeActive());
+    };
     window.addEventListener("clinic-payment-updated", updateClinicPayment);
     return () => window.removeEventListener("clinic-payment-updated", updateClinicPayment);
   }, []);
+
+  useEffect(() => {
+    if (!clinicPaymentNoticeVisible) return;
+    const remainingMs = Number(window.sessionStorage.getItem("clinic-card-notice-until") ?? 0) - Date.now();
+    const timeout = window.setTimeout(() => {
+      window.sessionStorage.removeItem("clinic-card-notice-until");
+      setClinicPaymentNoticeVisible(false);
+    }, Math.max(0, remainingMs));
+    return () => window.clearTimeout(timeout);
+  }, [clinicPaymentNoticeVisible]);
 
   return (
     <div className="border-y border-[#ECEEEA] py-4">
@@ -572,24 +587,26 @@ function SidebarSupportVersion({ onNavigate, onLogout }: { onNavigate: (p: Page)
           </div>
         )}
       </div>
-      <div className={`mt-2 rounded-[18px] border border-white/70 p-3 shadow-[0_10px_28px_rgba(38,54,45,0.08)] ${clinicPaymentEnabled ? "bg-[radial-gradient(circle_at_90%_0%,rgba(219,232,255,0.98),transparent_52%),linear-gradient(145deg,#f8fbff_0%,#edf4ff_100%)]" : "bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)]"}`}>
-          {clinicPaymentEnabled && <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[9px] font-semibold text-[#2563EB]"><CheckCircle2 size={11} strokeWidth={2.2} /> Card updated</span>}
-          <h3 className="text-[15px] font-semibold leading-[19px] tracking-[-0.01em] text-[#171A18]">{clinicPaymentEnabled ? "Pay by Clinic enabled" : "Enable Pay by Clinic"}</h3>
-          <p className="mt-1.5 text-[11px] leading-[16px] text-[#737A75]">{clinicPaymentEnabled ? "Visa ending in 1234 is ready for patient purchases." : "Use your clinic’s card for patient purchases."}</p>
-          <button
-            type="button"
-            onClick={() => {
-              const eventName = clinicPaymentEnabled ? "open-payment-overview" : "open-payment-setup";
-              window.sessionStorage.setItem(eventName, "true");
-              window.dispatchEvent(new Event(eventName));
-              onNavigate("settings");
-            }}
-            className="group mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-white px-3 py-2.5 text-[11px] font-semibold text-[#171A18] shadow-[0_3px_12px_rgba(34,46,39,0.06)] transition-transform hover:-translate-y-0.5"
-          >
-            {clinicPaymentEnabled ? "Manage payment" : "Set up payment"}
-            <ArrowUpRight size={13} strokeWidth={2} className="transition-transform group-hover:translate-x-0.5" />
-          </button>
-        </div>
+      {(!clinicPaymentEnabled || clinicPaymentNoticeVisible) && (
+        <div className={`mt-2 rounded-[18px] border border-white/70 p-3 shadow-[0_10px_28px_rgba(38,54,45,0.08)] ${clinicPaymentEnabled ? "bg-[radial-gradient(circle_at_90%_0%,rgba(219,232,255,0.98),transparent_52%),linear-gradient(145deg,#f8fbff_0%,#edf4ff_100%)]" : "bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)]"}`}>
+            {clinicPaymentEnabled && <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[9px] font-semibold text-[#2563EB]"><CheckCircle2 size={11} strokeWidth={2.2} /> Card updated</span>}
+            <h3 className="text-[15px] font-semibold leading-[19px] tracking-[-0.01em] text-[#171A18]">{clinicPaymentEnabled ? "Pay by Clinic enabled" : "Enable Pay by Clinic"}</h3>
+            <p className="mt-1.5 text-[11px] leading-[16px] text-[#737A75]">{clinicPaymentEnabled ? "Visa ending in 1234 is ready for patient purchases." : "Use your clinic’s card for patient purchases."}</p>
+            <button
+              type="button"
+              onClick={() => {
+                const eventName = clinicPaymentEnabled ? "open-payment-overview" : "open-payment-setup";
+                window.sessionStorage.setItem(eventName, "true");
+                window.dispatchEvent(new Event(eventName));
+                onNavigate("settings");
+              }}
+              className="group mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-white px-3 py-2.5 text-[11px] font-semibold text-[#171A18] shadow-[0_3px_12px_rgba(34,46,39,0.06)] transition-transform hover:-translate-y-0.5"
+            >
+              {clinicPaymentEnabled ? "Manage payment" : "Set up payment"}
+              <ArrowUpRight size={13} strokeWidth={2} className="transition-transform group-hover:translate-x-0.5" />
+            </button>
+          </div>
+      )}
       <div className="mt-3 space-y-0.5 border-t border-[#ECEEEA] pt-3">
         <button onClick={() => onNavigate("settings")} className="flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12px] font-medium text-[#555D59] transition-colors hover:bg-[var(--app-menu-bg)] hover:text-[#1F2220]"><Settings size={15} strokeWidth={1.6} /> Settings</button>
         <button onClick={() => window.location.reload()} className="flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12px] font-medium text-[#555D59] transition-colors hover:bg-[var(--app-menu-bg)] hover:text-[#1F2220]"><RefreshCw size={15} strokeWidth={1.6} /> Hard Refresh</button>
@@ -3806,6 +3823,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       setCardSaving(false);
       setSavedClinicCard(true);
       window.sessionStorage.setItem("clinic-card-saved", "true");
+      window.sessionStorage.setItem("clinic-card-notice-until", String(Date.now() + 20000));
       window.dispatchEvent(new Event("clinic-payment-updated"));
       setCreditCardOpen(false);
     }, 1100);
