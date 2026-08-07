@@ -6561,7 +6561,7 @@ function LoginPage({ onLogin, onRegister, onSingleSignOn }: { onLogin: () => voi
 }
 
 function OrganizationSetupPage({ onCreate }: { onCreate: () => void }) {
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -6587,6 +6587,29 @@ function OrganizationSetupPage({ onCreate }: { onCreate: () => void }) {
   }
 
   const canContinue = currentPassword.length > 0 && newPassword.length >= 8 && confirmPassword.length > 0;
+  const stepContent: Record<typeof currentStep, { title: string; subtitle: string }> = {
+    1: {
+      title: "Set Your Password",
+      subtitle: "Create a secure password for your account. You'll use this to log in.",
+    },
+    2: {
+      title: "Confirm Your Profile Details",
+      subtitle: "Please review and confirm your professional information.",
+    },
+    3: {
+      title: "Provider Credentials",
+      subtitle: "Please provide your professional credentials.",
+    },
+    4: {
+      title: "Set Your Digital Signature",
+      subtitle: "Draw your signature below. This will be used on your prescriptions.",
+    },
+    5: {
+      title: "Add Pay by Clinic Card",
+      subtitle: "Add a credit card for subscription and payment processing.",
+    },
+  };
+  const activeStepContent = stepContent[currentStep];
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white px-6 py-10 font-['Inter',sans-serif] text-[#171717]">
@@ -6602,19 +6625,14 @@ function OrganizationSetupPage({ onCreate }: { onCreate: () => void }) {
 
           <div className="rounded-[14px] border border-white/80 bg-white/65 px-7 py-8 shadow-[0_14px_40px_rgba(24,50,41,0.08)] backdrop-blur-[18px] sm:px-9">
             <div className="text-center">
-              <h1 className="text-[21px] font-semibold tracking-[-0.025em]">Welcome! Let&apos;s get you set up</h1>
-              <p className="mt-1.5 text-[11px] text-[#747c78]">Complete these steps to finish setting up your account</p>
-              <p className="mt-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#3974d8]">Step {currentStep} of 4</p>
+              <h1 className="text-[21px] font-semibold tracking-[-0.025em]">{activeStepContent.title}</h1>
+              <p className="mt-1.5 text-[11px] text-[#747c78]">{activeStepContent.subtitle}</p>
+              <p className="mt-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#3974d8]">Step {currentStep} of 5</p>
             </div>
 
             <div className="my-6 h-px bg-[#eceeec]" />
             {currentStep === 1 ? <>
-              <div className="text-center">
-                <h2 className="text-[17px] font-semibold tracking-[-0.02em]">Set Your Password</h2>
-                <p className="mt-1.5 text-[10px] text-[#767e7a]">Create a secure password for your account. You&apos;ll use this to log in.</p>
-              </div>
-
-              <form onSubmit={submitOrganization} className="mt-5 space-y-3.5">
+              <form onSubmit={submitOrganization} className="space-y-3.5">
               {[
                 { id: "current" as const, label: "Current Password", value: currentPassword, setValue: setCurrentPassword, placeholder: "Enter your current password" },
                 { id: "new" as const, label: "New Password", value: newPassword, setValue: setNewPassword, placeholder: "Enter your new password" },
@@ -6634,12 +6652,7 @@ function OrganizationSetupPage({ onCreate }: { onCreate: () => void }) {
               <button type="submit" disabled={!canContinue} className="flex h-10 w-full items-center justify-center rounded-[8px] bg-[#111] text-[12px] font-semibold text-white transition-colors hover:bg-[#183229] disabled:cursor-not-allowed disabled:bg-[#d5d8d6] disabled:text-[#8b918e]">Continue</button>
               </form>
             </> : currentStep === 2 ? <>
-              <div className="text-center">
-                <h2 className="text-[17px] font-semibold tracking-[-0.02em]">Confirm Your Profile Details</h2>
-                <p className="mt-1.5 text-[10px] text-[#767e7a]">Please review and confirm your professional information</p>
-              </div>
-
-              <form onSubmit={event => { event.preventDefault(); setCurrentStep(3); }} className="mt-5 space-y-3.5">
+              <form onSubmit={event => { event.preventDefault(); setCurrentStep(3); }} className="space-y-3.5">
                 <div className="grid grid-cols-2 gap-3">
                   <ProfileField label="First Name" defaultValue="Adnan" required />
                   <ProfileField label="Last Name" defaultValue="Godanci" required />
@@ -6669,12 +6682,7 @@ function OrganizationSetupPage({ onCreate }: { onCreate: () => void }) {
                 </div>
               </form>
             </> : currentStep === 3 ? <>
-              <div className="text-center">
-                <h2 className="text-[17px] font-semibold tracking-[-0.02em]">Provider Credentials</h2>
-                <p className="mt-1.5 text-[10px] text-[#767e7a]">Please provide your professional credentials</p>
-              </div>
-
-              <form onSubmit={event => { event.preventDefault(); setCurrentStep(4); }} className="mt-5 space-y-3.5">
+              <form onSubmit={event => { event.preventDefault(); setCurrentStep(4); }} className="space-y-3.5">
                 <div className="grid grid-cols-2 gap-3">
                   <ProfileField label="NPI Number" defaultValue="1770027724" required />
                   <ProfileField label="License Number" defaultValue="LEA1240812470" required />
@@ -6685,17 +6693,14 @@ function OrganizationSetupPage({ onCreate }: { onCreate: () => void }) {
                   <button type="button" onClick={() => setCurrentStep(2)} className="h-9 w-full rounded-[8px] text-[11px] font-semibold text-[#4f5753] hover:bg-white/70 hover:text-[#183229]">Back</button>
                 </div>
               </form>
-            </> : <>
-              <div className="text-center">
-                <h2 className="text-[17px] font-semibold tracking-[-0.02em]">Set Your Digital Signature</h2>
-                <p className="mt-1.5 text-[10px] text-[#767e7a]">Draw your signature below. This will be used on your prescriptions.</p>
-              </div>
-
+            </> : currentStep === 4 ? <>
               <SignaturePad />
               <div className="mt-4 space-y-2">
-                <button type="button" onClick={onCreate} className="h-10 w-full rounded-[8px] bg-[#111] px-6 text-[11px] font-semibold text-white hover:bg-[#183229]">Continue</button>
+                <button type="button" onClick={() => setCurrentStep(5)} className="h-10 w-full rounded-[8px] bg-[#111] px-6 text-[11px] font-semibold text-white hover:bg-[#183229]">Continue</button>
                 <button type="button" onClick={() => setCurrentStep(3)} className="h-9 w-full rounded-[8px] text-[11px] font-semibold text-[#4f5753] hover:bg-white/70 hover:text-[#183229]">Back</button>
               </div>
+            </> : <>
+              <PaymentMethodOnboardingStep onBack={() => setCurrentStep(4)} onComplete={onCreate} />
             </>}
           </div>
         </div>
@@ -6710,6 +6715,114 @@ function ProfileField({ label, defaultValue, placeholder, required = false }: { 
       <span className="mb-1.5 block text-[11px] font-medium">{label} {required && <span className="text-[#b4473d]">*</span>}</span>
       <input required={required} defaultValue={defaultValue} placeholder={placeholder} className="h-10 w-full rounded-[8px] border border-[#d7dcda] bg-white px-3 text-[11px] outline-none placeholder:text-[#a3aaa6] focus:border-[1.5px] focus:border-[#183229]" />
     </label>
+  );
+}
+
+function PaymentMethodOnboardingStep({ onBack, onComplete }: { onBack: () => void; onComplete: () => void }) {
+  const [authorized, setAuthorized] = useState(true);
+  const inputClass = "h-10 w-full rounded-[8px] border border-[#d7dcda] bg-white px-3 text-[11px] outline-none placeholder:text-[#a3aaa6] focus:border-[1.5px] focus:border-[#183229]";
+  const selectClass = `${inputClass} appearance-auto`;
+
+  return (
+    <form onSubmit={(event) => { event.preventDefault(); onComplete(); }} className="space-y-4">
+      <div className="px-0 py-1">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[10px] leading-[14px] text-[#6f7782]">You can add a payment method later from settings.</p>
+          <button type="button" onClick={onComplete} className="shrink-0 text-[10px] font-semibold text-[#3974d8] underline-offset-4 transition-colors hover:text-[#1f5fc5] hover:underline">
+            Skip
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-3.5">
+        <label className="block">
+          <span className="mb-1.5 block text-[11px] font-medium">Cardholder Name <span className="text-[#b4473d]">*</span></span>
+          <input required placeholder="Enter name as it appears on card" className={inputClass} />
+        </label>
+
+        <div>
+          <div className="space-y-3">
+            <label className="block">
+              <span className="mb-1.5 block text-[10px] text-[#4f5753]">Card Number</span>
+              <div className="flex h-10 items-center rounded-[8px] border border-[#d7dcda] bg-white px-3 focus-within:border-[1.5px] focus-within:border-[#183229]">
+                <input required inputMode="numeric" placeholder="4111 1111 1111 1111" className="min-w-0 flex-1 bg-transparent text-[11px] outline-none placeholder:text-[#6f7782]" />
+                <span className="ml-3 flex items-center gap-1 text-[9px] font-bold">
+                  <span className="italic text-[#1434CB]">VISA</span>
+                  <span className="size-4 rounded-full bg-[#EB001B]" />
+                  <span className="-ml-2 size-4 rounded-full bg-[#F79E1B] opacity-90" />
+                  <span className="rounded-[3px] bg-[#1F72CD] px-1.5 py-1 text-[7px] leading-none text-white">AMEX</span>
+                  <span className="rounded-[3px] bg-[#333] px-1.5 py-1 text-[7px] leading-none text-white">DISC</span>
+                </span>
+              </div>
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="mb-1.5 block text-[10px] text-[#4f5753]">Expiration</span>
+                <input required placeholder="MM / YY" className={inputClass} />
+              </label>
+              <label className="block">
+                <span className="mb-1.5 block text-[10px] text-[#4f5753]">CVV/CVC</span>
+                <input required placeholder="CVC" className={inputClass} />
+              </label>
+            </div>
+            <label className="block">
+              <span className="mb-1.5 block text-[10px] text-[#4f5753]">Address Line 1</span>
+              <input required placeholder="Address Line 1" className={inputClass} />
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-[10px] text-[#4f5753]">Address Line 2</span>
+              <input placeholder="Address Line 2" className={inputClass} />
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="mb-1.5 block text-[10px] text-[#4f5753]">City</span>
+                <input required placeholder="City" className={inputClass} />
+              </label>
+              <label className="block">
+                <span className="mb-1.5 block text-[10px] text-[#4f5753]">State</span>
+                <select required defaultValue="" className={selectClass}>
+                  <option value="" disabled>Select State</option>
+                  <option>New York</option>
+                  <option>Florida</option>
+                  <option>Texas</option>
+                  <option>California</option>
+                </select>
+              </label>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="mb-1.5 block text-[10px] text-[#4f5753]">Country</span>
+                <select required defaultValue="United States" className={selectClass}>
+                  <option>United States</option>
+                </select>
+              </label>
+              <label className="block">
+                <span className="mb-1.5 block text-[10px] text-[#4f5753]">Zip</span>
+                <input required placeholder="12345" className={inputClass} />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <label className="flex items-start gap-3 text-[10px] font-semibold leading-[14px] text-[#333b36]">
+        <input type="checkbox" checked={authorized} onChange={event => setAuthorized(event.target.checked)} className="mt-0.5 size-3.5 accent-black" />
+        <span>I authorize SCRIPTLINKRX.COM LLC to charge the credit card account listed. If this credit card needs to be updated, a new Credit Card Authorization form will be required to be filled out.</span>
+      </label>
+
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-[11px] text-[#4f5753]">Sign your authorization:</p>
+          <button type="button" className="h-8 rounded-[7px] border border-[#d7dcda] bg-white px-4 text-[11px] font-medium text-[#333] hover:bg-[#f8f8f8]">Clear</button>
+        </div>
+        <div className="h-[118px] rounded-[9px] border border-[#d7dcda] bg-white" />
+      </div>
+
+      <div className="space-y-2 pt-1">
+        <button type="submit" disabled={!authorized} className="h-10 w-full rounded-[8px] bg-[#111] px-6 text-[11px] font-semibold text-white hover:bg-[#183229] disabled:cursor-not-allowed disabled:bg-[#d5d8d6] disabled:text-[#8b918e]">Complete Setup</button>
+        <button type="button" onClick={onBack} className="h-9 w-full rounded-[8px] text-[11px] font-semibold text-[#4f5753] hover:bg-white/70 hover:text-[#183229]">Back</button>
+      </div>
+    </form>
   );
 }
 
