@@ -174,6 +174,7 @@ function useCartSummary() {
 
 type AppLoadingContextValue = {
   runWithAppLoader: (action: () => void, delayMs?: number) => void;
+  showToast: (message: string, type?: "success" | "error") => void;
 };
 
 const AppLoadingContext = createContext<AppLoadingContextValue | null>(null);
@@ -181,7 +182,10 @@ const AppLoadingContext = createContext<AppLoadingContextValue | null>(null);
 function useAppLoading() {
   const context = useContext(AppLoadingContext);
   if (!context) {
-    return { runWithAppLoader: (action: () => void) => action() };
+    return {
+      runWithAppLoader: (action: () => void) => action(),
+      showToast: () => undefined,
+    };
   }
   return context;
 }
@@ -218,6 +222,36 @@ function AppActionOverlay({ active }: { active: boolean }) {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/65 backdrop-blur-[1px]" role="status" aria-live="polite" aria-label="Processing">
       <Loader2 size={42} className="animate-spin text-[#183229]" />
+    </div>
+  );
+}
+
+function AppToast({
+  toast,
+  onClose,
+}: {
+  toast: { type: "success" | "error"; message: string } | null;
+  onClose: () => void;
+}) {
+  if (!toast) return null;
+
+  const isSuccess = toast.type === "success";
+
+  return (
+    <div className="fixed bottom-6 left-6 z-[10000] w-[min(462px,calc(100vw-48px))]" role="status" aria-live="polite">
+      <div className="flex min-h-[54px] items-center gap-3 rounded-[12px] border border-[#E6E8EF] bg-white px-4 py-3 shadow-[0_12px_34px_rgba(17,24,39,0.12)]">
+        <span className={`flex size-5 shrink-0 items-center justify-center rounded-full text-white ${isSuccess ? "bg-[#4BB574]" : "bg-[#FF4E4E]"}`}>
+          {isSuccess ? <CheckCircle2 size={14} strokeWidth={3} /> : <X size={13} strokeWidth={3} />}
+        </span>
+        <p className="min-w-0 flex-1 truncate text-[14px] font-semibold text-[#202124]">{toast.message}</p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="h-9 shrink-0 rounded-[8px] bg-[#5B5CF6] px-4 text-[13px] font-semibold text-white shadow-[0_6px_14px_rgba(91,92,246,0.24)] transition-colors hover:bg-[#4B4CF0]"
+        >
+          Got it
+        </button>
+      </div>
     </div>
   );
 }
@@ -1330,7 +1364,7 @@ function FavoritesPage({
 }) {
   const { favoriteProducts, setFavoriteProductIds } = useProductFavorites();
   const { addCartItems } = useCartSummary();
-  const { runWithAppLoader } = useAppLoading();
+  const { runWithAppLoader, showToast } = useAppLoading();
 
   function removeFavorite(id: number) {
     setFavoriteProductIds(current => {
@@ -1349,6 +1383,7 @@ function FavoritesPage({
         img: product.img,
         qty: 1,
       });
+      showToast("Product added to cart");
     });
   }
 
@@ -1452,7 +1487,7 @@ function ProductsPage({
   const [dosages, setDosages] = useState<string[]>([]);
   const [openCatalogFilter, setOpenCatalogFilter] = useState<string | null>(null);
   const [catalogFilterSearch, setCatalogFilterSearch] = useState<Record<string, string>>({});
-  const { runWithAppLoader } = useAppLoading();
+  const { runWithAppLoader, showToast } = useAppLoading();
   const searchRef = useRef<HTMLInputElement>(null);
   const catalogFiltersRef = useRef<HTMLDivElement>(null);
 
@@ -1486,12 +1521,14 @@ function ProductsPage({
   }, [openCatalogFilter]);
 
   function toggleFav(id: number) {
+    const willFavorite = !favoriteProductIds.has(id);
     runWithAppLoader(() => {
       setFavoriteProductIds((prev) => {
         const next = new Set(prev);
         next.has(id) ? next.delete(id) : next.add(id);
         return next;
       });
+      showToast(willFavorite ? "Product added to favorites" : "Product removed from favorites");
     });
   }
 
@@ -1953,7 +1990,7 @@ function ProductDetailPage({
   const configurationCardRef = useRef<HTMLDivElement>(null);
   const [productCardHeight, setProductCardHeight] = useState(825);
   const { addCartItems } = useCartSummary();
-  const { runWithAppLoader } = useAppLoading();
+  const { runWithAppLoader, showToast } = useAppLoading();
 
   useEffect(() => {
     setSize(defaultSize);
@@ -2120,6 +2157,7 @@ function ProductDetailPage({
       setSelectedPatientIds(new Set());
       setPatientQuantities({});
       setExpandedPatientIds(new Set());
+      showToast("Product added to cart");
     });
   }
 
@@ -2650,7 +2688,7 @@ function DashboardPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 const ORDERS = [
   {
     id: "#CEF164",
-    status: "Pending Approval",
+    status: "Pending Payment",
     orderType: "ORDER",
     timestamp: "07/11/2026 - 1:44 PM",
     payMethod: "Pay by Patient",
@@ -2665,10 +2703,10 @@ const ORDERS = [
     ],
     clinic: { name: "ScriptLinkRx Demo", address: "2823 Middletown Road Line 2, Bronx, NY 10461", phone: "(646)-617-9881" },
     items: [
-      { name: "Tirzepatide/Pyridoxine (B6)", description: "1 (0.5mL) Vial | 20mg/25mg/mL", pharmacy: "1st Choice Compounding Pharmacy", tracking: "Tracking Not Ready", qty: 1, authRefills: 1, refillsLeft: 0, daysSupply: 1, price: "$125.43", image: imgPT141 },
-      { name: "5-Amino-1mq/NMN", description: "30 Capsules | 25mg/500mg", pharmacy: "1st Choice Compounding Pharmacy", tracking: "Tracking Not Ready", qty: 30, authRefills: 1, refillsLeft: 0, daysSupply: 1, price: "$171.80", image: img431 },
-      { name: "Bremelanotide (PT-141)", description: "1 (10mL) Bottle | 10mg/mL", pharmacy: "Precision Compounding Pharmacy", tracking: "Tracking Not Ready", qty: 1, authRefills: 1, refillsLeft: 0, daysSupply: 1, price: "$118.80", image: imgProduct452 },
-      { name: "Aminoblend", description: "1 (30mL) Vial | 100mg/50mg/50mg/50mg/100mg/mL", pharmacy: "Thesis Pharmacy", tracking: "Tracking Not Ready", qty: 1, authRefills: 2, refillsLeft: 0, daysSupply: 1, price: "$35.99", image: img432 },
+	      { patientName: "Zeee Rabushaj", name: "Tirzepatide/Pyridoxine (B6)", description: "1 (0.5mL) Vial | 20mg/25mg/mL", pharmacy: "1st Choice Compounding Pharmacy", tracking: "Tracking Not Ready", qty: 1, authRefills: 1, refillsLeft: 0, daysSupply: 1, price: "$125.43", image: imgPT141 },
+	      { patientName: "Zeee Rabushaj", name: "5-Amino-1mq/NMN", description: "30 Capsules | 25mg/500mg", pharmacy: "1st Choice Compounding Pharmacy", tracking: "Tracking Not Ready", qty: 30, authRefills: 1, refillsLeft: 0, daysSupply: 1, price: "$171.80", image: img431 },
+	      { patientName: "Altin Selimi", name: "Bremelanotide (PT-141)", description: "1 (10mL) Bottle | 10mg/mL", pharmacy: "Precision Compounding Pharmacy", tracking: "Tracking Not Ready", qty: 1, authRefills: 1, refillsLeft: 0, daysSupply: 1, price: "$118.80", image: imgProduct452 },
+	      { patientName: "Altin Selimi", name: "Aminoblend", description: "1 (30mL) Vial | 100mg/50mg/50mg/50mg/100mg/mL", pharmacy: "Thesis Pharmacy", tracking: "Tracking Not Ready", qty: 1, authRefills: 2, refillsLeft: 0, daysSupply: 1, price: "$35.99", image: img432 },
     ],
   },
   {
@@ -2738,7 +2776,7 @@ function CopyButton({ text }: { text: string }) {
 }
 
 function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: (p: Page) => void; onOrderSelect: (order: typeof ORDERS[number]) => void; extraVariants: boolean }) {
-  const [filter, setFilter] = useState("Overall");
+  const [filter, setFilter] = useState("Pending Payment");
   const [search, setSearch] = useState("");
   const [selectedOrderId, setSelectedOrderId] = useState(ORDERS[0]?.id ?? "");
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
@@ -2749,10 +2787,10 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
   });
   const [shippingMethod, setShippingMethod] = useState<"standard" | "overnight">("standard");
   const [reviewOpen, setReviewOpen] = useState(false);
-  const [orderCardVariant, setOrderCardVariant] = useState<"current" | "cart" | "optimized" | "silver">("silver");
+  const [orderCardVariant, setOrderCardVariant] = useState<"current" | "cart" | "optimized" | "silver" | "multi">("multi");
 
   useEffect(() => {
-    if (!extraVariants) setOrderCardVariant("cart");
+    if (!extraVariants) setOrderCardVariant("multi");
   }, [extraVariants]);
 
   const tabs = ["Overall", "Pending Payment", "Pending Approval", "Cancellation Requested", "Processing", "Pending eScript", "Shipped", "Delivered", "Flagged", "Cancelled"];
@@ -2869,15 +2907,15 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
 
         {extraVariants && <div className="flex items-center gap-2 pt-1">
           <span className="mr-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#888]">Card style</span>
-          {(["silver", "cart"] as const).map(variant => (
-            <button
-              key={variant}
-              onClick={() => setOrderCardVariant(variant)}
-              className={`h-8 rounded-full px-3 text-[11px] font-semibold capitalize transition-colors ${orderCardVariant === variant ? "bg-[#111] text-white" : "border border-[#ddd] bg-white text-[#555] hover:border-[#999]"}`}
-            >
-              {variant === "cart" ? "Cart style" : "Current"}
-            </button>
-          ))}
+	          {(["silver", "cart", "multi"] as const).map(variant => (
+	            <button
+	              key={variant}
+	              onClick={() => setOrderCardVariant(variant)}
+	              className={`h-8 rounded-full px-3 text-[11px] font-semibold capitalize transition-colors ${orderCardVariant === variant ? "bg-[#111] text-white" : "border border-[#ddd] bg-white text-[#555] hover:border-[#999]"}`}
+	            >
+	              {variant === "cart" ? "Cart style" : variant === "multi" ? "Patient lanes" : "Current"}
+	            </button>
+	          ))}
         </div>}
 
       </div>
@@ -2978,11 +3016,124 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
                       <strong className="inline-flex h-6 items-center rounded-full bg-white px-2.5 text-[11px] font-semibold text-[#111]">{order.total}</strong>
                     </span>
                   </div>
-                </section>
-              );
-            }
+	                </section>
+	              );
+	            }
 
-            return (
+	            if (orderCardVariant === "multi") {
+	              const orderPatients = "patients" in order ? order.patients : [order.patient];
+	              const patientGroups = orderPatients.map((patient) => ({
+	                patient,
+	                items: order.items
+	                  .map((item, index) => ({ item, index }))
+	                  .filter(({ item, index }) => {
+	                    const assignedName = (item as { patientName?: string }).patientName;
+	                    return assignedName ? assignedName === patient.name : orderPatients[index]?.name === patient.name || (orderPatients.length === 1 && index >= 0);
+	                  }),
+	              })).filter(group => group.items.length > 0);
+	              const groups = patientGroups.length > 0
+	                ? patientGroups
+	                : orderPatients.map((patient, patientIndex) => ({
+	                    patient,
+	                    items: order.items
+	                      .map((item, index) => ({ item, index }))
+	                      .filter((_, index) => index === patientIndex),
+	                  })).filter(group => group.items.length > 0);
+	              const productCount = order.items.length;
+
+	              return (
+	                <section key={order.id} onClick={() => onOrderSelect(order)} className="cursor-pointer rounded-[14px] bg-[#F8F8F8] p-4 transition-colors hover:bg-[#f5f5f4]">
+	                  <div className="flex flex-wrap items-center gap-3 px-1 pb-4">
+	                    <span className="mr-1 text-[15px] font-bold text-[#161a18]">{order.id}</span>
+	                    <span className={`inline-flex h-8 items-center gap-2 rounded-full px-3 text-[11px] font-semibold ${order.payMethod === "Pay by Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
+	                      {order.payMethod.replace("by", "By")}
+	                      {order.payMethod === "Pay by Clinic" ? <Building2 size={13} /> : <User size={13} />}
+	                      <span className={`rounded-full px-2 py-1 text-[8px] font-bold ${order.payStatus === "PAID" ? "bg-white text-[#173d25]" : "bg-[#FF4A87] text-white"}`}>{order.payStatus}</span>
+	                    </span>
+	                    <span className={`inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[11px] font-semibold ${silverStatusPillStyle[order.status] ?? "bg-[#FFC55B] text-[#151515]"}`}>{labelCase(order.status)} {silverStatusIcon(order.status)}</span>
+	                    <span className={`inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[11px] font-semibold ${order.shipMethod === "Ship to Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
+	                      {order.shipMethod.replace("to", "To")} {order.shipMethod === "Ship to Clinic" ? <Building2 size={13} /> : <User size={13} />}
+	                    </span>
+	                    <span className="inline-flex h-8 items-center rounded-full bg-white px-3 text-[11px] font-semibold text-[#60656d]">{groups.length} patients</span>
+	                    <span className="inline-flex h-8 items-center rounded-full bg-white px-3 text-[11px] font-semibold text-[#60656d]">{productCount} prescriptions</span>
+	                    <span className="ml-auto text-[15px] font-semibold text-[#161a18]">{order.total}</span>
+	                  </div>
+
+	                  <div className="space-y-3">
+	                    {groups.map(({ patient, items }, groupIndex) => {
+	                      const patientTotal = items.reduce((sum, { item }) => sum + Number(item.price.replace(/[$,]/g, "")), 0);
+	                      return (
+	                        <article key={`${order.id}-${patient.name}`} className="rounded-[13px] bg-white p-4">
+	                          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#F1F1EF] pb-3">
+	                            <div className="flex min-w-0 items-start gap-3">
+	                              <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-[#F1F0EF] text-[12px] font-semibold text-[#183229]">{groupIndex + 1}</span>
+	                              <div className="min-w-0">
+	                                <div className="flex flex-wrap items-center gap-2">
+	                                  <p className="truncate text-[14px] font-semibold text-[#161a18]">{patient.name} ({patient.gender})</p>
+	                                  <span className="rounded-full bg-[#F8F8F8] px-2.5 py-1 text-[10px] font-semibold text-[#60656d]">{items.length} prescription{items.length === 1 ? "" : "s"}</span>
+	                                </div>
+	                                <p className="mt-1 text-[11px] text-[#5d6470]">{patient.phone}</p>
+	                                <p className="mt-1 text-[11px] leading-[1.35] text-[#5d6470]">{patient.address}</p>
+	                              </div>
+	                            </div>
+	                            <div className="rounded-full bg-[#F8F8F8] px-3 py-2 text-[11px] font-semibold text-[#60656d]">
+	                              Patient total <span className="ml-2 text-[#161a18]">${patientTotal.toFixed(2)}</span>
+	                            </div>
+	                          </div>
+
+	                          <div className="mt-3 grid gap-3 lg:grid-cols-2">
+	                            {items.map(({ item, index }) => (
+	                              <div key={`${order.id}-${patient.name}-${item.name}-${index}`} className="rounded-[11px] bg-[#FAFAFA] p-3">
+	                                <div className="flex min-w-0 items-start gap-3">
+	                                  <div className="flex h-[72px] w-[58px] shrink-0 items-center justify-center overflow-visible rounded-[9px] bg-white">
+	                                    <img src={item.image} alt="" className="max-h-[70px] max-w-[52px] object-contain mix-blend-multiply" />
+	                                  </div>
+	                                  <div className="min-w-0 flex-1">
+	                                    <div className="flex items-start justify-between gap-3">
+	                                      <div className="min-w-0">
+	                                        <p className="truncate text-[14px] font-semibold text-[#161a18]">{item.name}</p>
+	                                        <p className="mt-1 truncate text-[12px] text-[#777]">{item.description}</p>
+	                                      </div>
+	                                      <p className="shrink-0 text-[13px] font-semibold text-[#161a18]">{item.price}</p>
+	                                    </div>
+	                                    <div className="mt-3 flex flex-wrap items-center gap-1.5">
+	                                      <span className="rounded-full bg-white px-2 py-1 text-[9px] text-[#555]">Qty {item.qty}</span>
+	                                      <span className="rounded-full bg-white px-2 py-1 text-[9px] text-[#555]">Auth {item.authRefills}</span>
+	                                      <span className="rounded-full bg-white px-2 py-1 text-[9px] text-[#555]">Refills {item.refillsLeft}</span>
+	                                      <span className="rounded-full bg-white px-2 py-1 text-[9px] text-[#555]">Days {item.daysSupply}</span>
+	                                    </div>
+	                                    <div className="mt-3 flex flex-wrap items-center gap-2">
+	                                      <p className="truncate text-[11px] text-[#777]">{item.pharmacy}</p>
+	                                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-semibold ${(groupIndex + index) % 2 === 1 ? "bg-[#F6F6FF] text-[#4169E8]" : "bg-[#ECEBE3] text-[#2f3d35]"}`}>
+	                                        {(groupIndex + index) % 2 === 1 && <Send size={12} strokeWidth={1.8} />}
+	                                        {labelCase(item.tracking)}
+	                                      </span>
+	                                    </div>
+	                                  </div>
+	                                </div>
+	                              </div>
+	                            ))}
+	                          </div>
+	                        </article>
+	                      );
+	                    })}
+	                  </div>
+
+	                  <div className="mt-4 flex flex-wrap items-center gap-3 px-1">
+	                    <span className="inline-flex h-9 items-center gap-2 rounded-full bg-white px-3 text-[12px] font-semibold text-[#183229]">
+	                      Order Type
+	                      <span className="inline-flex h-6 items-center rounded-full bg-[#F1F0EF] px-2.5 text-[11px] font-semibold text-[#111]">{labelCase(order.orderType)}</span>
+	                    </span>
+	                    <span className="inline-flex h-9 items-center gap-2 rounded-full bg-white px-3 text-[12px] font-semibold text-[#183229]">
+	                      Order Timestamp
+	                      <span className="inline-flex h-6 items-center rounded-full bg-[#F1F0EF] px-2.5 text-[11px] font-semibold text-[#111]">{order.timestamp}</span>
+	                    </span>
+	                  </div>
+	                </section>
+	              );
+	            }
+
+	            return (
             <section key={order.id} onClick={() => onOrderSelect(order)} className={`cursor-pointer overflow-hidden ${orderCardVariant === "current" ? "rounded-[13px] border border-[#e5ddd5] bg-white" : orderCardVariant === "silver" ? "rounded-[10px] bg-[#FBFBFB] p-3" : "rounded-[10px] bg-[var(--app-soft)] p-3"}`}>
               <div className={`flex flex-wrap items-center justify-between gap-3 ${orderCardVariant === "current" ? "border-b border-[#eee8e3] bg-[#fffcf8] px-5 py-4" : orderCardVariant === "silver" ? "bg-[#FBFBFB] px-2 pb-4 pt-2" : "bg-[var(--app-soft)] px-2 pb-4 pt-2"}`}>
                 <div className="flex flex-wrap items-center gap-3">
@@ -7554,6 +7705,7 @@ export default function App() {
   const cartPage: Page = "cart-multi";
   const [cartPreviewItems, setCartPreviewItems] = useState<CartPreviewItem[]>([]);
   const [appLoading, setAppLoading] = useState(false);
+  const [appToast, setAppToast] = useState<{ id: number; type: "success" | "error"; message: string } | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMenuOpen, setChatMenuOpen] = useState(false);
   const [chatMuted, setChatMuted] = useState(false);
@@ -7740,9 +7892,22 @@ export default function App() {
     if (appLoading) return;
     setAppLoading(true);
     window.setTimeout(() => {
-      action();
-      setAppLoading(false);
+      try {
+        action();
+      } catch {
+        showToast("Failed to update", "error");
+      } finally {
+        setAppLoading(false);
+      }
     }, delayMs);
+  }
+
+  function showToast(message: string, type: "success" | "error" = "success") {
+    const id = Date.now();
+    setAppToast({ id, type, message });
+    window.setTimeout(() => {
+      setAppToast((current) => current?.id === id ? null : current);
+    }, 4200);
   }
 
   function renderPage() {
@@ -7879,7 +8044,7 @@ export default function App() {
   const activeTourStep = platformTourSteps[platformTourStep];
 
   return (
-    <AppLoadingContext.Provider value={{ runWithAppLoader }}>
+    <AppLoadingContext.Provider value={{ runWithAppLoader, showToast }}>
       <CartSummaryContext.Provider value={{ cartItemCount, cartPreviewItems, addCartItems, updateCartItemQty, removeCartItem, clearCartItems }}>
         <ProductFavoritesContext.Provider value={{ favoriteProductIds, setFavoriteProductIds, favoriteProducts }}>
           <div className={`app-theme app-theme-${appTheme} flex h-screen overflow-hidden bg-[var(--app-soft-hover)] font-['Inter',sans-serif]`}>
@@ -8002,6 +8167,7 @@ export default function App() {
             </div>
           </div>
           <AppActionOverlay active={appLoading} />
+          <AppToast toast={appToast} onClose={() => setAppToast(null)} />
         </ProductFavoritesContext.Provider>
       </CartSummaryContext.Provider>
     </AppLoadingContext.Provider>
