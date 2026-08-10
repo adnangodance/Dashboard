@@ -20,6 +20,7 @@ import {
   MoreHorizontal,
   ArrowUpRight,
   ArrowDownRight,
+  Check,
   CheckCircle2,
   Clock,
   AlertCircle,
@@ -103,8 +104,66 @@ type Page =
 type AppTheme = "default" | "orange";
 
 type CartMode = "single" | "multi";
+type CheckoutSubmissionState = "idle" | "submitting" | "submitted";
 
 const DEFAULT_PAGE: Page = "products";
+
+function CheckoutSubmissionFooter({
+  state,
+  submitLabel,
+  onSubmit,
+  onEdit,
+  onGoToOrders,
+}: {
+  state: CheckoutSubmissionState;
+  submitLabel: string;
+  onSubmit: () => void;
+  onEdit?: () => void;
+  onGoToOrders: () => void;
+}) {
+  if (state === "submitted") {
+    return (
+      <div className="w-full">
+        <div className="mb-4 rounded-[14px] border border-[#dce8df] bg-[#f7faf8] px-4 py-5 text-center">
+          <span className="mx-auto flex size-10 items-center justify-center rounded-full bg-[#e1efe7] text-[#183229]">
+            <CheckCircle2 size={20} strokeWidth={1.9} />
+          </span>
+          <p className="mt-3 text-[17px] font-semibold tracking-[-0.02em] text-[#171717]">Your order has been submitted!</p>
+          <p className="mt-1 text-[11px] leading-[17px] text-[#6f7782]">We&apos;ll follow up with status updates once it&apos;s shipped.</p>
+        </div>
+        <button onClick={onGoToOrders} className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#111] text-[13px] font-semibold text-white transition-colors hover:bg-[#183229]">
+          Go to orders
+        </button>
+        <button className="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-full text-[12px] font-semibold text-[#183229] transition-colors hover:bg-[#f2f4f3]">
+          <Download size={14} /> Download receipt
+        </button>
+      </div>
+    );
+  }
+
+  if (state === "submitting") {
+    return (
+      <button disabled className="flex h-[48px] w-full items-center justify-center gap-2 rounded-full bg-[#111] text-[13px] font-semibold text-white opacity-90">
+        <span className="size-4 rounded-full border-2 border-white/35 border-t-white animate-spin" />
+        Submitting...
+      </button>
+    );
+  }
+
+  return (
+    <div className={onEdit ? "flex w-full gap-2" : "w-full"}>
+      {onEdit && (
+        <button onClick={onEdit} className="flex h-10 flex-1 items-center justify-center gap-2 rounded-[8px] border border-[#183229] text-[13px] font-semibold text-[#183229]">
+          <ChevronLeft size={15} /> Edit order
+        </button>
+      )}
+      <button onClick={onSubmit} className={`${onEdit ? "h-10 flex-1 rounded-[8px]" : "h-[52px] w-full rounded-full"} flex items-center justify-center gap-2 bg-[#111] text-[13px] font-semibold text-white transition-colors hover:bg-[#183229]`}>
+        {onEdit && <CheckCircle2 size={15} />}
+        {submitLabel}
+      </button>
+    </div>
+  );
+}
 
 type ProductFavoritesContextValue = {
   favoriteProductIds: Set<number>;
@@ -216,6 +275,19 @@ function Badge({
   );
 }
 
+function PageBackButton({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-r-[12px] bg-[#f0f1f2] text-[#183229] transition-colors hover:bg-[#e6e8e9]"
+    >
+      <ChevronLeft size={21} strokeWidth={2} />
+    </button>
+  );
+}
+
 function AppActionOverlay({ active }: { active: boolean }) {
   if (!active) return null;
 
@@ -238,16 +310,16 @@ function AppToast({
   const isSuccess = toast.type === "success";
 
   return (
-    <div className="fixed bottom-6 left-6 z-[10000] w-[min(462px,calc(100vw-48px))]" role="status" aria-live="polite">
-      <div className="flex min-h-[54px] items-center gap-3 rounded-[12px] border border-[#E6E8EF] bg-white px-4 py-3 shadow-[0_12px_34px_rgba(17,24,39,0.12)]">
-        <span className={`flex size-5 shrink-0 items-center justify-center rounded-full text-white ${isSuccess ? "bg-[#4BB574]" : "bg-[#FF4E4E]"}`}>
-          {isSuccess ? <CheckCircle2 size={14} strokeWidth={3} /> : <X size={13} strokeWidth={3} />}
+    <div className="fixed bottom-6 left-1/2 z-[10000] w-[min(418px,calc(100vw-24px))] -translate-x-1/2" role="status" aria-live="polite">
+      <div className="flex h-[45px] items-center gap-2 rounded-full bg-white px-4 shadow-[0_5px_0_rgba(20,20,20,0.10),0_9px_10px_rgba(20,20,20,0.24)]">
+        <span className={`flex size-[14px] shrink-0 items-center justify-center rounded-full text-white ${isSuccess ? "bg-[#45AD68]" : "bg-[#EB4F47]"}`}>
+          {isSuccess ? <Check size={8} strokeWidth={3} /> : <X size={8} strokeWidth={3} />}
         </span>
-        <p className="min-w-0 flex-1 truncate text-[14px] font-semibold text-[#202124]">{toast.message}</p>
+        <p className="min-w-0 flex-1 truncate text-[12px] font-medium text-[#171717]">{toast.message}</p>
         <button
           type="button"
           onClick={onClose}
-          className="h-9 shrink-0 rounded-[8px] bg-[#5B5CF6] px-4 text-[13px] font-semibold text-white shadow-[0_6px_14px_rgba(91,92,246,0.24)] transition-colors hover:bg-[#4B4CF0]"
+          className="h-[33px] shrink-0 rounded-full bg-[#485DDD] px-[15px] text-[12px] font-medium text-white transition-colors hover:bg-[#3E52CF]"
         >
           Got it
         </button>
@@ -1987,6 +2059,8 @@ function ProductDetailPage({
   const [locationMenuOpen, setLocationMenuOpen] = useState(false);
   const [activeInfoTab, setActiveInfoTab] = useState<"overview" | "formula" | "dosage" | "safety">("overview");
   const [productDetailVariant, setProductDetailVariant] = useState<1 | 2 | 3 | 4 | 5 | 6>(6);
+  const [questionModalOpen, setQuestionModalOpen] = useState(false);
+  const [questionText, setQuestionText] = useState("");
   const configurationCardRef = useRef<HTMLDivElement>(null);
   const [productCardHeight, setProductCardHeight] = useState(825);
   const { addCartItems } = useCartSummary();
@@ -2004,6 +2078,8 @@ function ProductDetailPage({
     setPatientQuantities({});
     setExpandedPatientIds(new Set());
     setAddedItemCount(null);
+    setQuestionModalOpen(false);
+    setQuestionText("");
   }, [defaultSize, defaultStrength, product.dosage, product.id, product.pharmacy]);
 
   useEffect(() => {
@@ -2170,14 +2246,7 @@ function ProductDetailPage({
       <div className="-mt-4 mb-[39px]">
         <div className="flex items-start gap-3">
           {isReferenceStyle && (
-            <button
-              type="button"
-              onClick={() => onNavigate("products")}
-              aria-label="Back to catalog"
-              className="mt-0.5 flex size-10 cursor-pointer items-center justify-center rounded-r-[12px] bg-[#f0f1f2] text-[#183229] transition-colors hover:bg-[#e6e8e9]"
-            >
-              <ChevronLeft size={21} strokeWidth={2} />
-            </button>
+            <PageBackButton onClick={() => onNavigate("products")} label="Back to catalog" />
           )}
           <div>
             <h1 className="text-[32px] font-medium leading-tight text-[#111]">Products</h1>
@@ -2228,7 +2297,7 @@ function ProductDetailPage({
           {isReferenceStyle && (
             <button
               type="button"
-              onClick={() => onNavigate("support")}
+              onClick={() => setQuestionModalOpen(true)}
               className="mt-2 cursor-pointer text-[11px] font-medium text-[#333] underline decoration-[#999] underline-offset-4 transition-colors hover:text-black hover:decoration-black"
             >
               Ask a question?
@@ -2540,6 +2609,81 @@ function ProductDetailPage({
         </div>
       </section>
       </div>
+      {questionModalOpen && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/35 px-4 py-6 backdrop-blur-[2px]" role="dialog" aria-modal="true" aria-labelledby="product-question-title">
+          <div className="w-full max-w-[560px] rounded-[18px] border border-[#ece8e3] bg-white p-5 shadow-[0_28px_80px_rgba(0,0,0,0.22)]">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8c95a1]">Support ticket</p>
+                <h2 id="product-question-title" className="mt-1 text-[22px] font-semibold tracking-[-0.03em] text-[#111]">Ask a Question</h2>
+                <p className="mt-1 text-[12px] leading-5 text-[#6f7782]">We will attach this product setup so the team has the right context.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setQuestionModalOpen(false)}
+                className="flex size-9 cursor-pointer items-center justify-center rounded-full text-[#777] transition-colors hover:bg-[#f5f5f3] hover:text-[#111]"
+                aria-label="Close question modal"
+              >
+                <X size={18} strokeWidth={1.8} />
+              </button>
+            </div>
+
+            <div className="mt-5 rounded-[14px] border border-[#e8ebe9] bg-[#fafafa] p-3">
+              <p className="mb-2 text-[11px] font-medium text-[#6c746f]">Product</p>
+              <div className="flex items-center gap-3">
+                <span className="flex size-12 shrink-0 items-center justify-center rounded-[10px] bg-white">
+                  <img src={product.img} alt={product.name} className="h-10 w-10 object-contain mix-blend-multiply" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[14px] font-semibold text-[#151515]">{product.name}</p>
+                  <p className="mt-1 text-[11px] leading-4 text-[#6f7782]">{strength} | {size}</p>
+                  <p className="mt-0.5 truncate text-[10px] text-[#8d9591]">{selectedPharmacy.name}</p>
+                </div>
+                <p className="shrink-0 text-[13px] font-semibold text-[#151515]">${configuredPrice.toFixed(2)}</p>
+              </div>
+            </div>
+
+            <label className="mt-5 block">
+              <span className="text-[12px] font-semibold text-[#171717]">Your Question <span className="text-[#b4473d]">*</span></span>
+              <textarea
+                value={questionText}
+                onChange={(event) => setQuestionText(event.target.value)}
+                placeholder="Write..."
+                className="mt-2 min-h-[132px] w-full resize-y rounded-[12px] border border-[#d8dedb] bg-white px-3.5 py-3 text-[13px] leading-5 text-[#111] outline-none transition placeholder:text-[#a3aaa6] focus:border-[#183229] focus:ring-2 focus:ring-[#183229]/10"
+              />
+            </label>
+
+            <div className="mt-3 flex items-start gap-2 rounded-[12px] bg-[#f7f7f5] px-3 py-3">
+              <MessageSquare size={15} className="mt-0.5 shrink-0 text-[#183229]" strokeWidth={1.8} />
+              <p className="text-[11px] leading-[16px] text-[#66716c]">
+                This question will be automatically created as a support ticket and assigned to our team. You'll receive a response within 24 hours.
+              </p>
+            </div>
+
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setQuestionModalOpen(false)}
+                className="h-10 cursor-pointer rounded-[9px] border border-[#d7ddd9] bg-white px-4 text-[13px] font-semibold text-[#183229] transition-colors hover:bg-[#f7f8f6]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!questionText.trim()}
+                onClick={() => {
+                  showToast("Question submitted");
+                  setQuestionModalOpen(false);
+                  setQuestionText("");
+                }}
+                className="h-10 cursor-pointer rounded-[9px] bg-[#111] px-5 text-[13px] font-semibold text-white transition-colors hover:bg-[#183229] disabled:cursor-not-allowed disabled:bg-[#d5d8d6]"
+              >
+                Submit Question
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {createPatientOpen && (
         <div className="fixed inset-0 z-[80] flex justify-end bg-black/30 backdrop-blur-[2px]">
           <button className="absolute inset-0 cursor-default" onClick={() => setCreatePatientOpen(false)} aria-label="Close create patient" />
@@ -2679,6 +2823,7 @@ function DashboardPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           ))}
         </div>
       </section>
+
     </>
   );
 }
@@ -3282,7 +3427,10 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
     <>
       <div className="max-w-[1300px]">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <button onClick={() => onNavigate("orders")} className="flex items-center gap-2 text-[22px] font-semibold text-[#1a1a1a]"><ChevronLeft size={22} /> Orders</button>
+        <div className="flex items-center gap-3">
+          <PageBackButton onClick={() => onNavigate("orders")} label="Back to orders" />
+          <h1 className="text-[22px] font-semibold text-[#1a1a1a]">Orders</h1>
+        </div>
         <div className="flex flex-wrap gap-2">
           <button className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[#d8dedb] bg-white px-4 text-[11px] font-semibold text-[#31583F] transition-colors hover:bg-[#f7f8f7]"><Download size={13} /> Download receipt</button>
           <button onClick={() => onNavigate("support")} className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#272727] px-4 text-[11px] font-semibold text-white transition-colors hover:bg-[#111]"><Plus size={13} /> Create Ticket</button>
@@ -3706,7 +3854,10 @@ function PatientDetailsView({ patient, onBack, onEdit }: { patient: typeof PATIE
   const prescriptionUnitPrice = (name: string) => name === "NAD+ Injection" ? 84.50 : name === "Tirzepatide/Pyridoxine (B6)" ? 125.43 : 35;
   return (
     <div className="max-w-[1180px]">
-      <button onClick={onBack} className="mb-5 inline-flex items-center gap-2 text-[13px] font-semibold text-[#222] hover:underline"><ChevronLeft size={16} /> Patients</button>
+      <div className="mb-5 flex items-center gap-3">
+        <PageBackButton onClick={onBack} label="Back to patients" />
+        <h1 className="text-[22px] font-semibold text-[#1a1a1a]">Patients</h1>
+      </div>
       <section className="rounded-[14px] bg-[var(--app-soft)] px-6 py-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -4414,6 +4565,7 @@ function SinglePatientCartPage({
   const [activePharmacy, setActivePharmacy] = useState<string | null>(null);
   const [removedItems, setRemovedItems] = useState<Set<number>>(new Set());
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewSubmissionState, setPreviewSubmissionState] = useState<CheckoutSubmissionState>("idle");
   const [paymentMethod, setPaymentMethod] = useState<"patient" | "clinic">("patient");
   const [shipTo, setShipTo] = useState<"patient" | "clinic">("clinic");
   const [prescriptionDetails, setPrescriptionDetails] = useState<Record<number, { days: string; refills: string; directions: string; reason: string }>>({});
@@ -4449,6 +4601,7 @@ function SinglePatientCartPage({
     return patientForPharmacy(item.pharmacy) && details?.days && details?.refills && details?.directions && details?.reason;
   });
   const canPreview = allPharmaciesAssigned && prescriptionsComplete;
+  const previewSubmitted = previewSubmissionState === "submitted";
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
   const shipping = pharmacyGroups.reduce((sum, pharmacy) => sum + (Number(pharmacy.shipping[0].match(/\$(\d+(?:\.\d{2})?)/)?.[1] ?? 0)), 0);
   const total = subtotal + shipping;
@@ -4738,7 +4891,7 @@ function SinglePatientCartPage({
             <div className="flex items-end justify-between border-t border-[#eee8e3] pt-3">
               <span className="text-[14px] font-bold text-[#1a1a1a]">Total</span><span className="text-[19px] font-bold text-[#183229]">${total.toFixed(2)}</span>
             </div>
-            <button disabled={!canPreview} onClick={() => setPreviewOpen(true)} className="h-11 w-full rounded-[8px] bg-[#183229] text-[13px] font-semibold text-white transition-colors hover:bg-[#244438] disabled:cursor-not-allowed disabled:bg-[#c8cecb]">
+            <button disabled={!canPreview} onClick={() => { setPreviewSubmissionState("idle"); setPreviewOpen(true); }} className="h-11 w-full rounded-[8px] bg-[#183229] text-[13px] font-semibold text-white transition-colors hover:bg-[#244438] disabled:cursor-not-allowed disabled:bg-[#c8cecb]">
               {!allPharmaciesAssigned
                 ? `Assign ${pharmacyGroups.length - assignedPharmacyCount} more ${pharmacyGroups.length - assignedPharmacyCount === 1 ? "patient" : "patients"}`
                 : prescriptionsComplete ? "Continue: Preview" : "Complete required fields"}
@@ -4748,24 +4901,31 @@ function SinglePatientCartPage({
       </div>
 
       {previewOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-[#1a1a1a]/35 backdrop-blur-[2px]">
-          <button className="absolute inset-0 cursor-default" onClick={() => setPreviewOpen(false)} aria-label="Close preview" />
-          <aside className="relative h-full w-full max-w-[460px] overflow-auto border-l border-[#e8e3df] bg-white px-6 py-6">
-            <button onClick={() => setPreviewOpen(false)} className="mb-5 flex size-8 items-center justify-center rounded-[7px] text-[#183229] hover:bg-[#f6f4f5]" aria-label="Close preview">
-              <XCircle size={18} />
-            </button>
-            <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[#667085]">Preview</p>
-            <h2 className="mt-1 text-[22px] font-semibold text-[#1a1a1a]">Single-patient checkout</h2>
-            <p className="mt-1 text-[12px] text-[#6f7782]">Review assigned patients, prescriptions, payment, and shipping before submitting.</p>
+        <div className="fixed inset-0 z-50 flex justify-end bg-[#111]/35 backdrop-blur-[3px]">
+          <button className="absolute inset-0 cursor-default" onClick={() => { setPreviewOpen(false); setPreviewSubmissionState("idle"); }} aria-label="Close preview" />
+          <aside className="relative h-full w-full max-w-[500px] overflow-auto border-l border-[#e8e3df] bg-[#f7f6f2] shadow-[-24px_0_70px_rgba(24,24,24,0.16)]">
+            <header className="sticky top-0 z-10 border-b border-[#eee8e3] bg-white/95 px-5 pb-5 pt-6 backdrop-blur">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8c95a1]">Checkout</p>
+                  <h2 className="mt-1 text-[23px] font-semibold tracking-[-0.03em] text-[#171717]">Review and submit</h2>
+                  <p className="mt-1 text-[12px] leading-[18px] text-[#6f7782]">Confirm patients, prescriptions, payment, and shipping before submitting.</p>
+                </div>
+                <button onClick={() => { setPreviewOpen(false); setPreviewSubmissionState("idle"); }} className="flex size-8 items-center justify-center rounded-full text-[#777] transition-colors hover:bg-[#f5f3ef] hover:text-[#111]" aria-label="Close preview">
+                  <X size={17} strokeWidth={1.8} />
+                </button>
+              </div>
+            </header>
 
-            <section className="mt-6">
-              <h3 className="border-b border-[#eee8e3] pb-3 text-[15px] font-semibold text-[#1a1a1a]">Order for</h3>
-              <div className="mt-4 flex flex-col gap-3">
+            <div className="space-y-4 px-5 pb-6 pt-5">
+            <section className="rounded-[18px] bg-white p-4 shadow-[0_18px_50px_rgba(24,24,24,0.07)]">
+              <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Order for</h3>
+              <div className="mt-3 flex flex-col gap-3">
                 {pharmacyGroups.map(pharmacy => {
                   const patient = patientForPharmacy(pharmacy.name);
                   if (!patient) return null;
                   return (
-                    <div key={pharmacy.name} className="rounded-[10px] border border-[#e8e3df] bg-[var(--app-soft-hover)] px-4 py-3">
+                    <div key={pharmacy.name} className="rounded-[13px] bg-[#fbfaf8] px-4 py-3">
                       <p className="text-[13px] font-semibold text-[#1a1a1a]">{patient.name} ({patient.gender})</p>
                       <p className="mt-1 text-[12px] text-[#6f7782]">{patient.phone}</p>
                       <p className="mt-1 text-[12px] leading-relaxed text-[#6f7782]">{patient.address}</p>
@@ -4775,13 +4935,13 @@ function SinglePatientCartPage({
               </div>
             </section>
 
-            <section className="mt-6">
-              <h3 className="border-b border-[#eee8e3] pb-3 text-[15px] font-semibold text-[#1a1a1a]">Prescriptions</h3>
-              <div className="mt-4 flex flex-col gap-3">
+            <section className="rounded-[18px] bg-white p-4 shadow-[0_18px_50px_rgba(24,24,24,0.07)]">
+              <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Prescriptions</h3>
+              <div className="mt-3 flex flex-col gap-3">
                 {prescriptionItems.map(item => {
                   const patient = patientForPharmacy(item.pharmacy);
                   return (
-                    <div key={item.id} className="rounded-[10px] border border-[#e8e3df] px-4 py-4">
+                    <div key={item.id} className="rounded-[13px] bg-[#fbfaf8] px-4 py-4">
                       <div className="flex justify-between gap-4">
                         <div className="min-w-0">
                           <p className="text-[13px] font-semibold text-[#1a1a1a]">{item.name}</p>
@@ -4800,67 +4960,79 @@ function SinglePatientCartPage({
               </div>
             </section>
 
-            <section className="mt-6">
-              <div className="border-b border-[#eee8e3] pb-5">
+            <section className="rounded-[18px] bg-white p-4 shadow-[0_18px_50px_rgba(24,24,24,0.07)]">
+              <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#667085]">Payment</p>
-                <p className="mt-1 text-[13px] text-[#1a1a1a]">Select the payment method for the prescription</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setPaymentMethod("patient")}
-                    className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
-                      paymentMethod === "patient"
-                        ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
-                        : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
-                    }`}
-                  >
-                    Pay by Patient <User size={13} />
-                  </button>
-                  <button
-                    onClick={() => setPaymentMethod("clinic")}
-                    className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
-                      paymentMethod === "clinic"
-                        ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
-                        : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
-                    }`}
-                  >
-                    Pay by Clinic <Building2 size={13} />
-                  </button>
-                  <button className="inline-flex h-9 items-center gap-1.5 rounded-full border border-dashed border-[#17a34a] bg-white px-3 text-[12px] font-semibold text-[#0a8f3c] transition-colors hover:bg-[#f2f7f4]">
-                    <Plus size={13} /> Credit Card
-                  </button>
-                </div>
+                <p className="mt-1 text-[13px] text-[#1a1a1a]">{previewSubmitted ? "Payment method used for this order" : "Select the payment method for the prescription"}</p>
+                {previewSubmitted ? (
+                  <div className="mt-3 inline-flex h-9 items-center gap-2 rounded-full border border-[#dce8df] bg-[#f7faf8] px-3 text-[12px] font-semibold text-[#183229]">
+                    {paymentMethod === "patient" ? "Pay by Patient" : "Pay by Clinic"} {paymentMethod === "patient" ? <User size={13} /> : <Building2 size={13} />}
+                  </div>
+                ) : (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setPaymentMethod("patient")}
+                      className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
+                        paymentMethod === "patient"
+                          ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
+                          : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
+                      }`}
+                    >
+                      Pay by Patient <User size={13} />
+                    </button>
+                    <button
+                      onClick={() => setPaymentMethod("clinic")}
+                      className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
+                        paymentMethod === "clinic"
+                          ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
+                          : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
+                      }`}
+                    >
+                      Pay by Clinic <Building2 size={13} />
+                    </button>
+                    <button className="inline-flex h-9 items-center gap-1.5 rounded-full border border-dashed border-[#17a34a] bg-white px-3 text-[12px] font-semibold text-[#0a8f3c] transition-colors hover:bg-[#f2f7f4]">
+                      <Plus size={13} /> Credit Card
+                    </button>
+                  </div>
+                )}
               </div>
 
-              <div className="pt-5">
+              <div className="mt-5 border-t border-[#eee8e3] pt-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#667085]">Shipping</p>
-                <p className="mt-1 text-[13px] text-[#1a1a1a]">Choose where to ship the prescription</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setShipTo("patient")}
-                    className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
-                      shipTo === "patient"
-                        ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
-                        : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
-                    }`}
-                  >
-                    Ship to Patient <User size={13} />
-                  </button>
-                  <button
-                    onClick={() => setShipTo("clinic")}
-                    className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
-                      shipTo === "clinic"
-                        ? "border-[#0fbf9f] bg-[#d9fbf4] text-[#183229]"
-                        : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
-                    }`}
-                  >
-                    Ship to Clinic <Building2 size={13} />
-                  </button>
-                </div>
+                <p className="mt-1 text-[13px] text-[#1a1a1a]">{previewSubmitted ? "Shipping destination for this order" : "Choose where to ship the prescription"}</p>
+                {previewSubmitted ? (
+                  <div className="mt-3 inline-flex h-9 items-center gap-2 rounded-full border border-[#dce8df] bg-[#f7faf8] px-3 text-[12px] font-semibold text-[#183229]">
+                    {shipTo === "patient" ? "Ship to Patient" : "Ship to Clinic"} {shipTo === "patient" ? <User size={13} /> : <Building2 size={13} />}
+                  </div>
+                ) : (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setShipTo("patient")}
+                      className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
+                        shipTo === "patient"
+                          ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
+                          : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
+                      }`}
+                    >
+                      Ship to Patient <User size={13} />
+                    </button>
+                    <button
+                      onClick={() => setShipTo("clinic")}
+                      className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
+                        shipTo === "clinic"
+                          ? "border-[#0fbf9f] bg-[#d9fbf4] text-[#183229]"
+                          : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
+                      }`}
+                    >
+                      Ship to Clinic <Building2 size={13} />
+                    </button>
+                  </div>
+                )}
               </div>
             </section>
 
-            <section className="mt-6">
-              <h3 className="border-b border-[#eee8e3] pb-3 text-[15px] font-semibold text-[#1a1a1a]">Summary</h3>
+            <section className="rounded-[18px] bg-white p-4 shadow-[0_18px_50px_rgba(24,24,24,0.07)]">
+              <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Summary</h3>
               <div className="mt-4 space-y-3 text-[14px]">
                 <div className="flex justify-between text-[#6f7782]"><span>Items subtotal</span><span className="font-semibold text-[#1a1a1a]">${subtotal.toFixed(2)}</span></div>
                 <div className="flex justify-between text-[#6f7782]"><span>Shipping</span><span className="font-semibold text-[#1a1a1a]">${shipping.toFixed(2)}</span></div>
@@ -4868,13 +5040,18 @@ function SinglePatientCartPage({
               </div>
             </section>
 
-            <div className="sticky bottom-0 -mx-6 mt-8 flex gap-2 border-t border-[#eee8e3] bg-white px-6 py-4">
-              <button onClick={() => setPreviewOpen(false)} className="flex h-10 flex-1 items-center justify-center gap-2 rounded-[8px] border border-[#183229] text-[13px] font-semibold text-[#183229]">
-                <ChevronLeft size={15} /> Edit cart
-              </button>
-              <button onClick={() => onNavigate("orders")} className="flex h-10 flex-1 items-center justify-center gap-2 rounded-[8px] bg-[#183229] text-[13px] font-semibold text-white">
-                <CheckCircle2 size={15} /> Submit for Approval
-              </button>
+            <div className="sticky bottom-0 -mx-5 mt-2 border-t border-[#eee8e3] bg-white/95 px-5 py-4 backdrop-blur">
+              <CheckoutSubmissionFooter
+                state={previewSubmissionState}
+                submitLabel="Submit for Approval"
+                onEdit={() => { setPreviewOpen(false); setPreviewSubmissionState("idle"); }}
+                onSubmit={() => {
+                  setPreviewSubmissionState("submitting");
+                  window.setTimeout(() => setPreviewSubmissionState("submitted"), 2000);
+                }}
+                onGoToOrders={() => onNavigate("orders")}
+              />
+            </div>
             </div>
           </aside>
         </div>
@@ -5079,7 +5256,6 @@ function MultiPatientCartPage({
   cartEntries: PatientCartEntry[];
   extraVariants: boolean;
 }) {
-  const { runWithAppLoader } = useAppLoading();
   const cartData = useMemo(() => cartEntries.length > 0
     ? {
         ...MULTI_CART_DATA,
@@ -5146,6 +5322,7 @@ function MultiPatientCartPage({
   const [cartCardVariant, setCartCardVariant] = useState<1 | 2 | 3 | 4 | 5 | 6>(4);
   const [expandedSupplies, setExpandedSupplies] = useState<Set<number>>(new Set([1]));
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewSubmissionState, setPreviewSubmissionState] = useState<CheckoutSubmissionState>("idle");
   const [paymentMethod, setPaymentMethod] = useState<"patient" | "clinic">("patient");
   const [shipTo, setShipTo] = useState<"patient" | "clinic">("clinic");
   const [voucherCode, setVoucherCode] = useState("");
@@ -5189,6 +5366,7 @@ function MultiPatientCartPage({
     .reduce((sum, i) => sum + i.price * (quantities[i.id] ?? 1), 0);
   const voucherDiscount = appliedVoucher ? Math.min(subtotal * 0.1, 50) : 0;
   const total = subtotal + shipping - voucherDiscount;
+  const previewSubmitted = previewSubmissionState === "submitted";
 
   function applyVoucher() {
     const normalizedCode = voucherCode.trim().toUpperCase();
@@ -5287,6 +5465,7 @@ function MultiPatientCartPage({
 
   function handleCheckout() {
     if (prescriptionsComplete) {
+      setPreviewSubmissionState("idle");
       setPreviewOpen(true);
       return;
     }
@@ -6004,28 +6183,37 @@ function MultiPatientCartPage({
         </div>
       </div>
       {previewOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-[#1a1a1a]/20">
-          <button className="absolute inset-0 cursor-default" onClick={() => setPreviewOpen(false)} aria-label="Close preview" />
-          <aside className="relative h-full w-full max-w-[460px] overflow-auto bg-white shadow-[-20px_0_60px_rgba(24,24,24,0.1)]">
-            <header className="sticky top-0 z-10 bg-white px-6 pb-5 pt-8">
-              <h2 className="text-[18px] font-semibold text-[#171717]">Review and submit</h2>
+        <div className="fixed inset-0 z-50 flex justify-end bg-[#111]/35 backdrop-blur-[3px]">
+          <button className="absolute inset-0 cursor-default" onClick={() => { setPreviewOpen(false); setPreviewSubmissionState("idle"); }} aria-label="Close preview" />
+          <aside className="relative h-full w-full max-w-[500px] overflow-auto border-l border-[#e8e3df] bg-[#f7f6f2] shadow-[-24px_0_70px_rgba(24,24,24,0.16)]">
+            <header className="sticky top-0 z-10 border-b border-[#eee8e3] bg-white/95 px-5 pb-5 pt-6 backdrop-blur">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8c95a1]">Checkout</p>
+                  <h2 className="mt-1 text-[22px] font-semibold tracking-[-0.03em] text-[#171717]">Review and submit</h2>
+                  <p className="mt-1 text-[12px] leading-[18px] text-[#6f7782]">Confirm items, payment, shipping, and totals before submitting.</p>
+                </div>
+                <button onClick={() => { setPreviewOpen(false); setPreviewSubmissionState("idle"); }} className="flex size-8 items-center justify-center rounded-full text-[#777] transition-colors hover:bg-[#f5f3ef] hover:text-[#111]" aria-label="Close preview">
+                  <X size={17} strokeWidth={1.8} />
+                </button>
+              </div>
             </header>
-            <div className="px-6 pb-5">
+            <div className="space-y-4 px-5 pb-6 pt-5">
 
-            <section>
-              <div className="rounded-[9px] bg-[#fffcf3] px-4 py-3">
-                <p className="text-[13px] font-medium text-[#1a1a1a]">Items</p>
+            <section className="rounded-[18px] bg-white p-3 shadow-[0_18px_50px_rgba(24,24,24,0.07)]">
+              <div className="px-2 pb-2">
+                <p className="text-[13px] font-semibold text-[#1a1a1a]">Items</p>
               </div>
               {(showAllSummaryItems ? cartRowsWithNumbers : cartRowsWithNumbers.slice(0, 4)).map(({ patient, item, prescriptionNumber }, index) => {
                 const supplies = patient.items.filter(candidate => candidate.kind === "supply" && !removed.has(candidate.id));
                 const quantity = quantities[item.id] ?? 1;
                 return (
-                  <div key={item.id} className={`py-4 ${index > 0 ? "border-t border-[#e6e6e6]" : ""}`}>
-                    <div className="mx-4 flex items-center gap-2 rounded-[8px] bg-[#fbfffd] px-3 py-2">
+                  <div key={item.id} className="mt-3 rounded-[14px] bg-[#fbfaf8] p-4">
+                    <div className="flex items-center gap-2 rounded-[9px] bg-[#f7faf8] px-3 py-2">
                       <p className="min-w-0 truncate text-[11px] font-medium text-[#222]">{patient.name} ({patient.name.match(/\((.*?)\)/)?.[1] ?? "M"})</p>
-                      <span className="shrink-0 rounded-full bg-[#eeeeec] px-2 py-0.5 text-[9px] font-semibold text-[#7a7a76]">Prescription {prescriptionNumber}</span>
+                      <span className="shrink-0 rounded-full bg-[#ecefed] px-2 py-0.5 text-[9px] font-semibold text-[#69736e]">Prescription {prescriptionNumber}</span>
                     </div>
-                    <div className="mt-3 flex items-start gap-3 px-4">
+                    <div className="mt-3 flex items-start gap-3">
                       <CartItemImage item={item} />
                       <div className="min-w-0 flex-1">
                         <p className="text-[13px] font-semibold leading-[17px] text-[#1a1a1a]">{item.name}</p>
@@ -6036,10 +6224,10 @@ function MultiPatientCartPage({
                         <p className="mt-1 whitespace-nowrap text-[10px] text-[#747b82]">{quantity} × ${item.price.toFixed(2)}</p>
                       </div>
                     </div>
-                    <div className="px-4">{supplies.map(supply => {
+                    <div>{supplies.map(supply => {
                       const supplyQuantity = quantities[supply.id] ?? 1;
                       return (
-                        <div key={supply.id} className="mt-3 flex items-start gap-3">
+                          <div key={supply.id} className="mt-3 flex items-start gap-3 rounded-[10px] bg-white p-2.5">
                           <CartItemImage item={supply} />
                           <div className="min-w-0 flex-1">
                             <p className="text-[12px] font-semibold leading-[16px] text-[#1a1a1a]">{supply.name} <span className="rounded bg-[#efefef] px-1.5 py-0.5 text-[8px] font-medium text-[#7b7b7b]">Supplies</span></p>
@@ -6066,70 +6254,82 @@ function MultiPatientCartPage({
               )}
             </section>
 
-            <section className="mt-1">
-              <div className="border-t border-[#ededed] pt-4">
-                <div className="rounded-[8px] bg-[#fbfffd] px-3 py-2">
-                  <p className="text-[13px] font-medium text-[#171717]">Payment</p>
-                  <p className="mt-0.5 text-[10px] text-[#8c8c8c]">Select the payment method for the prescription</p>
+            <section className="rounded-[18px] bg-white p-4 shadow-[0_18px_50px_rgba(24,24,24,0.07)]">
+              <div>
+                <div className="rounded-[12px] bg-[#fbfaf8] px-4 py-3">
+                  <p className="text-[13px] font-semibold text-[#171717]">Payment</p>
+                  <p className="mt-0.5 text-[10px] text-[#8c8c8c]">{previewSubmitted ? "Payment method used for this order" : "Select the payment method for the prescription"}</p>
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setPaymentMethod("patient")}
-                    className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
-                      paymentMethod === "patient"
-                        ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
-                        : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
-                    }`}
-                  >
-                    Pay by Patient <User size={13} />
-                  </button>
-                  <button
-                    onClick={() => setPaymentMethod("clinic")}
-                    className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
-                      paymentMethod === "clinic"
-                        ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
-                        : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
-                    }`}
-                  >
-                    Pay by Clinic <Building2 size={13} />
-                  </button>
-                  <button className="inline-flex h-9 items-center gap-1.5 rounded-full border border-dashed border-[#17a34a] bg-white px-3 text-[12px] font-semibold text-[#0a8f3c] transition-colors hover:bg-[#f2f7f4]">
-                    <Plus size={13} /> Credit Card
-                  </button>
-                </div>
+                {previewSubmitted ? (
+                  <div className="mt-3 inline-flex h-9 items-center gap-2 rounded-full border border-[#dce8df] bg-[#f7faf8] px-3 text-[12px] font-semibold text-[#183229]">
+                    {paymentMethod === "patient" ? "Pay by Patient" : "Pay by Clinic"} {paymentMethod === "patient" ? <User size={13} /> : <Building2 size={13} />}
+                  </div>
+                ) : (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setPaymentMethod("patient")}
+                      className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
+                        paymentMethod === "patient"
+                          ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
+                          : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
+                      }`}
+                    >
+                      Pay by Patient <User size={13} />
+                    </button>
+                    <button
+                      onClick={() => setPaymentMethod("clinic")}
+                      className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
+                        paymentMethod === "clinic"
+                          ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
+                          : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
+                      }`}
+                    >
+                      Pay by Clinic <Building2 size={13} />
+                    </button>
+                    <button className="inline-flex h-9 items-center gap-1.5 rounded-full border border-dashed border-[#17a34a] bg-white px-3 text-[12px] font-semibold text-[#0a8f3c] transition-colors hover:bg-[#f2f7f4]">
+                      <Plus size={13} /> Credit Card
+                    </button>
+                  </div>
+                )}
               </div>
 
-              <div className="pt-5">
-                <div className="rounded-[8px] bg-[#fbfffd] px-3 py-2">
-                  <p className="text-[13px] font-medium text-[#171717]">Shipping</p>
-                  <p className="mt-0.5 text-[10px] text-[#8c8c8c]">Choose where to ship the prescription</p>
+              <div className="mt-5 border-t border-[#eee8e3] pt-5">
+                <div className="rounded-[12px] bg-[#fbfaf8] px-4 py-3">
+                  <p className="text-[13px] font-semibold text-[#171717]">Shipping</p>
+                  <p className="mt-0.5 text-[10px] text-[#8c8c8c]">{previewSubmitted ? "Shipping destination for this order" : "Choose where to ship the prescription"}</p>
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setShipTo("patient")}
-                    className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
-                      shipTo === "patient"
-                        ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
-                        : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
-                    }`}
-                  >
-                    Ship to Patient <User size={13} />
-                  </button>
-                  <button
-                    onClick={() => setShipTo("clinic")}
-                    className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
-                      shipTo === "clinic"
-                        ? "border-[#0fbf9f] bg-[#d9fbf4] text-[#183229]"
-                        : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
-                    }`}
-                  >
-                    Ship to Clinic <Building2 size={13} />
-                  </button>
-                </div>
+                {previewSubmitted ? (
+                  <div className="mt-3 inline-flex h-9 items-center gap-2 rounded-full border border-[#dce8df] bg-[#f7faf8] px-3 text-[12px] font-semibold text-[#183229]">
+                    {shipTo === "patient" ? "Ship to Patient" : "Ship to Clinic"} {shipTo === "patient" ? <User size={13} /> : <Building2 size={13} />}
+                  </div>
+                ) : (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setShipTo("patient")}
+                      className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
+                        shipTo === "patient"
+                          ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
+                          : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
+                      }`}
+                    >
+                      Ship to Patient <User size={13} />
+                    </button>
+                    <button
+                      onClick={() => setShipTo("clinic")}
+                      className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
+                        shipTo === "clinic"
+                          ? "border-[#0fbf9f] bg-[#d9fbf4] text-[#183229]"
+                          : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
+                      }`}
+                    >
+                      Ship to Clinic <Building2 size={13} />
+                    </button>
+                  </div>
+                )}
               </div>
             </section>
 
-            <section className="mt-8 border-t border-[#ededed] pt-5">
+            <section className="rounded-[18px] bg-white p-4 shadow-[0_18px_50px_rgba(24,24,24,0.07)]">
               <div className="space-y-3 text-[13px]">
                 <div className="flex justify-between text-[#222]"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
                 <div className="flex justify-between text-[#222]"><span>Estimated Shipping &amp; Handling</span><span>{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span></div>
@@ -6138,10 +6338,20 @@ function MultiPatientCartPage({
               </div>
             </section>
 
-              <p className="mt-4 text-[11px] leading-[16px] text-[#333]">Multi-Patient Orders can only be shipped to Clinic's address.</p>
-              <button onClick={() => runWithAppLoader(() => onNavigate("orders"), 1000)} className="mt-6 flex h-[52px] w-full items-center justify-center rounded-full bg-[#111] text-[13px] font-medium text-white hover:bg-black">
-                Review and submit
-              </button>
+              <div className="sticky bottom-0 -mx-5 mt-2 border-t border-[#eee8e3] bg-white/95 px-5 py-4 backdrop-blur">
+                <p className="rounded-[10px] bg-[#fbfaf8] px-3 py-3 text-[11px] leading-[16px] text-[#333]">Multi-Patient Orders can only be shipped to Clinic's address.</p>
+                <div className="mt-4">
+                  <CheckoutSubmissionFooter
+                    state={previewSubmissionState}
+                    submitLabel="Review and submit"
+                    onSubmit={() => {
+                      setPreviewSubmissionState("submitting");
+                      window.setTimeout(() => setPreviewSubmissionState("submitted"), 2000);
+                    }}
+                    onGoToOrders={() => onNavigate("orders")}
+                  />
+                </div>
+              </div>
             </div>
           </aside>
         </div>
@@ -6152,6 +6362,7 @@ function MultiPatientCartPage({
 
 function CheckoutPrescriptionPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewSubmissionState, setReviewSubmissionState] = useState<CheckoutSubmissionState>("idle");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ "altin-rx": true });
   const [shippingMethod, setShippingMethod] = useState<"ups" | "fedex">("ups");
 
@@ -6324,12 +6535,11 @@ function CheckoutPrescriptionPage({ onNavigate }: { onNavigate: (p: Page) => voi
 
   return (
     <div className="-m-8 min-h-screen bg-[var(--app-soft-hover)] px-6 py-8">
-      <button onClick={() => onNavigate("cart-multi")} className="fixed left-[calc(16rem+6px)] top-20 z-10 flex h-9 w-7 items-center justify-center rounded-r-[8px] bg-[#f7efe9] text-[#183229] shadow-sm" aria-label="Back to cart">
-        <ChevronLeft size={18} />
-      </button>
-
       <div className="mx-auto max-w-[940px]">
-        <h1 className="text-[30px] font-semibold tracking-[-0.01em] text-[#1a1a1a]">New Prescription Order</h1>
+        <div className="flex items-center gap-3">
+          <PageBackButton onClick={() => onNavigate("cart-multi")} label="Back to cart" />
+          <h1 className="text-[30px] font-semibold tracking-[-0.01em] text-[#1a1a1a]">New Prescription Order</h1>
+        </div>
 
         <section className="mt-10">
           <h2 className="border-b border-[#e8e3df] pb-2 text-[16px] font-semibold text-[#1a1a1a]">Patient</h2>
@@ -6386,7 +6596,7 @@ function CheckoutPrescriptionPage({ onNavigate }: { onNavigate: (p: Page) => voi
 
             <div className="mt-6 flex justify-end gap-3">
               <button onClick={() => onNavigate("cart-multi")} className="h-10 rounded-[8px] border border-[#d8dfdc] bg-white px-4 text-[13px] font-semibold text-[#183229] transition-colors hover:bg-[#f2f7f4]">Cancel</button>
-              <button onClick={() => setReviewOpen(true)} className="h-10 rounded-[8px] bg-[#183229] px-5 text-[13px] font-semibold text-white transition-colors hover:bg-[#244438]">Review order</button>
+              <button onClick={() => { setReviewSubmissionState("idle"); setReviewOpen(true); }} className="h-10 rounded-[8px] bg-[#183229] px-5 text-[13px] font-semibold text-white transition-colors hover:bg-[#244438]">Review order</button>
             </div>
           </div>
         </section>
@@ -6394,9 +6604,9 @@ function CheckoutPrescriptionPage({ onNavigate }: { onNavigate: (p: Page) => voi
 
       {reviewOpen && (
         <div className="fixed inset-0 z-50 flex justify-end bg-[#1a1a1a]/35 backdrop-blur-[2px]">
-          <button className="absolute inset-0 cursor-default" onClick={() => setReviewOpen(false)} aria-label="Close review" />
+          <button className="absolute inset-0 cursor-default" onClick={() => { setReviewOpen(false); setReviewSubmissionState("idle"); }} aria-label="Close review" />
           <aside className="relative h-full w-full max-w-[430px] overflow-auto border-l border-[#e8e3df] bg-white px-6 py-6 shadow-2xl">
-            <button onClick={() => setReviewOpen(false)} className="mb-6 flex size-8 items-center justify-center rounded-[7px] text-[#183229] hover:bg-[#f6f4f5]" aria-label="Close review"><XCircle size={18} /></button>
+            <button onClick={() => { setReviewOpen(false); setReviewSubmissionState("idle"); }} className="mb-6 flex size-8 items-center justify-center rounded-[7px] text-[#183229] hover:bg-[#f6f4f5]" aria-label="Close review"><XCircle size={18} /></button>
             <h2 className="text-[22px] font-semibold text-[#1a1a1a]">Review order</h2>
 
             <section className="mt-7">
@@ -6450,9 +6660,17 @@ function CheckoutPrescriptionPage({ onNavigate }: { onNavigate: (p: Page) => voi
               </div>
             </section>
 
-            <div className="sticky bottom-0 -mx-6 mt-8 flex gap-2 border-t border-[#eee8e3] bg-white px-6 py-4">
-              <button onClick={() => setReviewOpen(false)} className="flex h-10 flex-1 items-center justify-center gap-2 rounded-[8px] border border-[#183229] text-[13px] font-semibold text-[#183229]"><ChevronLeft size={15} /> Edit order</button>
-              <button onClick={() => onNavigate("orders")} className="flex h-10 flex-1 items-center justify-center gap-2 rounded-[8px] bg-[#183229] text-[13px] font-semibold text-white"><CheckCircle2 size={15} /> Submit and pay</button>
+            <div className="sticky bottom-0 -mx-6 mt-8 border-t border-[#eee8e3] bg-white px-6 py-4">
+              <CheckoutSubmissionFooter
+                state={reviewSubmissionState}
+                submitLabel="Submit and pay"
+                onEdit={() => { setReviewOpen(false); setReviewSubmissionState("idle"); }}
+                onSubmit={() => {
+                  setReviewSubmissionState("submitting");
+                  window.setTimeout(() => setReviewSubmissionState("submitted"), 2000);
+                }}
+                onGoToOrders={() => onNavigate("orders")}
+              />
             </div>
           </aside>
         </div>
