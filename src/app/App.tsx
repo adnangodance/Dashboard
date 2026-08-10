@@ -85,6 +85,7 @@ import scriptlinkrxLandingLogo from "@/assets/scriptlinkrx-landing-logo.png";
 import supportShayne from "@/assets/support-shayne.png";
 import supportZee from "@/assets/support-zee.png";
 import userVerifiedIcon from "@/assets/user-verified.svg";
+import blankVialReference from "@/assets/blank-vial-reference.png";
 
 type Page =
   | "dashboard"
@@ -1159,11 +1160,15 @@ function FigmaCard({
       <div className="col-1 row-1 h-[302px] w-[205.6px] rounded-[12.13px] bg-gradient-to-b from-[rgba(247,239,233,0.1)] to-[rgba(236,229,182,0.1)]" />
 
       <div className="pointer-events-none col-1 row-1" style={{ marginLeft: imgL, marginTop: imgT, width: imgW, height: imgH }}>
-        <img
-          alt={name}
-          className={`size-full max-w-none ${imgContain ? "object-contain" : "object-cover"}`}
-          src={img}
-        />
+        {img === blankVialReference ? (
+          <ManualVialPreview name={name} strength="20mg/25mg/mL" size="1 (0.5mL) Vial" compact />
+        ) : (
+          <img
+            alt={name}
+            className={`size-full max-w-none ${imgContain ? "object-contain" : "object-cover"}`}
+            src={img}
+          />
+        )}
       </div>
 
       <div className="col-1 row-1 z-10 flex items-center gap-1" style={{ marginLeft: 12, marginTop: 15 }}>
@@ -1348,6 +1353,7 @@ type CardDef = {
 };
 
 const POPULAR_CARDS: CardDef[] = [
+  { id: 8, name: "Tirzepatide/Pyridoxine (B6)", price: "$125.43", pharmacies: 3, pharmacy: "1st Choice Compounding Pharmacy", shippingState: "Florida", areaOfTreatment: "Weight Loss", dosage: "Injection", img: blankVialReference, imgW: 145, imgH: 181, imgL: 30, imgT: 17, imgContain: true, btnOffsetX: 168, heartVariant: "black" },
   { id: 1, name: "NAD+ Injecton", price: "$55.88", pharmacies: 4, pharmacy: "Optimal Balance Pharmacy", shippingState: "New York", areaOfTreatment: "Wellness", dosage: "Injection", img: img430, imgW: 111, imgH: 187, imgL: 47, imgT: 12, btnOffsetX: 170, heartVariant: "green" },
   { id: 2, name: "Nandrolone Decanoate", price: "$35.88", pharmacies: 2, pharmacy: "DCA Pharmacy", shippingState: "Florida", areaOfTreatment: "Men's Health", dosage: "Injection", img: img429, imgW: 138, imgH: 173, imgL: 37.4, imgT: 27, hasRxBadge: true, btnOffsetX: 168.4, heartVariant: "black" },
   { id: 3, name: "NAD+ Injecton", price: "$45.99", pharmacies: 4, pharmacy: "1st Choice Compounding Pharmacy", shippingState: "New York", areaOfTreatment: "Wellness", dosage: "Injection", img: img431, imgW: 133, imgH: 205, imgL: 34, imgT: 2, btnOffsetX: 168, heartVariant: "none" },
@@ -1358,6 +1364,7 @@ const POPULAR_CARDS: CardDef[] = [
 ];
 
 const ALL_CARDS: CardDef[] = [
+  { id: 18, name: "Tirzepatide/Pyridoxine (B6)", price: "$125.43", pharmacies: 3, pharmacy: "1st Choice Compounding Pharmacy", shippingState: "Florida", areaOfTreatment: "Weight Loss", dosage: "Injection", img: blankVialReference, imgW: 145, imgH: 181, imgL: 30, imgT: 17, imgContain: true, btnOffsetX: 168, heartVariant: "black" },
   { id: 11, name: "NAD+ Injecton", price: "$55.88", pharmacies: 4, pharmacy: "Optimal Balance Pharmacy", shippingState: "New York", areaOfTreatment: "Wellness", dosage: "Injection", img: img435, imgW: 111, imgH: 187, imgL: 47, imgT: 12, btnOffsetX: 170, heartVariant: "green" },
   { id: 12, name: "Nandrolone Decanoate", price: "$35.88", pharmacies: 2, pharmacy: "DCA Pharmacy", shippingState: "Florida", areaOfTreatment: "Men's Health", dosage: "Injection", img: img429, imgW: 138, imgH: 173, imgL: 37.4, imgT: 27, hasRxBadge: true, btnOffsetX: 168.4, heartVariant: "black" },
   { id: 13, name: "NAD+ Injecton", price: "$45.99", pharmacies: 4, pharmacy: "1st Choice Compounding Pharmacy", shippingState: "New York", areaOfTreatment: "Wellness", dosage: "Injection", img: img436, imgW: 133, imgH: 205, imgL: 34, imgT: 2, btnOffsetX: 168, heartVariant: "none" },
@@ -2022,6 +2029,45 @@ function OptionPill({
   );
 }
 
+function ManualVialPreview({
+  name,
+  strength,
+  size,
+  compact = false,
+}: {
+  name: string;
+  strength: string;
+  size: string;
+  compact?: boolean;
+}) {
+  const nameParts = name.split(/\s*\/\s*/).filter(Boolean);
+  const firstLine = nameParts.length > 1 ? `${nameParts[0]}/` : name;
+  const secondLine = nameParts.slice(1).join(" / ");
+  const volumeMatch = size.match(/(\d+(?:\.\d+)?)\s*mL/i);
+  const sizeLabel = volumeMatch ? `${volumeMatch[1]}mL VIAL` : size.replace(/^\d+\s*/, "");
+
+  return (
+    <div
+      className={`manual-vial-preview ${compact ? "manual-vial-preview-compact" : ""}`}
+      role="img"
+      aria-label={`${name}, ${strength}, ${size}`}
+    >
+      <img src={blankVialReference} alt="" draggable={false} />
+      <div className="manual-vial-label" aria-hidden="true">
+        <div className="manual-vial-product-name">
+          <span>{firstLine}</span>
+          {secondLine && <span>{secondLine}</span>}
+        </div>
+        <span className="manual-vial-size">{sizeLabel}</span>
+        <div className="manual-vial-strength-band">
+          <strong>{strength}</strong>
+          <span className="manual-vial-mark"><i /><i /><i /><i /><i /><i /></span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ProductDetailPage({
   onNavigate,
   cartMode,
@@ -2038,8 +2084,9 @@ function ProductDetailPage({
   extraVariants: boolean;
 }) {
   const isCompoundProduct = product.name.includes("/");
-  const defaultSize = product.dosage === "Gel" ? "30g Tube" : product.dosage === "Capsule" ? "30 Capsules" : "1 (5mL) Vial";
-  const defaultStrength = isCompoundProduct ? "15mg/40mg/250mg/mL" : product.price.includes("mg") ? product.price : product.dosage === "Gel" ? "0.025%" : "5mg/mL";
+  const isTirzepatidePyridoxine = product.name.toLowerCase().includes("tirzepatide") && product.name.toLowerCase().includes("pyridoxine");
+  const defaultSize = product.dosage === "Gel" ? "30g Tube" : product.dosage === "Capsule" ? "30 Capsules" : isTirzepatidePyridoxine ? "1 (0.5mL) Vial" : "1 (5mL) Vial";
+  const defaultStrength = isTirzepatidePyridoxine ? "20mg/25mg/mL" : isCompoundProduct ? "15mg/40mg/250mg/mL" : product.price.includes("mg") ? product.price : product.dosage === "Gel" ? "0.025%" : "5mg/mL";
   const [size, setSize] = useState(defaultSize);
   const [strength, setStrength] = useState(defaultStrength);
   const [injType, setInjType] = useState(product.dosage === "Injection" ? "Intramuscular" : product.dosage);
@@ -2102,12 +2149,16 @@ function ProductDetailPage({
     "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
     "West Virginia", "Wisconsin", "Wyoming",
   ];
-  const sizeCatalog = product.dosage === "Gel"
+  const sizeCatalog = isTirzepatidePyridoxine
+    ? ["1 (0.5mL) Vial", "1 (1mL) Vial", "1 (2mL) Vial", "1 (3mL) Vial", "1 (5mL) Vial", "1 (10mL) Vial", "2 (0.5mL) Vials", "2 (1mL) Vials", "2 (2mL) Vials", "2 (5mL) Vials"]
+    : product.dosage === "Gel"
     ? ["10g Tube", "15g Tube", "20g Tube", "30g Tube", "45g Tube", "60g Tube", "75g Tube", "90g Tube", "15g Pump", "30g Pump", "45g Pump", "60g Pump", "75g Pump", "90g Pump", "120g Pump"]
     : product.dosage === "Capsule"
     ? ["15 Capsules", "20 Capsules", "30 Capsules", "40 Capsules", "45 Capsules", "50 Capsules", "60 Capsules", "75 Capsules", "90 Capsules", "100 Capsules", "120 Capsules", "150 Capsules", "180 Capsules", "240 Capsules", "360 Capsules"]
     : ["1 (1mL) Vial", "1 (2mL) Vial", "1 (3mL) Vial", "1 (5mL) Vial", "1 (10mL) Vial", "1 (15mL) Vial", "1 (20mL) Vial", "1 (30mL) Vial", "2 (2mL) Vials", "2 (5mL) Vials", "2 (10mL) Vials", "3 (5mL) Vials", "4 (2mL) Vials", "5 (1mL) Vials", "6 (1mL) Vials"];
-  const strengthCatalog = product.dosage === "Gel"
+  const strengthCatalog = isTirzepatidePyridoxine
+    ? ["5mg/6.25mg/mL", "7.5mg/9.4mg/mL", "10mg/12.5mg/mL", "12.5mg/15mg/mL", "15mg/18.75mg/mL", "17.5mg/22mg/mL", "20mg/25mg/mL", "22.5mg/28mg/mL", "25mg/31.25mg/mL", "30mg/37.5mg/mL"]
+    : product.dosage === "Gel"
     ? ["0.005%", "0.01%", "0.015%", "0.02%", "0.025%", "0.03%", "0.04%", "0.05%", "0.06%", "0.075%", "0.08%", "0.1%", "0.125%", "0.15%", "0.2%"]
     : product.dosage === "Capsule"
     ? ["2.5mg", "5mg", "7.5mg", "10mg", "12.5mg", "15mg", "20mg", "25mg", "30mg", "40mg", "50mg", "75mg", "100mg", "150mg", "200mg"]
@@ -2267,7 +2318,11 @@ function ProductDetailPage({
       <div className={`grid max-w-[1180px] items-start gap-10 ${isReferenceStyle ? "xl:grid-cols-[minmax(0,1.1fr)_minmax(480px,0.9fr)]" : "xl:grid-cols-[minmax(0,1.244fr)_minmax(0,1fr)]"}`}>
         <div className="min-w-0">
           <div className={`flex h-[600px] items-center justify-center overflow-hidden rounded-[18px] p-16 ${isReferenceStyle ? "bg-[#fafafa]" : `border border-[#e4e4e4] ${productDetailVariant === 2 ? "bg-[#fbfdfc]" : "bg-[#f8f8f8]"}`}`}>
-            <img src={product.img} alt={product.name} className="max-h-[410px] h-full w-full object-contain mix-blend-multiply" />
+            {isTirzepatidePyridoxine ? (
+              <ManualVialPreview name={product.name} strength={strength} size={size} />
+            ) : (
+              <img src={product.img} alt={product.name} className="max-h-[470px] h-full w-full object-contain mix-blend-multiply" />
+            )}
           </div>
           <div className="mt-7 flex flex-wrap gap-2">
             {[
@@ -2848,7 +2903,7 @@ const ORDERS = [
     ],
     clinic: { name: "ScriptLinkRx Demo", address: "2823 Middletown Road Line 2, Bronx, NY 10461", phone: "(646)-617-9881" },
     items: [
-	      { patientName: "Zeee Rabushaj", name: "Tirzepatide/Pyridoxine (B6)", description: "1 (0.5mL) Vial | 20mg/25mg/mL", pharmacy: "1st Choice Compounding Pharmacy", tracking: "Tracking Not Ready", qty: 1, authRefills: 1, refillsLeft: 0, daysSupply: 1, price: "$125.43", image: imgPT141 },
+	      { patientName: "Zeee Rabushaj", name: "Tirzepatide/Pyridoxine (B6)", description: "1 (0.5mL) Vial | 20mg/25mg/mL", pharmacy: "1st Choice Compounding Pharmacy", tracking: "Tracking Not Ready", qty: 1, authRefills: 1, refillsLeft: 0, daysSupply: 1, price: "$125.43", image: blankVialReference },
 	      { patientName: "Zeee Rabushaj", name: "5-Amino-1mq/NMN", description: "30 Capsules | 25mg/500mg", pharmacy: "1st Choice Compounding Pharmacy", tracking: "Tracking Not Ready", qty: 30, authRefills: 1, refillsLeft: 0, daysSupply: 1, price: "$171.80", image: img431 },
 	      { patientName: "Altin Selimi", name: "Bremelanotide (PT-141)", description: "1 (10mL) Bottle | 10mg/mL", pharmacy: "Precision Compounding Pharmacy", tracking: "Tracking Not Ready", qty: 1, authRefills: 1, refillsLeft: 0, daysSupply: 1, price: "$118.80", image: imgProduct452 },
 	      { patientName: "Altin Selimi", name: "Aminoblend", description: "1 (30mL) Vial | 100mg/50mg/50mg/50mg/100mg/mL", pharmacy: "Thesis Pharmacy", tracking: "Tracking Not Ready", qty: 1, authRefills: 2, refillsLeft: 0, daysSupply: 1, price: "$35.99", image: img432 },
@@ -4573,7 +4628,7 @@ function SinglePatientCartPage({
     `${patient.name} ${patient.phone} ${patient.address}`.toLowerCase().includes(patientSearch.toLowerCase())
   );
   const baseItems = [
-    { id: 1, pharmacy: "1st Choice Compounding Pharmacy", name: "Tirzepatide/Pyridoxine (B6)", detail: "20mg/25mg/mL | 1 (0.5mL) Vial", qty: 1, price: 125.43, image: imgPT141, kind: "vial" },
+    { id: 1, pharmacy: "1st Choice Compounding Pharmacy", name: "Tirzepatide/Pyridoxine (B6)", detail: "20mg/25mg/mL | 1 (0.5mL) Vial", qty: 1, price: 125.43, image: blankVialReference, kind: "vial" },
     { id: 2, pharmacy: "1st Choice Compounding Pharmacy", name: "BD 27G X 1/2 Needle Only", detail: "1 Needle", qty: 1, price: 0, image: null, kind: "supply" },
     { id: 5, pharmacy: "Precision Compounding Pharmacy", name: "Aminoblend", detail: "100mg/50mg/50mg/50mg/100mg/mL | 1 (30mL) Vial", qty: 1, price: 35.99, image: img432, kind: "vial" },
   ];
@@ -6476,7 +6531,7 @@ function CheckoutPrescriptionPage({ onNavigate }: { onNavigate: (p: Page) => voi
     }
     return (
       <div className="flex size-11 items-center justify-center overflow-hidden rounded-[8px] border border-[#eee] bg-gradient-to-b from-[#f7efe9] to-[#ece5b6]/45">
-        <img src={imgPT141} alt="" className="h-12 w-12 object-contain mix-blend-multiply" />
+        <img src={blankVialReference} alt="" className="h-12 w-12 object-contain mix-blend-multiply" />
       </div>
     );
   }
