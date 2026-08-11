@@ -1115,6 +1115,8 @@ const RX_ICON = "M15.9802 8.84809C15.9898 8.88727 15.9916 8.92795 15.9855 8.9678
 // Exact Figma product card using stacking CSS grid (col-1 row-1 for all children)
 function FigmaCard({
   name,
+  strength,
+  vialPalette,
   price,
   pharmacies,
   img,
@@ -1132,6 +1134,8 @@ function FigmaCard({
   onClick,
 }: {
   name: string;
+  strength?: string;
+  vialPalette?: VialPalette;
   price: string;
   pharmacies: number;
   img: string;
@@ -1161,7 +1165,7 @@ function FigmaCard({
 
       <div className="pointer-events-none col-1 row-1" style={{ marginLeft: imgL, marginTop: imgT, width: imgW, height: imgH }}>
         {img === blankVialReference ? (
-          <ManualVialPreview name={name} strength="20mg/25mg/mL" size="1 (0.5mL) Vial" compact />
+          <ManualVialPreview name={name} strength={strength ?? "20mg/25mg/mL"} size="1 (5mL) Vial" palette={vialPalette} compact />
         ) : (
           <img
             alt={name}
@@ -1233,6 +1237,8 @@ function FigmaCard({
 
 function OldCatalogCard({
   name,
+  strength,
+  vialPalette,
   price,
   pharmacies,
   img,
@@ -1243,6 +1249,8 @@ function OldCatalogCard({
   onClick,
 }: {
   name: string;
+  strength?: string;
+  vialPalette?: VialPalette;
   price: string;
   pharmacies: number;
   img: string;
@@ -1258,7 +1266,13 @@ function OldCatalogCard({
       className="relative h-[374px] w-[268px] shrink-0 cursor-pointer overflow-hidden rounded-[16px] bg-gradient-to-b from-[rgba(247,239,233,0.10)] to-[rgba(236,229,182,0.10)] transition-transform duration-200 hover:-translate-y-0.5"
     >
       <div className="flex h-[276px] items-center justify-center px-7 pt-5">
-        <img src={img} alt={name} className="max-h-[245px] max-w-[205px] object-contain mix-blend-multiply" />
+        {img === blankVialReference ? (
+          <div className="h-[245px] w-[196px]">
+            <ManualVialPreview name={name} strength={strength ?? "20mg/25mg/mL"} size="1 (5mL) Vial" palette={vialPalette} compact />
+          </div>
+        ) : (
+          <img src={img} alt={name} className="max-h-[245px] max-w-[205px] object-contain mix-blend-multiply" />
+        )}
       </div>
       <div className="absolute inset-x-0 bottom-0 px-6 pb-6">
         <h3 className="truncate text-[16px] font-medium leading-5 text-[#1a1a1a]">{name}</h3>
@@ -1282,6 +1296,8 @@ function OldCatalogCard({
 
 function PharmacyCatalogCard({
   name,
+  strength,
+  vialPalette,
   price,
   pharmacy,
   pharmacies,
@@ -1293,6 +1309,8 @@ function PharmacyCatalogCard({
   onClick,
 }: {
   name: string;
+  strength?: string;
+  vialPalette?: VialPalette;
   price: string;
   pharmacy: string;
   pharmacies: number;
@@ -1306,7 +1324,13 @@ function PharmacyCatalogCard({
   return (
     <article onClick={onClick} className="group relative flex h-[374px] w-[268px] shrink-0 cursor-pointer flex-col overflow-hidden rounded-[16px] border border-[#e7e9e7] bg-white transition-colors hover:border-[#cbd2ce]">
       <div className="relative flex h-[230px] items-center justify-center bg-[#f7f8f7] px-7 py-5">
-        <img src={img} alt={name} className="max-h-[195px] max-w-[175px] object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-[1.03]" />
+        {img === blankVialReference ? (
+          <div className="h-[195px] w-[156px] transition-transform duration-300 group-hover:scale-[1.03]">
+            <ManualVialPreview name={name} strength={strength ?? "20mg/25mg/mL"} size="1 (5mL) Vial" palette={vialPalette} compact />
+          </div>
+        ) : (
+          <img src={img} alt={name} className="max-h-[195px] max-w-[175px] object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-[1.03]" />
+        )}
         {heartVariant !== "none" && (
           <button type="button" onClick={(event) => { event.stopPropagation(); onFavorite(); }} className="absolute right-3.5 top-3.5 flex size-8 items-center justify-center rounded-full border border-[#e5e8e6] bg-white text-[#1c211e]" aria-label={favorited ? "Remove from favorites" : "Add to favorites"}>
             <Heart size={15} strokeWidth={1.8} className={favorited || heartVariant === "green" ? "fill-[#2563EB] text-[#2563EB]" : ""} />
@@ -1334,6 +1358,13 @@ function PharmacyCatalogCard({
   );
 }
 
+type VialPalette = {
+  start: string;
+  middle: string;
+  end: string;
+  mark: string;
+};
+
 // Product definitions matching the Figma dashboard export exactly
 type CardDef = {
   id: number;
@@ -1350,7 +1381,50 @@ type CardDef = {
   hasRxBadge?: boolean;
   btnOffsetX: number;
   heartVariant: "green" | "black" | "none";
+  strength?: string;
+  vialPalette?: VialPalette;
 };
+
+const NEW_INJECTION_CARDS: CardDef[] = [
+  { id: 101, name: "Nandrolone Decanoate (Sesame Oil)", strength: "200mg/mL", areaOfTreatment: "Men's Health", vialPalette: { start: "#553018", middle: "#9a5c2d", end: "#d4934d", mark: "#dda45e" } },
+  { id: 102, name: "Nandrolone Grape Seed Oil", strength: "200mg/mL", areaOfTreatment: "Men's Health", vialPalette: { start: "#3f224f", middle: "#78468a", end: "#b06bc2", mark: "#bb7bca" } },
+  { id: 103, name: "Oxytocin", strength: "100IU/mL", areaOfTreatment: "Women's Health", vialPalette: { start: "#174d72", middle: "#2784ad", end: "#61bdd1", mark: "#73c7d8" } },
+  { id: 104, name: "PEG-MGF", strength: "0.4mg/mL", areaOfTreatment: "Peptide Therapy", vialPalette: { start: "#135956", middle: "#238f82", end: "#55c5ad", mark: "#67ceb9" } },
+  { id: 105, name: "Pentadecapeptide Arginate (PDA)", strength: "10mg/mL", areaOfTreatment: "Peptide Therapy", vialPalette: { start: "#772e3a", middle: "#b94f5d", end: "#ea8084", mark: "#ee9194" } },
+  { id: 106, name: "Phenylephrine", strength: "10mg/mL", areaOfTreatment: "Wellness", vialPalette: { start: "#792126", middle: "#b73b3e", end: "#e56b68", mark: "#ea7c78" } },
+  { id: 107, name: "Procaine", strength: "2%", areaOfTreatment: "Wellness", vialPalette: { start: "#1d527d", middle: "#367eb6", end: "#75b5df", mark: "#86c0e4" } },
+  { id: 108, name: "Proline", strength: "50mg/mL", areaOfTreatment: "Wellness", vialPalette: { start: "#18563d", middle: "#2f8b61", end: "#67c893", mark: "#79d09f" } },
+  { id: 109, name: "PT/141", strength: "2mg/mL", areaOfTreatment: "Peptide Therapy", vialPalette: { start: "#682052", middle: "#a53b80", end: "#d96aae", mark: "#df7cba" } },
+  { id: 110, name: "Pyridoxine (Vitamin B6)", strength: "100mg/mL", areaOfTreatment: "Wellness", vialPalette: { start: "#735113", middle: "#ad7c22", end: "#d9ad4f", mark: "#e1bb65" } },
+  { id: 111, name: "Quadmix (PAPA/PHEN/ATRO/PGE)", strength: "9mg/1mg/10mcg/10mcg/mL", areaOfTreatment: "Men's Health", vialPalette: { start: "#172b5b", middle: "#2e4f91", end: "#6683c5", mark: "#7892ce" } },
+  { id: 112, name: "Semaglutide/Glycine/B12", strength: "1mg/1mg/10mg/mL", areaOfTreatment: "Weight Loss", vialPalette: { start: "#0f5b62", middle: "#168c93", end: "#4cc3c1", mark: "#60cdca" } },
+  { id: 113, name: "Sermorelin/Ipamorelin", strength: "3mg/3.6mg/mL", areaOfTreatment: "Peptide Therapy", vialPalette: { start: "#32326f", middle: "#5752a8", end: "#8d82dc", mark: "#9b91e2" } },
+  { id: 114, name: "Sodium Deoxycholate", strength: "1.67%", areaOfTreatment: "Wellness", vialPalette: { start: "#7c3e17", middle: "#b86529", end: "#e49a54", mark: "#eaa868" } },
+  { id: 115, name: "Testosterone Cyp Grape Seed Oil", strength: "200mg/mL", areaOfTreatment: "Men's Health", vialPalette: { start: "#173b77", middle: "#2b61ab", end: "#638fd5", mark: "#759cdb" } },
+  { id: 116, name: "Testosterone Ent Grape Seed Oil", strength: "200mg/mL", areaOfTreatment: "Men's Health", vialPalette: { start: "#28435c", middle: "#496d8a", end: "#7ea1b9", mark: "#8eacc2" } },
+  { id: 117, name: "Testosterone Pro Grape Seed Oil", strength: "100mg/mL", areaOfTreatment: "Men's Health", vialPalette: { start: "#6b2d24", middle: "#a84d3c", end: "#d67d68", mark: "#de8e7b" } },
+  { id: 118, name: "Testosterone (Various Female Esters & Blends)", strength: "Cypionate/Propionate 175mg/25mg/mL", areaOfTreatment: "Hormone Support", vialPalette: { start: "#652f52", middle: "#9d4e7d", end: "#d17dac", mark: "#d98db7" } },
+  { id: 119, name: "Test Product 2", strength: "10mg/2.5mg/mL", areaOfTreatment: "Wellness", vialPalette: { start: "#35414c", middle: "#60717e", end: "#91a1aa", mark: "#9eacb4" } },
+  { id: 120, name: "Thymosin Alpha-1", strength: "3mg/mL", areaOfTreatment: "Peptide Therapy", vialPalette: { start: "#4b286e", middle: "#7545a2", end: "#a975d2", mark: "#b486da" } },
+  { id: 121, name: "Tirzepatide/Glycine/B12", strength: "10mg/5mg/500mcg/mL", areaOfTreatment: "Weight Loss", vialPalette: { start: "#282e84", middle: "#5d55bd", end: "#9680ef", mark: "#9f8cf1" } },
+  { id: 122, name: "Vitamin B-12 (Cyanocobalamin)", strength: "1200mg/mL", areaOfTreatment: "Wellness", vialPalette: { start: "#721d3f", middle: "#b43365", end: "#e76591", mark: "#eb779e" } },
+  { id: 123, name: "Vitamin D3", strength: "50,000IU/mL", areaOfTreatment: "Wellness", vialPalette: { start: "#6d5510", middle: "#a98718", end: "#d8b945", mark: "#dfc45b" } },
+].map((product, index) => ({
+  ...product,
+  price: "$35.88",
+  pharmacies: 2 + (index % 4),
+  pharmacy: ["1st Choice Compounding Pharmacy", "Optimal Balance Pharmacy", "DCA Pharmacy", "Thesis Pharmacy"][index % 4],
+  shippingState: ["Florida", "New York", "Texas"][index % 3],
+  dosage: "Injection",
+  img: blankVialReference,
+  imgW: 145,
+  imgH: 181,
+  imgL: 30,
+  imgT: 17,
+  imgContain: true,
+  btnOffsetX: 168,
+  heartVariant: "black" as const,
+}));
 
 const POPULAR_CARDS: CardDef[] = [
   { id: 8, name: "Tirzepatide/Pyridoxine (B6)", price: "$125.43", pharmacies: 3, pharmacy: "1st Choice Compounding Pharmacy", shippingState: "Florida", areaOfTreatment: "Weight Loss", dosage: "Injection", img: blankVialReference, imgW: 145, imgH: 181, imgL: 30, imgT: 17, imgContain: true, btnOffsetX: 168, heartVariant: "black" },
@@ -1372,6 +1446,7 @@ const ALL_CARDS: CardDef[] = [
   { id: 15, name: "Esteadol", price: "$65.99", pharmacies: 4, pharmacy: "Rush Pharmacy TX", shippingState: "New York", areaOfTreatment: "Women's Health", dosage: "Gel", img: img433, imgW: 99, imgH: 166, imgL: 49.8, imgT: 21, btnOffsetX: 168.8, heartVariant: "black" },
   { id: 16, name: "NAD+ Injecton", price: "$15.98", pharmacies: 4, pharmacy: "1st Choice Compounding Pharmacy", shippingState: "New York", areaOfTreatment: "Wellness", dosage: "Injection", img: img437, imgW: 130, imgH: 193, imgL: 33.6, imgT: 18, btnOffsetX: 168.6, heartVariant: "black" },
   { id: 17, name: "Testosterone Cypionate Injection", price: "$135.99", pharmacies: 5, pharmacy: "DCA Pharmacy", shippingState: "New York", areaOfTreatment: "Men's Health", dosage: "Injection", img: img452dash, imgW: 166, imgH: 181, imgL: 21, imgT: 19.48, btnOffsetX: 168, heartVariant: "black" },
+  ...NEW_INJECTION_CARDS,
 ];
 
 const PHARMACIES_MULTI = [
@@ -1486,6 +1561,8 @@ function FavoritesPage({
               <article key={product.id} className="relative w-[268px]">
                 <FigmaCard
                   name={product.name}
+                  strength={product.strength}
+                  vialPalette={product.vialPalette}
                   price={product.price}
                   pharmacies={product.pharmacies}
                   img={product.img}
@@ -1620,6 +1697,8 @@ function ProductsPage({
         <PharmacyCatalogCard
           key={card.id}
           name={card.name}
+          strength={card.strength}
+          vialPalette={card.vialPalette}
           price={card.price}
           pharmacy={card.pharmacy}
           pharmacies={card.pharmacies}
@@ -1640,6 +1719,8 @@ function ProductsPage({
         <OldCatalogCard
           key={card.id}
           name={card.name}
+          strength={card.strength}
+          vialPalette={card.vialPalette}
           price={card.price}
           pharmacies={card.pharmacies}
           img={card.img}
@@ -1657,6 +1738,8 @@ function ProductsPage({
       <FigmaCard
         key={card.id}
         name={card.name}
+        strength={card.strength}
+        vialPalette={card.vialPalette}
         price={card.price}
         pharmacies={card.pharmacies}
         img={card.img}
@@ -2033,34 +2116,65 @@ function ManualVialPreview({
   name,
   strength,
   size,
+  palette,
   compact = false,
 }: {
   name: string;
   strength: string;
   size: string;
+  palette?: VialPalette;
   compact?: boolean;
 }) {
-  const nameParts = name.split(/\s*\/\s*/).filter(Boolean);
-  const firstLine = nameParts.length > 1 ? `${nameParts[0]}/` : name;
-  const secondLine = nameParts.slice(1).join(" / ");
+  const breakCandidates = Array.from(name).flatMap((character, index) =>
+    character === " " || character === "/" ? [{ index, character }] : [],
+  );
+  const selectedBreak = name.length > 16
+    ? breakCandidates.reduce<{ index: number; character: string } | null>((best, candidate) => {
+        const firstLength = candidate.character === "/" ? candidate.index + 1 : candidate.index;
+        const secondLength = name.length - candidate.index - 1;
+        const score = Math.max(firstLength, secondLength) + Math.abs(firstLength - secondLength) * 0.08;
+        if (!best) return candidate;
+        const bestFirstLength = best.character === "/" ? best.index + 1 : best.index;
+        const bestSecondLength = name.length - best.index - 1;
+        const bestScore = Math.max(bestFirstLength, bestSecondLength) + Math.abs(bestFirstLength - bestSecondLength) * 0.08;
+        return score < bestScore ? candidate : best;
+      }, null)
+    : null;
+  const firstLine = selectedBreak
+    ? name.slice(0, selectedBreak.character === "/" ? selectedBreak.index + 1 : selectedBreak.index).trim()
+    : name;
+  const secondLine = selectedBreak ? name.slice(selectedBreak.index + 1).trim() : "";
   const volumeMatch = size.match(/(\d+(?:\.\d+)?)\s*mL/i);
   const sizeLabel = volumeMatch ? `${volumeMatch[1]}mL VIAL` : size.replace(/^\d+\s*/, "");
+  const longestNameLine = Math.max(firstLine.length, secondLine.length || 0, 1);
+  const nameFontSize = Math.max(5.15, Math.min(9.15, 137 / longestNameLine));
+  const strengthFontSize = Math.max(1.9, Math.min(4.8, (4.8 * 14) / Math.max(strength.length, 1)));
+  const previewStyle = {
+    "--vial-band-start": palette?.start ?? "#282e84",
+    "--vial-band-middle": palette?.middle ?? "#5d55bd",
+    "--vial-band-end": palette?.end ?? "#9680ef",
+    "--vial-mark": palette?.mark ?? "#9680ef",
+  } as CSSProperties;
 
   return (
     <div
       className={`manual-vial-preview ${compact ? "manual-vial-preview-compact" : ""}`}
       role="img"
       aria-label={`${name}, ${strength}, ${size}`}
+      style={previewStyle}
     >
       <img src={blankVialReference} alt="" draggable={false} />
       <div className="manual-vial-label" aria-hidden="true">
-        <div className="manual-vial-product-name">
+        <div
+          className={`manual-vial-product-name ${secondLine ? "" : "manual-vial-product-name-single"}`}
+          style={{ fontSize: `${nameFontSize}cqw` }}
+        >
           <span>{firstLine}</span>
           {secondLine && <span>{secondLine}</span>}
         </div>
         <span className="manual-vial-size">{sizeLabel}</span>
         <div className="manual-vial-strength-band">
-          <strong>{strength}</strong>
+          <strong style={{ fontSize: `${strengthFontSize}cqw` }}>{strength}</strong>
           <span className="manual-vial-mark"><i /><i /><i /><i /><i /><i /></span>
         </div>
       </div>
@@ -2086,7 +2200,7 @@ function ProductDetailPage({
   const isCompoundProduct = product.name.includes("/");
   const isTirzepatidePyridoxine = product.name.toLowerCase().includes("tirzepatide") && product.name.toLowerCase().includes("pyridoxine");
   const defaultSize = product.dosage === "Gel" ? "30g Tube" : product.dosage === "Capsule" ? "30 Capsules" : isTirzepatidePyridoxine ? "1 (0.5mL) Vial" : "1 (5mL) Vial";
-  const defaultStrength = isTirzepatidePyridoxine ? "20mg/25mg/mL" : isCompoundProduct ? "15mg/40mg/250mg/mL" : product.price.includes("mg") ? product.price : product.dosage === "Gel" ? "0.025%" : "5mg/mL";
+  const defaultStrength = product.strength ?? (isTirzepatidePyridoxine ? "20mg/25mg/mL" : isCompoundProduct ? "15mg/40mg/250mg/mL" : product.price.includes("mg") ? product.price : product.dosage === "Gel" ? "0.025%" : "5mg/mL");
   const [size, setSize] = useState(defaultSize);
   const [strength, setStrength] = useState(defaultStrength);
   const [injType, setInjType] = useState(product.dosage === "Injection" ? "Intramuscular" : product.dosage);
@@ -2318,8 +2432,8 @@ function ProductDetailPage({
       <div className={`grid max-w-[1180px] items-start gap-10 ${isReferenceStyle ? "xl:grid-cols-[minmax(0,1.1fr)_minmax(480px,0.9fr)]" : "xl:grid-cols-[minmax(0,1.244fr)_minmax(0,1fr)]"}`}>
         <div className="min-w-0">
           <div className={`flex h-[600px] items-center justify-center overflow-hidden rounded-[18px] p-16 ${isReferenceStyle ? "bg-[#fafafa]" : `border border-[#e4e4e4] ${productDetailVariant === 2 ? "bg-[#fbfdfc]" : "bg-[#f8f8f8]"}`}`}>
-            {isTirzepatidePyridoxine ? (
-              <ManualVialPreview name={product.name} strength={strength} size={size} />
+            {product.img === blankVialReference ? (
+              <ManualVialPreview name={product.name} strength={strength} size={size} palette={product.vialPalette} />
             ) : (
               <img src={product.img} alt={product.name} className="max-h-[470px] h-full w-full object-contain mix-blend-multiply" />
             )}
