@@ -4076,7 +4076,6 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const shouldOpenPaymentSetup = () => window.sessionStorage.getItem("open-payment-setup") === "true";
   const shouldOpenPaymentOverview = () => window.sessionStorage.getItem("open-payment-overview") === "true";
   const [activeTab, setActiveTab] = useState(() => shouldOpenPaymentSetup() || shouldOpenPaymentOverview() ? "Pay by Clinic" : "Business Account");
-  const [payByClinicTab, setPayByClinicTab] = useState<"cards" | "ach">("cards");
   const [creditCardOpen, setCreditCardOpen] = useState(() => shouldOpenPaymentSetup());
   const [cardType, setCardType] = useState("Visa");
   const [cardAuthorized, setCardAuthorized] = useState(true);
@@ -4090,14 +4089,12 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
     window.sessionStorage.removeItem("open-payment-overview");
     const openPaymentSetup = () => {
       setActiveTab("Pay by Clinic");
-      setPayByClinicTab("cards");
       setCreditCardOpen(true);
       window.sessionStorage.removeItem("open-payment-setup");
     };
     window.addEventListener("open-payment-setup", openPaymentSetup);
     const openPaymentOverview = () => {
       setActiveTab("Pay by Clinic");
-      setPayByClinicTab("cards");
       setCreditCardOpen(false);
       window.sessionStorage.removeItem("open-payment-overview");
     };
@@ -4331,91 +4328,58 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           )}
 
           {activeTab === "Pay by Clinic" && (
-            <div className="rounded-[14px] bg-[#FBFBFB] p-6">
-            <div className="mb-5 border-b border-[#e8e9e8] pb-4">
-              <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Pay by Clinic</h3>
-              <p className="mt-1 text-[11px] text-[#7b827e]">Manage the clinic's credit card and ACH bank account.</p>
-            </div>
-            {payByClinicTab === "cards" ? (
-              <div className="space-y-6">
-                <section>
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <h4 className="text-[13px] font-semibold text-[#1a1a1a]">Credit Card</h4>
-                    {!savedClinicCard && (
-                      <button onClick={() => setCreditCardOpen(true)} className="flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Credit Card</button>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
-                    {savedClinicCard ? (
-                      <div className="rounded-[10px] border border-[#eaeaea] bg-white p-5">
-                        <div className="flex items-start justify-between gap-4 border-b border-[#eeeeee] pb-4">
-                          <div className="flex items-center gap-3">
-                            <span className="flex h-9 w-12 items-center justify-center rounded-[5px] border border-[#dedede] bg-white text-[12px] font-black italic text-[#1434CB]">VISA</span>
-                            <div><p className="text-[13px] font-semibold text-[#1a1a1a]">Visa ending in 1234</p><p className="mt-1 text-[10px] text-[#888]">Expires 12/29</p></div>
-                          </div>
-                          <span className="rounded-full bg-black px-2.5 py-1 text-[9px] font-semibold text-white">Primary</span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 py-4 text-[11px]"><div><p className="text-[#888]">Cardholder</p><p className="mt-1 font-semibold text-[#222]">ScriptLinkRx Clinic</p></div><div><p className="text-[#888]">Status</p><p className="mt-1 font-semibold text-[#31583F]">Active</p></div></div>
-                        <button type="button" onClick={() => setCreditCardOpen(true)} className="h-8 rounded-[7px] bg-black px-3 text-[11px] font-medium text-white transition-colors hover:bg-[#252525]">Update card</button>
-                      </div>
-                    ) : (
-                      <div className="flex min-h-[190px] flex-col items-center justify-center rounded-[10px] border border-[#eaeaea] bg-white p-6 text-center">
-                        <Package size={28} strokeWidth={1.5} className="mb-3 text-[#9d9d9d]" /><p className="text-[14px] font-semibold text-[#1a1a1a]">No credit card found</p><p className="mt-2 text-[12px] text-[#8c8c8c]">Add a credit card to enable Pay by Clinic.</p>
-                        <button onClick={() => setCreditCardOpen(true)} className="mt-4 flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[11px] font-medium text-white"><Plus size={14} /> Add Credit Card</button>
-                      </div>
-                    )}
-                    <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-5"><AlertCircle size={17} className="mb-3 text-[#667085]" /><p className="text-[12px] leading-relaxed text-[#667085]">The card on file is charged when a new prescription is submitted using Pay by Clinic.</p></div>
-                  </div>
-                </section>
+            <div className="rounded-[14px] bg-white px-3 py-1 sm:px-5 sm:py-2">
+              <h3 className="text-[21px] font-semibold tracking-[-0.02em] text-[#151515]">Pay by Clinic</h3>
 
-                <section className="border-t border-[#e8e9e8] pt-5">
-                  <div className="mb-3 flex items-center justify-between gap-3"><h4 className="text-[13px] font-semibold text-[#1a1a1a]">ACH Bank Account</h4><button className="flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Bank Account</button></div>
-                  <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
-                    <div className="overflow-hidden rounded-[10px] border border-[#eaeaea] bg-white">
-                      <div className="grid grid-cols-[40px_minmax(0,1fr)_100px_82px] border-b border-[#eee8e3] bg-[#fbfaf8] px-4 py-3">{["#", "Bank Accounts", "Status", ""].map(h => <span key={h} className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8c8c8c]">{h}</span>)}</div>
-                      <div className="grid grid-cols-[40px_minmax(0,1fr)_100px_82px] items-center px-4 py-4 text-[12px] text-[#1a1a1a]"><span>1</span><div className="min-w-0"><p className="truncate text-[13px] font-semibold">Chase Bank</p><p className="mt-1 text-[11px] text-[#8c8c8c]">**** **** **** 2826</p><p className="mt-1 text-[11px] text-[#667085]">Checking</p></div><span className="w-fit rounded-full bg-black px-2.5 py-1 text-[9px] font-medium text-white">Primary</span><button className="rounded-[7px] border border-[#D9DEDB] px-2.5 py-2 text-[11px] font-medium hover:bg-[#F7F8F7]">Update</button></div>
+              <section className="mt-7">
+                <h4 className="mb-3 text-[12px] font-medium text-[#242424]">Credit Cards</h4>
+                <div className="space-y-1.5">
+                  <div className="flex min-h-[56px] items-center gap-4 rounded-[7px] bg-[#FAFAFA] px-3 py-2">
+                    <div className="flex h-[38px] w-[56px] shrink-0 items-center justify-center rounded-[5px] bg-white text-[15px] font-black italic tracking-[-0.08em] text-[#1739B7]">VISA</div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[11px] font-medium text-[#111]">Visa •••• 0145</p>
+                      <p className="mt-0.5 text-[9px] text-[#777]">Expires 12/2027</p>
                     </div>
-                    <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-5"><AlertCircle size={17} className="mb-3 text-[#667085]" /><p className="text-[12px] leading-relaxed text-[#667085]">Use this bank account for Pay by Clinic ACH payments.</p></div>
+                    <button type="button" className="shrink-0 rounded-full bg-[#E5E5E5] px-3 py-2 text-[9px] font-medium text-[#1a1a1a] transition-colors hover:bg-[#dcdcdc]">Set as Primary</button>
                   </div>
-                </section>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <button className="rounded-[8px] bg-black px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
-                  Set as Primary
-                </button>
-                <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
-                  <div className="overflow-hidden rounded-[10px] border border-[#eaeaea] bg-white">
-                    <div className="grid grid-cols-[40px_minmax(0,1fr)_120px_92px] border-b border-[#eee8e3] bg-[#fbfaf8] px-4 py-3">
-                      {["#", "Bank Accounts", "Status", ""].map(h => (
-                        <span key={h} className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8c8c8c]">{h}</span>
-                      ))}
+
+                  <div className="flex min-h-[56px] items-center gap-4 rounded-[7px] bg-[#FAFAFA] px-3 py-2">
+                    <div className="flex h-[38px] w-[56px] shrink-0 items-center justify-center rounded-[5px] bg-white">
+                      <span className="h-4 w-4 rounded-full bg-[#EB001B]" />
+                      <span className="-ml-1.5 h-4 w-4 rounded-full bg-[#F79E1B] opacity-95" />
                     </div>
-                    <div className="grid grid-cols-[40px_minmax(0,1fr)_120px_92px] items-center px-4 py-4 text-[12px] text-[#1a1a1a]">
-                      <span>1</span>
-                      <div className="min-w-0">
-                        <p className="truncate text-[13px] font-semibold text-[#1a1a1a]">Chase Bank</p>
-                        <p className="mt-1 text-[11px] text-[#8c8c8c]">**** **** **** 2826</p>
-                        <p className="mt-2 text-[11px] text-[#667085]">Checking</p>
-                      </div>
-                      <span className="w-fit rounded-full bg-black px-2.5 py-1 text-[10px] font-medium text-white">
-                        Primary
-                      </span>
-                      <button className="rounded-[8px] border border-[#D9DEDB] px-3 py-2 text-[12px] font-medium text-[#1a1a1a] transition-colors hover:bg-[#F7F8F7]">
-                        Update
-                      </button>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[11px] font-medium text-[#111]">Mastercard•••• 1312</p>
+                      <p className="mt-0.5 flex items-center gap-1 text-[9px] text-[#555]"><span className="flex size-[9px] items-center justify-center rounded-full bg-[#2374D3] text-[7px] font-bold text-white">i</span>Virtual card not set up</p>
                     </div>
                   </div>
-                  <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-6">
-                    <AlertCircle size={17} className="mb-4 text-[#667085]" />
-                    <p className="max-w-[420px] text-[13px] leading-relaxed text-[#667085]">
-                      Add a bank account to receive payouts for patient transactions. We securely store your banking information and process payouts on a weekly basis.
-                    </p>
-                  </div>
+
+                  <button type="button" onClick={() => setCreditCardOpen(true)} className="flex min-h-[56px] w-full items-center gap-3 rounded-[7px] bg-[#FAFAFA] px-5 text-left text-[11px] font-medium text-[#111] transition-colors hover:bg-[#f3f3f3]">
+                    <span className="relative"><CreditCard size={14} strokeWidth={1.8} /><Plus size={7} strokeWidth={2.5} className="absolute -right-1 -top-1 rounded-full bg-[#FAFAFA]" /></span>
+                    Add payment method
+                  </button>
+                  <button type="button" onClick={() => setCreditCardOpen(true)} className="flex min-h-[56px] w-full items-center rounded-[7px] bg-[#FAFAFA] px-5 text-left text-[11px] font-medium text-[#111] transition-colors hover:bg-[#f3f3f3]">Manage Payment Methods</button>
                 </div>
-              </div>
-            )}
-          </div>
+              </section>
+
+              <section className="mt-8 pb-1">
+                <h4 className="mb-3 text-[12px] font-medium text-[#242424]">ACH Bank Account</h4>
+                <div className="space-y-1.5">
+                  <div className="flex min-h-[56px] items-center gap-4 rounded-[7px] bg-[#FAFAFA] px-3 py-2">
+                    <div className="flex h-[38px] w-[56px] shrink-0 items-center justify-center rounded-[5px] bg-white text-[9px] font-extrabold tracking-[-0.06em] text-[#252525]">CHASE<span className="ml-0.5 size-2 rounded-full border-[2px] border-[#28A9E0]" /></div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[11px] font-medium text-[#111]">Chasebank•••• 1453</p>
+                      <p className="mt-0.5 flex items-center gap-1.5 text-[9px] text-[#777]">Expires 12/2027 <span className="rounded-full bg-[#D9DEFF] px-1.5 py-0.5 text-[8px] font-medium text-[#5A63DC]">Primary</span></p>
+                    </div>
+                  </div>
+                  <button type="button" className="flex min-h-[56px] w-full items-center gap-3 rounded-[7px] bg-[#FAFAFA] px-5 text-left text-[11px] font-medium text-[#111] transition-colors hover:bg-[#f3f3f3]">
+                    <span className="relative"><CreditCard size={14} strokeWidth={1.8} /><Plus size={7} strokeWidth={2.5} className="absolute -right-1 -top-1 rounded-full bg-[#FAFAFA]" /></span>
+                    Add payment method
+                  </button>
+                  <button type="button" className="flex min-h-[56px] w-full items-center rounded-[7px] bg-[#FAFAFA] px-5 text-left text-[11px] font-medium text-[#111] transition-colors hover:bg-[#f3f3f3]">Manage Payment Methods</button>
+                </div>
+              </section>
+            </div>
           )}
 
           {activeTab === "Agreements" && (
