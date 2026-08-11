@@ -54,6 +54,7 @@ import {
   Send,
   Snowflake,
   Copy,
+  Tag,
 } from "lucide-react";
 
 import img430 from "@/imports/ScriptlinkrxDashboard/9b6fa0a3b334659006bcf39e91b4da387a7b4cf0.png";
@@ -2222,6 +2223,8 @@ function ProductDetailPage({
   const [productDetailVariant, setProductDetailVariant] = useState<1 | 2 | 3 | 4 | 5 | 6>(6);
   const [questionModalOpen, setQuestionModalOpen] = useState(false);
   const [questionText, setQuestionText] = useState("");
+  const [discountApplied, setDiscountApplied] = useState(false);
+  const [discountApplying, setDiscountApplying] = useState(false);
   const configurationCardRef = useRef<HTMLDivElement>(null);
   const [productCardHeight, setProductCardHeight] = useState(825);
   const { addCartItems } = useCartSummary();
@@ -2241,6 +2244,8 @@ function ProductDetailPage({
     setAddedItemCount(null);
     setQuestionModalOpen(false);
     setQuestionText("");
+    setDiscountApplied(false);
+    setDiscountApplying(false);
   }, [defaultSize, defaultStrength, product.dosage, product.id, product.pharmacy]);
 
   useEffect(() => {
@@ -2486,6 +2491,36 @@ function ProductDetailPage({
               {strengthOptions.map(option => <OptionPill key={option} label={option} subLabel={isCompoundProduct ? "Combined strength" : "150mg total"} selected={strength === option} onClick={() => setStrength(option)} emphasis={productDetailVariant === 2} card={productDetailVariant === 3} tesla={isReferenceStyle} blue={isBlueReference} tone={productDetailVariant === 4 ? "green" : "apple"} />)}
             </div>
           </div>
+
+          {!discountApplied && (
+            <div className={`${isReferenceStyle ? "mt-6" : "mt-4"} w-[226px] max-w-full rounded-[14px] border border-white/80 bg-[linear-gradient(135deg,#f3fbf7_0%,#e5f1eb_62%,#fbf8ea_100%)] p-3 shadow-[0_10px_28px_rgba(24,50,41,0.08)]`}>
+              <div className="flex items-start gap-2.5">
+                <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-white/55 text-[#315a47]">
+                  <Tag size={14} strokeWidth={1.9} />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[14px] font-semibold leading-[18px] tracking-[-0.02em] text-[#171717]">$25 coupon is ready</p>
+                  <p className="mt-1 text-[11px] font-medium leading-[15px] text-[#68736d]">1 active coupon is ready for this product.</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                disabled={discountApplying}
+                onClick={() => {
+                  setDiscountApplying(true);
+                  window.setTimeout(() => {
+                    setDiscountApplied(true);
+                    setDiscountApplying(false);
+                    showToast("Coupon applied");
+                  }, 1000);
+                }}
+                className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-full bg-white text-[11px] font-semibold text-[#171717] shadow-[0_1px_0_rgba(24,50,41,0.04)] transition-colors hover:bg-[#fbfbfb] disabled:cursor-wait disabled:text-[#68736d]"
+              >
+                {discountApplying && <Loader2 size={13} className="animate-spin text-[#315a47]" />}
+                {discountApplying ? "Applying" : "Apply discount"}
+              </button>
+            </div>
+          )}
 
           <div className={`${isReferenceStyle ? "mt-5" : "mt-3 border-t border-[#ededed] pt-2"}`}>
             <div className={isReferenceStyle ? "mb-3 flex items-center gap-3" : ""}><p className={`${isReferenceStyle ? "shrink-0 text-[12px] font-medium" : "mb-2 text-[12px] font-medium"} text-[#111]`}>{product.dosage === "Injection" ? "Injection Type" : "Form"}</p>{isReferenceStyle && <span className="h-px flex-1 bg-[#e5e5e5]" />}</div>
@@ -8516,7 +8551,6 @@ export default function App() {
 
             {/* Main content area */}
             <main className="app-main-scroll h-screen min-w-0 flex-1 overflow-y-scroll p-3 pl-1.5">
-              <VoucherBanner />
               <div className="bg-card rounded-[10px] min-h-full p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
                 {renderPage()}
               </div>
