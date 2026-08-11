@@ -4337,128 +4337,60 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
           {activeTab === "Pay by Clinic" && (
             <div className="rounded-[14px] bg-[#FBFBFB] p-6">
-            <div className="mb-5 flex items-center border-b border-[#f5f5f5] pb-4">
-              <button
-                onClick={() => setPayByClinicTab("cards")}
-                className={`rounded-[8px] px-3 py-2 text-[12px] font-medium transition-colors ${
-                  payByClinicTab === "cards" ? "bg-[var(--app-menu-bg)] text-[#1a1a1a]" : "text-[#9d9d9d] hover:bg-[var(--app-menu-bg)] hover:text-[#1a1a1a]"
-                }`}
-              >
-                Payment Setup
-                <span className="ml-2 rounded-full bg-[#F1F2F2] px-2 py-0.5 text-[10px] font-medium text-[#5f6662]">
-                  Card + ACH
-                </span>
-              </button>
-              <button
-                onClick={() => setPayByClinicTab("ach")}
-                className={`rounded-[8px] px-3 py-2 text-[12px] font-medium transition-colors ${
-                  payByClinicTab === "ach" ? "bg-[var(--app-menu-bg)] text-[#1a1a1a]" : "text-[#9d9d9d] hover:bg-[var(--app-menu-bg)] hover:text-[#1a1a1a]"
-                }`}
-              >
-                Payout Account
-              </button>
-              {(!savedClinicCard || payByClinicTab === "ach") && (
-                <button onClick={() => payByClinicTab === "cards" && setCreditCardOpen(true)} className="ml-auto flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
-                  <Plus size={15} /> {payByClinicTab === "cards" ? "Add Payment Method" : "Add Bank Account"}
-                </button>
-              )}
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-[#e8e9e8] pb-4">
+              <div>
+                <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Payment methods</h3>
+                <p className="mt-1 text-[11px] text-[#7b827e]">Split clinic credit between the card and ACH account below.</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.08em] text-[#909793]">Available clinic credit</p>
+                <p className="mt-1 text-[16px] font-semibold text-[#183229]">{formatClinicCredit(clinicCredit)}</p>
+              </div>
             </div>
             {payByClinicTab === "cards" ? (
-              <div className="space-y-5">
-                <div className="flex flex-wrap items-start justify-between gap-4 rounded-[12px] border border-[#dfe8e3] bg-[#f6faf8] p-5">
-                  <div className="flex items-start gap-3">
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#183229] text-white">
-                      <CheckCircle2 size={18} strokeWidth={1.9} />
-                    </span>
-                    <div>
-                      <p className="text-[14px] font-semibold text-[#17231e]">Pay by Clinic is enabled</p>
-                      <p className="mt-1 max-w-[540px] text-[12px] leading-[18px] text-[#667085]">Clinic charges will be divided between your credit card and ACH account using the allocation below.</p>
-                    </div>
-                  </div>
-                  <div className="rounded-[9px] border border-[#dfe8e3] bg-white px-4 py-2.5 text-right">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8a948f]">Available clinic credit</p>
-                    <p className="mt-1 text-[18px] font-semibold text-[#183229]">{formatClinicCredit(clinicCredit)}</p>
-                  </div>
-                </div>
-
+              <div>
                 <div className="rounded-[12px] border border-[#e6e8e6] bg-white p-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Payment allocation</h3>
-                      <p className="mt-1 text-[11px] leading-[17px] text-[#7b827e]">Choose how much of the clinic credit is assigned to each payment method. The total always equals 100%.</p>
+                      <h3 className="text-[13px] font-semibold text-[#1a1a1a]">Clinic credit split</h3>
+                      <p className="mt-1 text-[10px] text-[#7b827e]">Credit card first, then ACH bank account.</p>
                     </div>
                     <span className="rounded-full bg-[#eef4f1] px-3 py-1.5 text-[10px] font-semibold text-[#31583F]">100% allocated</span>
                   </div>
 
-                  <div className="mt-5 grid grid-cols-2 gap-4 max-lg:grid-cols-1">
-                    <div className="rounded-[11px] border border-[#dfe4e1] bg-[#fbfcfb] p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <span className="flex size-10 items-center justify-center rounded-[9px] border border-[#e0e4e2] bg-white text-[#183229]"><CreditCard size={18} /></span>
-                          <div>
-                            <p className="text-[12px] font-semibold text-[#1a1a1a]">Credit card</p>
-                            <p className="mt-1 text-[10px] text-[#838a86]">Visa •••• 1234 · Expires 12/29</p>
-                          </div>
-                        </div>
-                        <span className="rounded-full bg-[#edf3ff] px-2.5 py-1 text-[9px] font-semibold text-[#2856a8]">Active</span>
-                      </div>
-                      <div className="mt-5 flex items-end justify-between gap-3">
+                  <div className="mt-4 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-4 rounded-[10px] border border-[#dfe4e1] bg-[#fbfcfb] p-4">
+                      <div className="flex min-w-[230px] items-center gap-3">
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-[9px] border border-[#e0e4e2] bg-white text-[#183229]"><CreditCard size={18} /></span>
                         <div>
-                          <p className="text-[10px] uppercase tracking-[0.07em] text-[#8a918d]">Allocation</p>
-                          <p className="mt-1 text-[24px] font-semibold tracking-[-0.03em] text-[#1a1a1a]">{cardAllocation}%</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[10px] text-[#8a918d]">Up to</p>
-                          <p className="mt-1 text-[14px] font-semibold text-[#1a1a1a]">{formatClinicCredit(clinicCredit * cardAllocation / 100)}</p>
+                          <div className="flex items-center gap-2"><p className="text-[12px] font-semibold text-[#1a1a1a]">Credit card</p><span className="rounded-full bg-[#edf3ff] px-2 py-0.5 text-[8px] font-semibold text-[#2856a8]">Active</span></div>
+                          <p className="mt-1 text-[10px] text-[#838a86]">Visa •••• 1234 · Expires 12/29</p>
+                          <button type="button" onClick={() => setCreditCardOpen(true)} className="mt-1.5 text-[9px] font-semibold text-[#31583F] hover:underline">Manage card</button>
                         </div>
                       </div>
-                      <button type="button" onClick={() => setCreditCardOpen(true)} className="mt-4 text-[10px] font-semibold text-[#31583F] hover:underline">Manage card</button>
+                      <div className="flex items-end gap-8">
+                        <div><p className="text-[9px] uppercase tracking-[0.07em] text-[#8a918d]">Allocation</p><p className="mt-1 text-[20px] font-semibold text-[#1a1a1a]">{cardAllocation}%</p></div>
+                        <div className="min-w-[70px] text-right"><p className="text-[9px] text-[#8a918d]">Up to</p><p className="mt-1 text-[13px] font-semibold text-[#1a1a1a]">{formatClinicCredit(clinicCredit * cardAllocation / 100)}</p></div>
+                      </div>
                     </div>
 
-                    <div className="rounded-[11px] border border-[#dfe4e1] bg-[#fbfcfb] p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <span className="flex size-10 items-center justify-center rounded-[9px] border border-[#e0e4e2] bg-white text-[#183229]"><Building2 size={18} /></span>
-                          <div>
-                            <p className="text-[12px] font-semibold text-[#1a1a1a]">ACH bank account</p>
-                            <p className="mt-1 text-[10px] text-[#838a86]">Chase checking •••• 2826</p>
-                          </div>
-                        </div>
-                        <span className="rounded-full bg-[#eaf7ef] px-2.5 py-1 text-[9px] font-semibold text-[#277043]">Verified</span>
-                      </div>
-                      <div className="mt-5 flex items-end justify-between gap-3">
+                    <div className="flex flex-wrap items-center justify-between gap-4 rounded-[10px] border border-[#dfe4e1] bg-[#fbfcfb] p-4">
+                      <div className="flex min-w-[230px] items-center gap-3">
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-[9px] border border-[#e0e4e2] bg-white text-[#183229]"><Building2 size={18} /></span>
                         <div>
-                          <p className="text-[10px] uppercase tracking-[0.07em] text-[#8a918d]">Allocation</p>
-                          <p className="mt-1 text-[24px] font-semibold tracking-[-0.03em] text-[#1a1a1a]">{achAllocation}%</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[10px] text-[#8a918d]">Up to</p>
-                          <p className="mt-1 text-[14px] font-semibold text-[#1a1a1a]">{formatClinicCredit(clinicCredit * achAllocation / 100)}</p>
+                          <div className="flex items-center gap-2"><p className="text-[12px] font-semibold text-[#1a1a1a]">ACH bank account</p><span className="rounded-full bg-[#eaf7ef] px-2 py-0.5 text-[8px] font-semibold text-[#277043]">Verified</span></div>
+                          <p className="mt-1 text-[10px] text-[#838a86]">Chase checking •••• 2826</p>
+                          <button type="button" className="mt-1.5 text-[9px] font-semibold text-[#31583F] hover:underline">Manage bank account</button>
                         </div>
                       </div>
-                      <button type="button" onClick={() => setPayByClinicTab("ach")} className="mt-4 text-[10px] font-semibold text-[#31583F] hover:underline">Manage bank account</button>
+                      <div className="flex items-end gap-8">
+                        <div><p className="text-[9px] uppercase tracking-[0.07em] text-[#8a918d]">Allocation</p><p className="mt-1 text-[20px] font-semibold text-[#1a1a1a]">{achAllocation}%</p></div>
+                        <div className="min-w-[70px] text-right"><p className="text-[9px] text-[#8a918d]">Up to</p><p className="mt-1 text-[13px] font-semibold text-[#1a1a1a]">{formatClinicCredit(clinicCredit * achAllocation / 100)}</p></div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="mt-5 rounded-[10px] bg-[#f7f8f7] p-4">
-                    <div className="flex items-center justify-between text-[10px] font-semibold text-[#626a66]">
-                      <span>Credit card {cardAllocation}%</span>
-                      <span>ACH {achAllocation}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      step="5"
-                      value={cardAllocation}
-                      onChange={event => { setCardAllocation(Number(event.target.value)); setPaymentSplitSaved(false); }}
-                      aria-label="Credit card allocation percentage"
-                      className="mt-3 h-2 w-full cursor-pointer accent-[#183229]"
-                    />
-                    <div className="mt-2 flex justify-between text-[9px] text-[#9aa19d]"><span>0% card</span><span>50 / 50</span><span>100% card</span></div>
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[#eceeec] pt-4">
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#eceeec] pt-4">
                     <p className="flex items-center gap-2 text-[10px] leading-[15px] text-[#737b77]"><AlertCircle size={14} className="shrink-0" /> If an ACH debit fails, the remaining amount will be charged to the card on file.</p>
                     <button
                       type="button"
