@@ -698,7 +698,7 @@ function SidebarSupportVersion({ onNavigate, onLogout }: { onNavigate: (p: Page)
         <div className={`mt-2 rounded-[18px] border border-white/70 p-3 shadow-[0_10px_28px_rgba(38,54,45,0.08)] ${clinicPaymentEnabled ? "bg-[radial-gradient(circle_at_90%_0%,rgba(219,232,255,0.98),transparent_52%),linear-gradient(145deg,#f8fbff_0%,#edf4ff_100%)]" : "bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)]"}`}>
             {clinicPaymentEnabled && <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[9px] font-semibold text-[#2563EB]"><CheckCircle2 size={11} strokeWidth={2.2} /> Card updated</span>}
             <h3 className="text-[15px] font-semibold leading-[19px] tracking-[-0.01em] text-[#171A18]">{clinicPaymentEnabled ? "Pay by Clinic enabled" : "Enable Pay by Clinic"}</h3>
-            <p className="mt-1.5 text-[11px] leading-[16px] text-[#737A75]">{clinicPaymentEnabled ? "Your card and ACH split are ready for patient purchases." : "Split clinic purchases between a card and ACH."}</p>
+            <p className="mt-1.5 text-[11px] leading-[16px] text-[#737A75]">{clinicPaymentEnabled ? "Your card and ACH account are ready for patient purchases." : "Use your clinic’s card or ACH account for patient purchases."}</p>
             <button
               type="button"
               onClick={() => {
@@ -4082,13 +4082,8 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const [cardAuthorized, setCardAuthorized] = useState(true);
   const [cardSaving, setCardSaving] = useState(false);
   const [savedClinicCard, setSavedClinicCard] = useState(() => window.sessionStorage.getItem("clinic-card-saved") === "true");
-  const [cardAllocation, setCardAllocation] = useState(40);
-  const [paymentSplitSaved, setPaymentSplitSaved] = useState(false);
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const signatureDrawingRef = useRef(false);
-  const clinicCredit = 10000;
-  const achAllocation = 100 - cardAllocation;
-  const formatClinicCredit = (amount: number) => amount.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
   useEffect(() => {
     window.sessionStorage.removeItem("open-payment-setup");
@@ -4271,9 +4266,9 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             >
               <Icon size={15} strokeWidth={1.5} className="shrink-0" />
               <span className="min-w-0 flex-1">{label}</span>
-              {label === "Pay by Clinic" && (
+              {label === "Pay by Clinic" && savedClinicCard && (
                 <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white px-2 py-1 text-[9px] font-medium text-[#222]">
-                  2 methods <CheckCircle2 size={14} strokeWidth={2.1} className="text-[#2563EB]" />
+                  Card on file <CheckCircle2 size={14} strokeWidth={2.1} className="text-[#2563EB]" />
                 </span>
               )}
             </button>
@@ -4337,70 +4332,52 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
           {activeTab === "Pay by Clinic" && (
             <div className="rounded-[14px] bg-[#FBFBFB] p-6">
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-[#e8e9e8] pb-4">
-              <div>
-                <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Payment methods</h3>
-                <p className="mt-1 text-[11px] text-[#7b827e]">Split clinic credit between the card and ACH account below.</p>
-              </div>
-              <div className="text-right">
-                <p className="text-[9px] font-semibold uppercase tracking-[0.08em] text-[#909793]">Available clinic credit</p>
-                <p className="mt-1 text-[16px] font-semibold text-[#183229]">{formatClinicCredit(clinicCredit)}</p>
-              </div>
+            <div className="mb-5 border-b border-[#e8e9e8] pb-4">
+              <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Pay by Clinic</h3>
+              <p className="mt-1 text-[11px] text-[#7b827e]">Manage the clinic's credit card and ACH bank account.</p>
             </div>
             {payByClinicTab === "cards" ? (
-              <div>
-                <div className="rounded-[12px] border border-[#e6e8e6] bg-white p-5">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <h3 className="text-[13px] font-semibold text-[#1a1a1a]">Clinic credit split</h3>
-                      <p className="mt-1 text-[10px] text-[#7b827e]">Credit card first, then ACH bank account.</p>
-                    </div>
-                    <span className="rounded-full bg-[#eef4f1] px-3 py-1.5 text-[10px] font-semibold text-[#31583F]">100% allocated</span>
+              <div className="space-y-6">
+                <section>
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <h4 className="text-[13px] font-semibold text-[#1a1a1a]">Credit Card</h4>
+                    {!savedClinicCard && (
+                      <button onClick={() => setCreditCardOpen(true)} className="flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Credit Card</button>
+                    )}
                   </div>
-
-                  <div className="mt-4 space-y-3">
-                    <div className="flex flex-wrap items-center justify-between gap-4 rounded-[10px] border border-[#dfe4e1] bg-[#fbfcfb] p-4">
-                      <div className="flex min-w-[230px] items-center gap-3">
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-[9px] border border-[#e0e4e2] bg-white text-[#183229]"><CreditCard size={18} /></span>
-                        <div>
-                          <div className="flex items-center gap-2"><p className="text-[12px] font-semibold text-[#1a1a1a]">Credit card</p><span className="rounded-full bg-[#edf3ff] px-2 py-0.5 text-[8px] font-semibold text-[#2856a8]">Active</span></div>
-                          <p className="mt-1 text-[10px] text-[#838a86]">Visa •••• 1234 · Expires 12/29</p>
-                          <button type="button" onClick={() => setCreditCardOpen(true)} className="mt-1.5 text-[9px] font-semibold text-[#31583F] hover:underline">Manage card</button>
+                  <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
+                    {savedClinicCard ? (
+                      <div className="rounded-[10px] border border-[#eaeaea] bg-white p-5">
+                        <div className="flex items-start justify-between gap-4 border-b border-[#eeeeee] pb-4">
+                          <div className="flex items-center gap-3">
+                            <span className="flex h-9 w-12 items-center justify-center rounded-[5px] border border-[#dedede] bg-white text-[12px] font-black italic text-[#1434CB]">VISA</span>
+                            <div><p className="text-[13px] font-semibold text-[#1a1a1a]">Visa ending in 1234</p><p className="mt-1 text-[10px] text-[#888]">Expires 12/29</p></div>
+                          </div>
+                          <span className="rounded-full bg-black px-2.5 py-1 text-[9px] font-semibold text-white">Primary</span>
                         </div>
+                        <div className="grid grid-cols-2 gap-4 py-4 text-[11px]"><div><p className="text-[#888]">Cardholder</p><p className="mt-1 font-semibold text-[#222]">ScriptLinkRx Clinic</p></div><div><p className="text-[#888]">Status</p><p className="mt-1 font-semibold text-[#31583F]">Active</p></div></div>
+                        <button type="button" onClick={() => setCreditCardOpen(true)} className="h-8 rounded-[7px] bg-black px-3 text-[11px] font-medium text-white transition-colors hover:bg-[#252525]">Update card</button>
                       </div>
-                      <div className="flex items-end gap-8">
-                        <div><p className="text-[9px] uppercase tracking-[0.07em] text-[#8a918d]">Allocation</p><p className="mt-1 text-[20px] font-semibold text-[#1a1a1a]">{cardAllocation}%</p></div>
-                        <div className="min-w-[70px] text-right"><p className="text-[9px] text-[#8a918d]">Up to</p><p className="mt-1 text-[13px] font-semibold text-[#1a1a1a]">{formatClinicCredit(clinicCredit * cardAllocation / 100)}</p></div>
+                    ) : (
+                      <div className="flex min-h-[190px] flex-col items-center justify-center rounded-[10px] border border-[#eaeaea] bg-white p-6 text-center">
+                        <Package size={28} strokeWidth={1.5} className="mb-3 text-[#9d9d9d]" /><p className="text-[14px] font-semibold text-[#1a1a1a]">No credit card found</p><p className="mt-2 text-[12px] text-[#8c8c8c]">Add a credit card to enable Pay by Clinic.</p>
+                        <button onClick={() => setCreditCardOpen(true)} className="mt-4 flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[11px] font-medium text-white"><Plus size={14} /> Add Credit Card</button>
                       </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center justify-between gap-4 rounded-[10px] border border-[#dfe4e1] bg-[#fbfcfb] p-4">
-                      <div className="flex min-w-[230px] items-center gap-3">
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-[9px] border border-[#e0e4e2] bg-white text-[#183229]"><Building2 size={18} /></span>
-                        <div>
-                          <div className="flex items-center gap-2"><p className="text-[12px] font-semibold text-[#1a1a1a]">ACH bank account</p><span className="rounded-full bg-[#eaf7ef] px-2 py-0.5 text-[8px] font-semibold text-[#277043]">Verified</span></div>
-                          <p className="mt-1 text-[10px] text-[#838a86]">Chase checking •••• 2826</p>
-                          <button type="button" className="mt-1.5 text-[9px] font-semibold text-[#31583F] hover:underline">Manage bank account</button>
-                        </div>
-                      </div>
-                      <div className="flex items-end gap-8">
-                        <div><p className="text-[9px] uppercase tracking-[0.07em] text-[#8a918d]">Allocation</p><p className="mt-1 text-[20px] font-semibold text-[#1a1a1a]">{achAllocation}%</p></div>
-                        <div className="min-w-[70px] text-right"><p className="text-[9px] text-[#8a918d]">Up to</p><p className="mt-1 text-[13px] font-semibold text-[#1a1a1a]">{formatClinicCredit(clinicCredit * achAllocation / 100)}</p></div>
-                      </div>
-                    </div>
+                    )}
+                    <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-5"><AlertCircle size={17} className="mb-3 text-[#667085]" /><p className="text-[12px] leading-relaxed text-[#667085]">The card on file is charged when a new prescription is submitted using Pay by Clinic.</p></div>
                   </div>
+                </section>
 
-                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#eceeec] pt-4">
-                    <p className="flex items-center gap-2 text-[10px] leading-[15px] text-[#737b77]"><AlertCircle size={14} className="shrink-0" /> If an ACH debit fails, the remaining amount will be charged to the card on file.</p>
-                    <button
-                      type="button"
-                      onClick={() => setPaymentSplitSaved(true)}
-                      className={`h-9 rounded-[8px] px-4 text-[11px] font-semibold text-white transition-colors ${paymentSplitSaved ? "bg-[#31583F]" : "bg-black hover:bg-[#252525]"}`}
-                    >
-                      {paymentSplitSaved ? "Split saved" : "Save payment split"}
-                    </button>
+                <section className="border-t border-[#e8e9e8] pt-5">
+                  <div className="mb-3 flex items-center justify-between gap-3"><h4 className="text-[13px] font-semibold text-[#1a1a1a]">ACH Bank Account</h4><button className="flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Bank Account</button></div>
+                  <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
+                    <div className="overflow-hidden rounded-[10px] border border-[#eaeaea] bg-white">
+                      <div className="grid grid-cols-[40px_minmax(0,1fr)_100px_82px] border-b border-[#eee8e3] bg-[#fbfaf8] px-4 py-3">{["#", "Bank Accounts", "Status", ""].map(h => <span key={h} className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8c8c8c]">{h}</span>)}</div>
+                      <div className="grid grid-cols-[40px_minmax(0,1fr)_100px_82px] items-center px-4 py-4 text-[12px] text-[#1a1a1a]"><span>1</span><div className="min-w-0"><p className="truncate text-[13px] font-semibold">Chase Bank</p><p className="mt-1 text-[11px] text-[#8c8c8c]">**** **** **** 2826</p><p className="mt-1 text-[11px] text-[#667085]">Checking</p></div><span className="w-fit rounded-full bg-black px-2.5 py-1 text-[9px] font-medium text-white">Primary</span><button className="rounded-[7px] border border-[#D9DEDB] px-2.5 py-2 text-[11px] font-medium hover:bg-[#F7F8F7]">Update</button></div>
+                    </div>
+                    <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-5"><AlertCircle size={17} className="mb-3 text-[#667085]" /><p className="text-[12px] leading-relaxed text-[#667085]">Use this bank account for Pay by Clinic ACH payments.</p></div>
                   </div>
-                </div>
+                </section>
               </div>
             ) : (
               <div className="space-y-4">
