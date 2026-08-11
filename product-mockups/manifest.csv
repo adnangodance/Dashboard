@@ -1,0 +1,124 @@
+number,product,strength,file
+1,TIRZEPATIDE/PYRIDOXINE (B6),10MG/2MG/ML,001-tirzepatide-pyridoxine-b6.png
+2,SEMAGLUTIDE/PYRIDOXINE (B6),2.5MG/2MG/ML,002-semaglutide-pyridoxine-b6.png
+3,RETATRUTIDE,16MG/ML,003-retatrutide.png
+4,TIRZEPATIDE/CYANOCOBALAMIN (B12),15MG/1MG/0.5ML,004-tirzepatide-cyanocobalamin-b12.png
+5,NICOTINAMIDE ADENINE DINUCLEOTIDE (NAD+),200MG/ML,005-nicotinamide-adenine-dinucleotide-nad.png
+6,SERMORELIN ACETATE,2MG/ML,006-sermorelin-acetate.png
+7,SEMAGLUTIDE/CYANOCOBALAMIN (B12),2.5MG/1.25MG/ML,007-semaglutide-cyanocobalamin-b12.png
+8,GLUTATHIONE,200MG/ML,008-glutathione.png
+9,TIRZEPATIDE/L-CARNITINE,12.5MG/100MG/ML,009-tirzepatide-l-carnitine.png
+10,BPC-157,3MG/ML,010-bpc-157.png
+11,BPC-157/TB-500 (WOLVERINE),1.66MG/3.33MG/ML,011-bpc-157-tb-500-wolverine.png
+12,CJC-1295/IPAMORELIN,1.5MG/2.5MG/ML,012-cjc-1295-ipamorelin.png
+13,TB-500,10MG/3ML,013-tb-500.png
+14,GHK-CU (COPPER PEPTIDE),10MG/ML,014-ghk-cu-copper-peptide.png
+15,TIRZEPATIDE/NAD+/L-CARNITINE,15MG/40MG/250MG/ML,015-tirzepatide-nad-l-carnitine.png
+16,TIRZEPATIDE (SIC),10MG/ML,016-tirzepatide-sic.png
+17,ASCORBIC ACID (TAPIOCA BASE) VITAMIN C,500MG/ML,017-ascorbic-acid-tapioca-base-vitamin-c.png
+18,ASCORBIC ACID (VITAMIN C),[5500MG] 550MG/ML,018-ascorbic-acid-vitamin-c.png
+19,SEMAGLUTIDE/GLYCINE,2.5MG/7.5MG/ML,019-semaglutide-glycine.png
+20,TESTOSTERONE CYPIONATE (COMMERCIAL),200MG/ML,020-testosterone-cypionate-commercial.png
+21,GHK-CU/BPC-157/TB-500 (GLOW),9MG/1.66MG/3.33MG/ML,021-ghk-cu-bpc-157-tb-500-glow.png
+22,N-ACETYL-L-CYSTEINE,200MG/ML,022-n-acetyl-l-cysteine.png
+23,SEMAGLUTIDE/NAD+,1MG/20MG/ML,023-semaglutide-nad.png
+24,SERMORELIN,3MG/ML,024-sermorelin.png
+25,TESAMORELIN/IPAMORELIN,2.4MG/1.2MG/ML,025-tesamorelin-ipamorelin.png
+26,TESTOSTERONE CYPIONATE IN SESAME SEED OIL,200MG,026-testosterone-cypionate-in-sesame-seed-oil.png
+27,TESTOSTERONE CYPIONATE MIGLYOL 812N OIL,200MG/ML,027-testosterone-cypionate-miglyol-812n-oil.png
+28,VITAMIN B12,1MG/ML,028-vitamin-b12.png
+29,AMINOBLEND,100/50/50/50/100 MG/ML,029-aminoblend.png
+30,BPC/157/TB500/KPV/GHK/CU,3/3/3/10 MG/ML,030-bpc-157-tb500-kpv-ghk-cu.png
+31,MAGNESIUM SULFATE,500MG/ML,031-magnesium-sulfate.png
+32,TESAMORELIN,2MG/ML,032-tesamorelin.png
+33,TIRZEPATIDE/NIACINAMIDE,20MG/25MG/ML,033-tirzepatide-niacinamide.png
+34,ALPHA LIPOIC ACID,25MG/ML,034-alpha-lipoic-acid.png
+35,GLYCINE,50MG/ML,035-glycine.png
+36,GONADORELIN ACETATE,1MG,036-gonadorelin-acetate.png
+37,LEVOCARNITINE,500MG/ML,037-levocarnitine.png
+38,MOTS-C,10MG/ML,038-mots-c.png
+39,TIRZEPATIDE/GLYCINE,16.6MG/7.5MG/ML,039-tirzepatide-glycine.png
+40,ZINC CHLORIDE,10MG/ML,040-zinc-chloride.png
+41,BIOTIN (VITAMIN B7),10MG/ML,041-biotin-vitamin-b7.png
+42,MELANOTAN II,2MG/ML,042-melanotan-ii.png
+43,METHYLCOBALAMIN,5MG/ML,043-methylcobalamin.png
+44,MIC,25MG/50MG/50MG/ML,044-mic.png
+45,SEMAGLUTIDE/L-CARNITINE,2.5MG/100MG/ML,045-semaglutide-l-carnitine.png
+46,SODIUM ASCORBATE,500MG/ML,046-sodium-ascorbate.png
+47,SODIUM ASCORBATE (PF),500MG/ML,047-sodium-ascorbate-pf.png
+48,TAURINE,50MG/ML,048-taurine.png
+49,TESTOSTERONE CYPIONATE (SESAME SEED OIL),200MG/ML,049-testosterone-cypionate-sesame-seed-oil.png
+50,TRI-MIX (PGE/PAPA/PHEN),10MCG/30MG/1MG/ML,050-tri-mix-pge-papa-phen.png
+51,BPC/157/TB500/KPV (NO COPPER),3/3/3 MG/ML,051-bpc-157-tb500-kpv-no-copper.png
+52,ELAMIPRETIDE (SS31),15MG/ML,052-elamipretide-ss31.png
+53,HYDROGEN PEROXIDE,3%,053-hydrogen-peroxide.png
+54,LIPODEN SKINNY SHOT,50/5/50/5/5/1/12.5/25/50/10/50 MG/ML,054-lipoden-skinny-shot.png
+55,METHIONINE/INOSITOL/CHOLINE CHLORIDE/METHYLCOBALAMIN,15MG/50MG/100MG/1MG/ML,055-methionine-inositol-choline-chloride-methylcobalamin.png
+56,MIC/B12,25/100/50/1 MG/ML,056-mic-b12.png
+57,PHOSPHATIDYLCHOLINE/DEOXYCHOLIC ACID (PCDC),100MG/47.5MG/ML,057-phosphatidylcholine-deoxycholic-acid-pcdc.png
+58,PREGNYL HCG (COMMERCIAL),10000IU/VIAL,058-pregnyl-hcg-commercial.png
+59,THEANINE,50MG/ML,059-theanine.png
+60,TRIPEPTIDE-1 (GHK-CU),10MG/ML,060-tripeptide-1-ghk-cu.png
+61,5-AMINO-1MQ,5MG/ML,061-5-amino-1mq.png
+62,ALPROSTADIL/PAPAVERINE HCL/PHENTOLAMINE MESYLATE,10MCG/30MG/1MG/ML,062-alprostadil-papaverine-hcl-phentolamine-mesylate.png
+63,AMINO ACID #1,75/25/15/30/15/30/50/5/10/25 MG/ML,063-amino-acid-1.png
+64,AMINO ACID #3,25/5/5/2.5/4/5/1/5/10/25 MG/ML,064-amino-acid-3.png
+65,AOD-9604,1.2MG/ML,065-aod-9604.png
+66,AOD-9604/MOTS-C/TESAMORELIN/IPAMORELIN,1.2/2/2/2 MG/ML,066-aod-9604-mots-c-tesamorelin-ipamorelin.png
+67,ARA 290,6MG/ML,067-ara-290.png
+68,ARGININE,[7500MG] 200MG/ML,068-arginine.png
+69,ASCORBIC ACID,500MG/ML,069-ascorbic-acid.png
+70,B-COMPLEX,25/25/25/2/2 MG/ML,070-b-complex.png
+71,BIMIX (PAPA/PHEN),[150MG/5MG] 30MG/1MG/ML,071-bimix-papa-phen.png
+72,BRANCHED CHAIN AMINO ACIDS (BCAA) (ILE/L/V),0.4/0.3/1.2 GM/ML,072-branched-chain-amino-acids-bcaa-ile-l-v.png
+73,BREMELANOTIDE ACETATE (PT-141),10MG/ML,073-bremelanotide-acetate-pt-141.png
+74,CALCIUM GLUCONATE,10%,074-calcium-gluconate.png
+75,"CARTALAX (AED, T-31)",4MG/ML,075-cartalax-aed-t-31.png
+76,COENZYME Q10,25MG/ML,076-coenzyme-q10.png
+77,DEXPANTHENOL,250MG/ML,077-dexpanthenol.png
+78,DSIP,2MG/ML,078-dsip.png
+79,DUTASTERIDE,100MCG/ML,079-dutasteride.png
+80,EPITHALON,2MG/ML,080-epithalon.png
+81,FOLIC ACID,10MG/ML,081-folic-acid.png
+82,FOXO4-DRI,2MG/ML,082-foxo4-dri.png
+83,GHK/CU/EPITHALON,10/2 MG/ML,083-ghk-cu-epithalon.png
+84,GLYCERIN,72%,084-glycerin.png
+85,GONADORELIN,200MCG/ML,085-gonadorelin.png
+86,IGF-LR3,200MCG/ML,086-igf-lr3.png
+87,KISSPEPTIN,1MG/ML,087-kisspeptin.png
+88,L-CARNITINE,500MG/ML,088-l-carnitine.png
+89,LIDOCAINE,2% (20MG/ML),089-lidocaine.png
+90,LIPO-B (CYANOCOBALAMIN/MIC),25MG/50MG/50MG/1MG/ML,090-lipo-b-cyanocobalamin-mic.png
+91,LIPO-C,25/25/50/100/1 MG/ML,091-lipo-c.png
+92,LIPO-C (CYANOCOBALAMIN/MIC/L-CARNITINE),15MG/50MG/50MG/ML,092-lipo-c-cyanocobalamin-mic-l-carnitine.png
+93,LIRAGLUTIDE,12MG/ML,093-liraglutide.png
+94,LIRAGLUTIDE/METHIONINE,6MG/2MG/ML,094-liraglutide-methionine.png
+95,LL-37,1MG/ML,095-ll-37.png
+96,L-LEUCINE/L-ISOLEUCINE/L-VALINE,10MG/10MG/5MG/ML,096-l-leucine-l-isoleucine-l-valine.png
+97,LYSINE,200MG/ML,097-lysine.png
+98,MYER'S COCKTAIL,100MG/10MG/0.5MG/ML,098-myer-s-cocktail.png
+99,NANDROLONE,200MG/ML,099-nandrolone.png
+100,NANDROLONE DECANOATE,200MG/ML,100-nandrolone-decanoate.png
+101,NANDROLONE DECANOATE (SESAME OIL),200MG/ML,101-nandrolone-decanoate-sesame-oil.png
+102,NANDROLONE GRAPE SEED OIL,200MG/ML,102-nandrolone-grape-seed-oil.png
+103,OXYTOCIN,100IU/ML,103-oxytocin.png
+104,PEG-MGF,0.4MG/ML,104-peg-mgf.png
+105,PENTADECAPEPTIDE ARGINATE (PDA),10MG/ML,105-pentadecapeptide-arginate-pda.png
+106,PHENYLEPHRINE,10MG/ML,106-phenylephrine.png
+107,PROCAINE,2%,107-procaine.png
+108,PROLINE,50MG/ML,108-proline.png
+109,PT/141,2MG/ML,109-pt-141.png
+110,PYRIDOXINE (VITAMIN B6),100MG/ML,110-pyridoxine-vitamin-b6.png
+111,QUADMIX (PAPA/PHEN/ATRO/PGE),9MG/1MG/10MCG/10MCG/ML,111-quadmix-papa-phen-atro-pge.png
+112,SEMAGLUTIDE/GLYCINE/B12,1MG/1MG/10MG/ML,112-semaglutide-glycine-b12.png
+113,SERMORELIN/IPAMORELIN,3MG/3.6MG/ML,113-sermorelin-ipamorelin.png
+114,SODIUM DEOXYCHOLATE,1.67%,114-sodium-deoxycholate.png
+115,TESTOSTERONE CYP GRAPE SEED OIL,200MG/ML,115-testosterone-cyp-grape-seed-oil.png
+116,TESTOSTERONE ENT GRAPE SEED OIL,200MG/ML,116-testosterone-ent-grape-seed-oil.png
+117,TESTOSTERONE PRO GRAPE SEED OIL,100MG/ML,117-testosterone-pro-grape-seed-oil.png
+118,TESTOSTERONE (VARIOUS FEMALE ESTERS & BLENDS),CYPIONATE/PROPIONATE 175MG/25MG/ML,118-testosterone-various-female-esters-blends.png
+119,TEST PRODUCT 2,10MG/2.5MG/ML,119-test-product-2.png
+120,THYMOSIN ALPHA-1,3MG/ML,120-thymosin-alpha-1.png
+121,TIRZEPATIDE/GLYCINE/B12,10MG/5MG/500MCG/ML,121-tirzepatide-glycine-b12.png
+122,VITAMIN B-12 (CYANOCOBALAMIN),1200MG/ML,122-vitamin-b-12-cyanocobalamin.png
+123,VITAMIN D3,"50,000IU/ML",123-vitamin-d3.png
