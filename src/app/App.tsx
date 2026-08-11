@@ -4180,7 +4180,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
     }, 1100);
   }
 
-  const tabs = ["Business Account", "Users", "Prescribers", "Pay by Clinic Card", "ACH Bank Account", "Agreements"];
+  const tabs = ["Business Account", "Users", "Prescribers", "Pay by Clinic Card", "ACH Bank Account"];
   const users = [
     ["1", "Adnan Godanci", "(646)-617-9881", "adnan@batchrx.com", "Manager"],
     ["2", "Anna Robinson", "(646)-690-9596", "anna@scriptlinkrx.com", "Prescriber"],
@@ -4253,7 +4253,6 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             { icon: User, label: "Prescribers" },
             { icon: CreditCard, label: "Pay by Clinic Card" },
             { icon: Building2, label: "ACH Bank Account" },
-            { icon: ClipboardList, label: "Agreements" },
           ].map(({ icon: Icon, label }) => (
             <button
               key={label}
@@ -4379,35 +4378,33 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 </div>
                 <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-5"><AlertCircle size={17} className="mb-3 text-[#667085]" /><p className="text-[12px] leading-relaxed text-[#667085]">Use this bank account for Pay by Clinic ACH payments.</p></div>
               </div>
-            </div>
-          )}
 
-          {activeTab === "Agreements" && (
-            <div className="rounded-[14px] bg-[#FBFBFB] p-6">
-            <h3 className="mb-4 text-[14px] font-semibold text-[#1a1a1a]">Agreements</h3>
-            <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
-              <div className="rounded-[10px] border border-[#eaeaea] bg-white p-6">
-                <div className="mb-5 flex items-center gap-4">
-                  <div className="flex size-12 items-center justify-center rounded-[10px] bg-[#F1F2F2] text-[#4e5652]">
-                    <Upload size={22} strokeWidth={1.8} />
+              <section className="mt-6 border-t border-[#e8e9e8] pt-5">
+                <h4 className="mb-4 text-[13px] font-semibold text-[#1a1a1a]">ACH Agreement</h4>
+                <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
+                  <div className="rounded-[10px] border border-[#eaeaea] bg-white p-6">
+                    <div className="mb-5 flex items-center gap-4">
+                      <div className="flex size-12 items-center justify-center rounded-[10px] bg-[#F1F2F2] text-[#4e5652]">
+                        <Upload size={22} strokeWidth={1.8} />
+                      </div>
+                      <div>
+                        <p className="text-[16px] font-semibold text-[#1a1a1a]">ACH Debit Authorization Agreement</p>
+                        <p className="mt-1 text-[12px] text-[#667085]">Signed on: December 13, 2025</p>
+                      </div>
+                    </div>
+                    <button className="rounded-[8px] bg-black px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
+                      View Agreement
+                    </button>
                   </div>
-                  <div>
-                    <p className="text-[16px] font-semibold text-[#1a1a1a]">ACH Debit Authorization Agreement</p>
-                    <p className="mt-1 text-[12px] text-[#667085]">Signed on: December 13, 2025</p>
+                  <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-6">
+                    <AlertCircle size={17} className="mb-4 text-[#667085]" />
+                    <p className="max-w-[430px] text-[13px] leading-relaxed text-[#667085]">
+                      The ACH Debit Authorization Agreement authorizes ScriptLinkRx to initiate ACH debit entries to your designated bank account for payment of fees and other amounts owed.
+                    </p>
                   </div>
                 </div>
-                <button className="rounded-[8px] bg-black px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
-                  View Agreement
-                </button>
-              </div>
-              <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-6">
-                <AlertCircle size={17} className="mb-4 text-[#667085]" />
-                <p className="max-w-[430px] text-[13px] leading-relaxed text-[#667085]">
-                  The ACH Debit Authorization Agreement authorizes ScriptLinkRx to initiate ACH debit entries to your designated bank account for payment of fees and other amounts owed.
-                </p>
-              </div>
+              </section>
             </div>
-          </div>
           )}
         </div>
       </div>
