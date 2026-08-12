@@ -1157,17 +1157,17 @@ function FigmaCard({
   const [pharmacyMenuOpen, setPharmacyMenuOpen] = useState(false);
   const cardPharmacies = ["Altin Compounding Pharmacy", "Emerald Pharmacy SandBox", "Partel Sandbox"];
   const usesManualVial = img === blankVialReference;
+  const cardScale = 1.3;
   const productImageStyle = usesManualVial
-    ? { marginLeft: 16.5, marginTop: 2, width: 172, height: 215 }
-    : { marginLeft: imgL, marginTop: imgT, width: imgW, height: imgH };
+    ? { marginLeft: 16.5 * cardScale, marginTop: 2 * cardScale, width: 172 * cardScale, height: 215 * cardScale }
+    : { marginLeft: imgL * cardScale, marginTop: imgT * cardScale, width: imgW * cardScale, height: imgH * cardScale };
 
   return (
     <div
       className="relative inline-grid shrink-0 cursor-pointer grid-cols-[max-content] grid-rows-[max-content] place-items-start"
-      style={{ zoom: 1.3 }}
       onClick={onClick}
     >
-      <div className="col-1 row-1 h-[302px] w-[205.6px] rounded-[12.13px] bg-gradient-to-b from-[rgba(247,239,233,0.1)] to-[rgba(236,229,182,0.1)]" />
+      <div className="col-1 row-1 h-[393px] w-[268px] rounded-[16px] bg-gradient-to-b from-[rgba(247,239,233,0.1)] to-[rgba(236,229,182,0.1)]" />
 
       <div className="pointer-events-none col-1 row-1" style={productImageStyle}>
         {usesManualVial ? (
@@ -1181,18 +1181,18 @@ function FigmaCard({
         )}
       </div>
 
-      <div className="col-1 row-1 z-10 flex items-center gap-1" style={{ marginLeft: 12, marginTop: 15 }}>
-        <span className="flex h-5 min-w-7 items-center justify-center rounded-[6px] bg-[#EAF2FF] px-1.5 text-[#2563EB]" title="Refrigerated"><Snowflake size={11} strokeWidth={2} /></span>
-        {hasRxBadge && <span className="flex size-5 items-center justify-center rounded-[6px] bg-[#FFF0F0] text-[10px] font-semibold text-[#D84B4B]" title="Controlled">C</span>}
+      <div className="col-1 row-1 z-10 flex items-center gap-[5px]" style={{ marginLeft: 15.6, marginTop: 19.5 }}>
+        <span className="flex h-[26px] min-w-[36px] items-center justify-center rounded-[8px] bg-[#EAF2FF] px-2 text-[#2563EB]" title="Refrigerated"><Snowflake size={14} strokeWidth={2} /></span>
+        {hasRxBadge && <span className="flex size-[26px] items-center justify-center rounded-[8px] bg-[#FFF0F0] text-[13px] font-semibold text-[#D84B4B]" title="Controlled">C</span>}
       </div>
 
-      <div className="col-1 row-1" style={{ marginLeft: 20.62, marginTop: 219.47, width: 172 }}>
-        <h3 className="truncate text-[14px] font-medium leading-[18px] tracking-[-0.279px] text-[#1a1a1a]">{name}</h3>
-        <p className="mt-[3px] text-[12px] leading-[16px] text-[#1a1a1a]">{price}</p>
-        <div className="mt-[6px] flex items-center gap-[5px]">
+      <div className="col-1 row-1" style={{ marginLeft: 26.8, marginTop: 285.3, width: 223.6 }}>
+        <h3 className="truncate text-[18px] font-light leading-[23px] tracking-[-0.36px] text-[#1a1a1a]">{name}</h3>
+        <p className="mt-1 text-[15.5px] font-normal leading-[21px] text-[#1a1a1a]">{price}</p>
+        <div className="mt-2 flex items-center gap-[6px]">
           <button
             type="button"
-            className="relative inline-flex h-5 items-center rounded-[3px] bg-[#f8f5f1] px-2 text-[10px] font-medium text-[#333]"
+            className="relative inline-flex h-[26px] items-center rounded-[4px] bg-[#f8f5f1] px-2.5 text-[13px] font-normal text-[#333]"
             onClick={(event) => { event.stopPropagation(); setPharmacyMenuOpen(current => !current); }}
             aria-expanded={pharmacyMenuOpen}
           >
@@ -1221,19 +1221,19 @@ function FigmaCard({
 
       {heartVariant !== "none" && (
         <button
-          className="col-1 row-1 z-10 flex size-[27.5px] items-center justify-center rounded-full bg-white shadow-[0_3px_8px_rgba(0,0,0,0.04)]"
-          style={{ marginLeft: btnOffsetX, marginTop: 15 }}
+          className="col-1 row-1 z-10 flex size-9 items-center justify-center rounded-full bg-white shadow-[0_3px_8px_rgba(0,0,0,0.04)]"
+          style={{ marginLeft: btnOffsetX * cardScale, marginTop: 19.5 }}
           onClick={(e) => { e.stopPropagation(); onFavorite(); }}
           disabled={favoriteLoading}
           aria-busy={favoriteLoading}
           aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
         >
           {favoriteLoading ? (
-            <Loader2 size={15.5} className="animate-spin text-[#183229]" />
+            <Loader2 size={20} className="animate-spin text-[#183229]" />
           ) : favorited || heartVariant === "green" ? (
-            <Heart size={16} strokeWidth={1.8} className="fill-[#2563EB] text-[#2563EB]" />
+            <Heart size={21} strokeWidth={1.8} className="fill-[#2563EB] text-[#2563EB]" />
           ) : (
-            <Heart size={15} strokeWidth={1.8} className="text-black" />
+            <Heart size={20} strokeWidth={1.8} className="text-black" />
           )}
         </button>
       )}
@@ -2134,20 +2134,29 @@ function ManualVialPreview({
     ? name.slice(0, selectedBreak.character === "/" ? selectedBreak.index + 1 : selectedBreak.index).trim()
     : name;
   const secondLine = selectedBreak ? name.slice(selectedBreak.index + 1).trim() : "";
-  const volumeMatch = size.match(/(\d+(?:\.\d+)?)\s*mL/i);
-  const sizeLabel = volumeMatch ? `${volumeMatch[1]}mL VIAL` : size.replace(/^\d+\s*/, "");
   const labelCanvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     let cancelled = false;
+    let drawFrame = 0;
+    let densityQuery: MediaQueryList | null = null;
 
     const drawLabel = () => {
       const canvas = labelCanvasRef.current;
       if (!canvas || cancelled) return;
 
-      const renderScale = compact ? 0.4 : 1;
-      const width = Math.round(1400 * renderScale);
-      const height = Math.round(1500 * renderScale);
+      const bounds = canvas.getBoundingClientRect();
+      if (bounds.width <= 0 || bounds.height <= 0) return;
+
+      // Keep the artwork at Retina density on standard external monitors too.
+      // Recomputing from the live CSS size also prevents browser resampling when
+      // the window moves between displays with different pixel densities.
+      const pixelDensity = compact
+        ? Math.max(4, window.devicePixelRatio || 1)
+        : Math.min(3, Math.max(2, window.devicePixelRatio || 1));
+      const width = Math.max(1, Math.round(bounds.width * pixelDensity));
+      const height = Math.max(1, Math.round(bounds.height * pixelDensity));
+      const renderScale = width / 1400;
       canvas.width = width;
       canvas.height = height;
 
@@ -2194,8 +2203,16 @@ function ManualVialPreview({
       nameLines.forEach((line, index) => {
         sourceContext.save();
         sourceContext.translate(nameX, firstNameY + index * nameLineGap);
-        sourceContext.scale(1, 1.22);
+        sourceContext.scale(compact ? 0.96 : 0.98, 1.22);
         sourceContext.fillText(line.toUpperCase(), 0, 0);
+        sourceContext.globalAlpha = 1;
+        sourceContext.globalCompositeOperation = "destination-out";
+        sourceContext.lineWidth = compact
+          ? Math.max(1, 3.2 * renderScale)
+          : Math.max(0.8, 2.6 * renderScale);
+        sourceContext.strokeStyle = "#000";
+        sourceContext.strokeText(line.toUpperCase(), 0, 0);
+        sourceContext.globalCompositeOperation = "source-over";
         sourceContext.restore();
       });
       sourceContext.globalAlpha = 1;
@@ -2259,15 +2276,16 @@ function ManualVialPreview({
       sourceContext.textBaseline = "middle";
       sourceContext.save();
       sourceContext.translate(bandX + mainBandWidth * 0.065, bandY + bandHeight * 0.515);
-      sourceContext.scale(1, 1.12);
+      sourceContext.scale(compact ? 0.96 : 0.98, 1.12);
       sourceContext.fillText(strengthText, 0, 0);
+      sourceContext.globalCompositeOperation = "destination-out";
+      sourceContext.lineWidth = compact
+        ? Math.max(0.8, 2.2 * renderScale)
+        : Math.max(0.65, 1.8 * renderScale);
+      sourceContext.strokeStyle = "#000";
+      sourceContext.strokeText(strengthText, 0, 0);
+      sourceContext.globalCompositeOperation = "source-over";
       sourceContext.restore();
-
-      sourceContext.font = `400 ${35 * renderScale}px "Bebas Neue", Impact, sans-serif`;
-      sourceContext.fillStyle = "rgba(66, 66, 66, 0.78)";
-      sourceContext.textAlign = "right";
-      sourceContext.textBaseline = "alphabetic";
-      sourceContext.fillText(sizeLabel.toUpperCase(), width * 0.92, height * 0.952);
 
       outputContext.clearRect(0, 0, width, height);
       outputContext.imageSmoothingEnabled = true;
@@ -2275,7 +2293,7 @@ function ManualVialPreview({
       const thetaMax = 0.72;
       const sinMax = Math.sin(thetaMax);
       const curveDepth = 28 * renderScale;
-      const sourceSliceWidth = compact ? 1 : 2;
+      const sourceSliceWidth = 1;
 
       for (let sourceX = 0; sourceX < width; sourceX += sourceSliceWidth) {
         const nextSourceX = Math.min(sourceX + sourceSliceWidth, width);
@@ -2312,13 +2330,36 @@ function ManualVialPreview({
       outputContext.globalCompositeOperation = "source-over";
     };
 
-    drawLabel();
-    document.fonts?.load('400 174px "Bebas Neue"').then(drawLabel).catch(() => undefined);
+    const scheduleDraw = () => {
+      window.cancelAnimationFrame(drawFrame);
+      drawFrame = window.requestAnimationFrame(drawLabel);
+    };
+
+    const canvas = labelCanvasRef.current;
+    const resizeObserver = typeof ResizeObserver === "undefined"
+      ? null
+      : new ResizeObserver(scheduleDraw);
+    if (canvas) resizeObserver?.observe(canvas);
+
+    const handleDensityChange = () => {
+      densityQuery?.removeEventListener("change", handleDensityChange);
+      densityQuery = window.matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`);
+      densityQuery.addEventListener("change", handleDensityChange);
+      scheduleDraw();
+    };
+
+    handleDensityChange();
+    window.addEventListener("resize", scheduleDraw);
+    document.fonts?.load('400 174px "Bebas Neue"').then(scheduleDraw).catch(() => undefined);
 
     return () => {
       cancelled = true;
+      window.cancelAnimationFrame(drawFrame);
+      resizeObserver?.disconnect();
+      densityQuery?.removeEventListener("change", handleDensityChange);
+      window.removeEventListener("resize", scheduleDraw);
     };
-  }, [firstLine, secondLine, strength, sizeLabel, palette, compact]);
+  }, [firstLine, secondLine, strength, palette, compact]);
 
   return (
     <div
