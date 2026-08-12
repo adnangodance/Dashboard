@@ -8366,6 +8366,7 @@ export default function App() {
   const [multiCartPatientIds, setMultiCartPatientIds] = useState<number[]>([]);
   const [patientCartEntries, setPatientCartEntries] = useState<PatientCartEntry[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<CardDef>(POPULAR_CARDS[0]);
+  const mainScrollRef = useRef<HTMLElement>(null);
   const [selectedOrder, setSelectedOrder] = useState<typeof ORDERS[number]>(ORDERS[0]);
   const [favoriteProductIds, setFavoriteProductIds] = useState<Set<number>>(
     () => new Set(ALL_CARDS.filter((card) => card.heartVariant === "green").map((card) => card.id)),
@@ -8388,6 +8389,11 @@ export default function App() {
   const [platformTourStep, setPlatformTourStep] = useState(0);
   const [platformTourTooltipVisible, setPlatformTourTooltipVisible] = useState(false);
   const [chatInput, setChatInput] = useState("");
+
+  useEffect(() => {
+    if (page !== "product-detail") return;
+    mainScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [page, selectedProduct.id]);
   const [alexTyping, setAlexTyping] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [chatMessages, setChatMessages] = useState<Array<{ id: number; sender: "alex" | "user"; text: string }>>([
@@ -8742,7 +8748,7 @@ export default function App() {
             />
 
             {/* Main content area */}
-            <main className="app-main-scroll h-screen min-w-0 flex-1 overflow-y-scroll p-3 pl-1.5">
+            <main ref={mainScrollRef} className="app-main-scroll h-screen min-w-0 flex-1 overflow-y-scroll p-3 pl-1.5">
               <div className="bg-card rounded-[10px] min-h-full p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
                 {renderPage()}
               </div>
