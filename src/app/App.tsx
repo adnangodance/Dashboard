@@ -87,6 +87,7 @@ import supportShayne from "@/assets/support-shayne.png";
 import supportZee from "@/assets/support-zee.png";
 import userVerifiedIcon from "@/assets/user-verified.svg";
 import blankVialReference from "@/assets/blank-vial-reference.png";
+import { INJECTION_PRODUCT_SEEDS } from "./injection-products";
 
 type Page =
   | "dashboard"
@@ -1390,36 +1391,36 @@ type CardDef = {
   vialPalette?: VialPalette;
 };
 
-const NEW_INJECTION_CARDS: CardDef[] = [
-  { id: 101, name: "Nandrolone Decanoate (Sesame Oil)", strength: "200mg/mL", areaOfTreatment: "Men's Health", vialPalette: { start: "#553018", middle: "#9a5c2d", end: "#d4934d", mark: "#dda45e" } },
-  { id: 102, name: "Nandrolone Grape Seed Oil", strength: "200mg/mL", areaOfTreatment: "Men's Health", vialPalette: { start: "#3f224f", middle: "#78468a", end: "#b06bc2", mark: "#bb7bca" } },
-  { id: 103, name: "Oxytocin", strength: "100IU/mL", areaOfTreatment: "Women's Health", vialPalette: { start: "#174d72", middle: "#2784ad", end: "#61bdd1", mark: "#73c7d8" } },
-  { id: 104, name: "PEG-MGF", strength: "0.4mg/mL", areaOfTreatment: "Peptide Therapy", vialPalette: { start: "#135956", middle: "#238f82", end: "#55c5ad", mark: "#67ceb9" } },
-  { id: 105, name: "Pentadecapeptide Arginate (PDA)", strength: "10mg/mL", areaOfTreatment: "Peptide Therapy", vialPalette: { start: "#772e3a", middle: "#b94f5d", end: "#ea8084", mark: "#ee9194" } },
-  { id: 106, name: "Phenylephrine", strength: "10mg/mL", areaOfTreatment: "Wellness", vialPalette: { start: "#792126", middle: "#b73b3e", end: "#e56b68", mark: "#ea7c78" } },
-  { id: 107, name: "Procaine", strength: "2%", areaOfTreatment: "Wellness", vialPalette: { start: "#1d527d", middle: "#367eb6", end: "#75b5df", mark: "#86c0e4" } },
-  { id: 108, name: "Proline", strength: "50mg/mL", areaOfTreatment: "Wellness", vialPalette: { start: "#18563d", middle: "#2f8b61", end: "#67c893", mark: "#79d09f" } },
-  { id: 109, name: "PT/141", strength: "2mg/mL", areaOfTreatment: "Peptide Therapy", vialPalette: { start: "#682052", middle: "#a53b80", end: "#d96aae", mark: "#df7cba" } },
-  { id: 110, name: "Pyridoxine (Vitamin B6)", strength: "100mg/mL", areaOfTreatment: "Wellness", vialPalette: { start: "#735113", middle: "#ad7c22", end: "#d9ad4f", mark: "#e1bb65" } },
-  { id: 111, name: "Quadmix (PAPA/PHEN/ATRO/PGE)", strength: "9mg/1mg/10mcg/10mcg/mL", areaOfTreatment: "Men's Health", vialPalette: { start: "#172b5b", middle: "#2e4f91", end: "#6683c5", mark: "#7892ce" } },
-  { id: 112, name: "Semaglutide/Glycine/B12", strength: "1mg/1mg/10mg/mL", areaOfTreatment: "Weight Loss", vialPalette: { start: "#0f5b62", middle: "#168c93", end: "#4cc3c1", mark: "#60cdca" } },
-  { id: 113, name: "Sermorelin/Ipamorelin", strength: "3mg/3.6mg/mL", areaOfTreatment: "Peptide Therapy", vialPalette: { start: "#32326f", middle: "#5752a8", end: "#8d82dc", mark: "#9b91e2" } },
-  { id: 114, name: "Sodium Deoxycholate", strength: "1.67%", areaOfTreatment: "Wellness", vialPalette: { start: "#7c3e17", middle: "#b86529", end: "#e49a54", mark: "#eaa868" } },
-  { id: 115, name: "Testosterone Cyp Grape Seed Oil", strength: "200mg/mL", areaOfTreatment: "Men's Health", vialPalette: { start: "#173b77", middle: "#2b61ab", end: "#638fd5", mark: "#759cdb" } },
-  { id: 116, name: "Testosterone Ent Grape Seed Oil", strength: "200mg/mL", areaOfTreatment: "Men's Health", vialPalette: { start: "#28435c", middle: "#496d8a", end: "#7ea1b9", mark: "#8eacc2" } },
-  { id: 117, name: "Testosterone Pro Grape Seed Oil", strength: "100mg/mL", areaOfTreatment: "Men's Health", vialPalette: { start: "#6b2d24", middle: "#a84d3c", end: "#d67d68", mark: "#de8e7b" } },
-  { id: 118, name: "Testosterone (Various Female Esters & Blends)", strength: "Cypionate/Propionate 175mg/25mg/mL", areaOfTreatment: "Hormone Support", vialPalette: { start: "#652f52", middle: "#9d4e7d", end: "#d17dac", mark: "#d98db7" } },
-  { id: 119, name: "Test Product 2", strength: "10mg/2.5mg/mL", areaOfTreatment: "Wellness", vialPalette: { start: "#35414c", middle: "#60717e", end: "#91a1aa", mark: "#9eacb4" } },
-  { id: 120, name: "Thymosin Alpha-1", strength: "3mg/mL", areaOfTreatment: "Peptide Therapy", vialPalette: { start: "#4b286e", middle: "#7545a2", end: "#a975d2", mark: "#b486da" } },
-  { id: 121, name: "Tirzepatide/Glycine/B12", strength: "10mg/5mg/500mcg/mL", areaOfTreatment: "Weight Loss", vialPalette: { start: "#282e84", middle: "#5d55bd", end: "#9680ef", mark: "#9f8cf1" } },
-  { id: 122, name: "Vitamin B-12 (Cyanocobalamin)", strength: "1200mg/mL", areaOfTreatment: "Wellness", vialPalette: { start: "#721d3f", middle: "#b43365", end: "#e76591", mark: "#eb779e" } },
-  { id: 123, name: "Vitamin D3", strength: "50,000IU/mL", areaOfTreatment: "Wellness", vialPalette: { start: "#6d5510", middle: "#a98718", end: "#d8b945", mark: "#dfc45b" } },
-].map((product, index) => ({
-  ...product,
+function injectionArea(name: string) {
+  const normalizedName = name.toLowerCase();
+  if (["tirzepatide", "semaglutide", "retatrutide", "liraglutide", "aod-9604", "mots-c"].some(term => normalizedName.includes(term))) return "Weight Loss";
+  if (["testosterone", "nandrolone", "tri-mix", "bimix", "quadmix", "alprostadil", "papaverine", "dutasteride", "pt-141", "bremelanotide", "pregnyl"].some(term => normalizedName.includes(term))) return "Men's Health";
+  if (["bpc", "tb-500", "tb500", "ghk", "cjc", "ipamorelin", "sermorelin", "tesamorelin", "peptide", "epithalon", "foxo", "igf", "kisspeptin", "thymosin", "dsip", "ll-37", "ara 290", "ss31", "peg-mgf"].some(term => normalizedName.includes(term))) return "Peptide Therapy";
+  if (["oxytocin", "biotin", "folic acid"].some(term => normalizedName.includes(term))) return "Women's Health";
+  return "Wellness";
+}
+
+function injectionPalette(catalogNumber: number): VialPalette {
+  const hue = (218 + catalogNumber * 47) % 360;
+  const middleHue = (hue + 7) % 360;
+  const endHue = (hue + 14) % 360;
+  return {
+    start: `hsl(${hue} 56% 25%)`,
+    middle: `hsl(${middleHue} 58% 45%)`,
+    end: `hsl(${endHue} 72% 68%)`,
+    mark: `hsl(${endHue} 76% 73%)`,
+  };
+}
+
+const INJECTION_CARDS: CardDef[] = INJECTION_PRODUCT_SEEDS.map((product, index) => ({
+  id: 1000 + product.catalogNumber,
+  name: product.name,
+  strength: product.strength,
   price: "$35.88",
   pharmacies: 2 + (index % 4),
   pharmacy: ["1st Choice Compounding Pharmacy", "Optimal Balance Pharmacy", "DCA Pharmacy", "Thesis Pharmacy"][index % 4],
   shippingState: ["Florida", "New York", "Texas"][index % 3],
+  areaOfTreatment: injectionArea(product.name),
   dosage: "Injection",
   img: blankVialReference,
   imgW: 145,
@@ -1429,30 +1430,12 @@ const NEW_INJECTION_CARDS: CardDef[] = [
   imgContain: true,
   btnOffsetX: 168,
   heartVariant: "black" as const,
+  vialPalette: injectionPalette(product.catalogNumber),
 }));
 
-const POPULAR_CARDS: CardDef[] = [
-  { id: 8, name: "Tirzepatide/Pyridoxine (B6)", price: "$125.43", pharmacies: 3, pharmacy: "1st Choice Compounding Pharmacy", shippingState: "Florida", areaOfTreatment: "Weight Loss", dosage: "Injection", img: blankVialReference, imgW: 145, imgH: 181, imgL: 30, imgT: 17, imgContain: true, btnOffsetX: 168, heartVariant: "black" },
-  { id: 1, name: "NAD+ Injecton", price: "$55.88", pharmacies: 4, pharmacy: "Optimal Balance Pharmacy", shippingState: "New York", areaOfTreatment: "Wellness", dosage: "Injection", img: img430, imgW: 111, imgH: 187, imgL: 47, imgT: 12, btnOffsetX: 170, heartVariant: "green" },
-  { id: 2, name: "Nandrolone Decanoate", price: "$35.88", pharmacies: 2, pharmacy: "DCA Pharmacy", shippingState: "Florida", areaOfTreatment: "Men's Health", dosage: "Injection", img: img429, imgW: 138, imgH: 173, imgL: 37.4, imgT: 27, hasRxBadge: true, btnOffsetX: 168.4, heartVariant: "black" },
-  { id: 3, name: "NAD+ Injecton", price: "$45.99", pharmacies: 4, pharmacy: "1st Choice Compounding Pharmacy", shippingState: "New York", areaOfTreatment: "Wellness", dosage: "Injection", img: img431, imgW: 133, imgH: 205, imgL: 34, imgT: 2, btnOffsetX: 168, heartVariant: "none" },
-  { id: 4, name: "MIC/B12", price: "$215.98", pharmacies: 5, pharmacy: "Rush Pharmacy TX", shippingState: "Texas", areaOfTreatment: "Wellness", dosage: "Injection", img: img432, imgW: 152, imgH: 190, imgL: 31.8, imgT: 9.48, btnOffsetX: 168.2, heartVariant: "black" },
-  { id: 5, name: "Esteadol", price: "$65.99", pharmacies: 4, pharmacy: "Thesis Pharmacy", shippingState: "New York", areaOfTreatment: "Women's Health", dosage: "Gel", img: img433, imgW: 99, imgH: 166, imgL: 49.8, imgT: 21, btnOffsetX: 168.8, heartVariant: "black" },
-  { id: 6, name: "NAD+ Injecton", price: "$15.98", pharmacies: 4, pharmacy: "Optimal Balance Pharmacy", shippingState: "New York", areaOfTreatment: "Wellness", dosage: "Injection", img: img434, imgW: 130, imgH: 193, imgL: 33.6, imgT: 18, btnOffsetX: 168.6, heartVariant: "black" },
-  { id: 7, name: "Testosterone Cypionate Injection", price: "$135.99", pharmacies: 5, pharmacy: "Spring Creek Pharmacy", shippingState: "New York", areaOfTreatment: "Men's Health", dosage: "Injection", img: img452dash, imgW: 166, imgH: 181, imgL: 21, imgT: 19.48, btnOffsetX: 168, heartVariant: "black" },
-];
+const POPULAR_CARDS: CardDef[] = INJECTION_CARDS.slice(0, 8);
 
-const ALL_CARDS: CardDef[] = [
-  { id: 18, name: "Tirzepatide/Pyridoxine (B6)", price: "$125.43", pharmacies: 3, pharmacy: "1st Choice Compounding Pharmacy", shippingState: "Florida", areaOfTreatment: "Weight Loss", dosage: "Injection", img: blankVialReference, imgW: 145, imgH: 181, imgL: 30, imgT: 17, imgContain: true, btnOffsetX: 168, heartVariant: "black" },
-  { id: 11, name: "NAD+ Injecton", price: "$55.88", pharmacies: 4, pharmacy: "Optimal Balance Pharmacy", shippingState: "New York", areaOfTreatment: "Wellness", dosage: "Injection", img: img435, imgW: 111, imgH: 187, imgL: 47, imgT: 12, btnOffsetX: 170, heartVariant: "green" },
-  { id: 12, name: "Nandrolone Decanoate", price: "$35.88", pharmacies: 2, pharmacy: "DCA Pharmacy", shippingState: "Florida", areaOfTreatment: "Men's Health", dosage: "Injection", img: img429, imgW: 138, imgH: 173, imgL: 37.4, imgT: 27, hasRxBadge: true, btnOffsetX: 168.4, heartVariant: "black" },
-  { id: 13, name: "NAD+ Injecton", price: "$45.99", pharmacies: 4, pharmacy: "1st Choice Compounding Pharmacy", shippingState: "New York", areaOfTreatment: "Wellness", dosage: "Injection", img: img436, imgW: 133, imgH: 205, imgL: 34, imgT: 2, btnOffsetX: 168, heartVariant: "none" },
-  { id: 14, name: "MIC/B12", price: "$215.98", pharmacies: 3, pharmacy: "Thesis Pharmacy", shippingState: "Texas", areaOfTreatment: "Wellness", dosage: "Injection", img: img432, imgW: 152, imgH: 190, imgL: 31.8, imgT: 9.48, btnOffsetX: 168.2, heartVariant: "black" },
-  { id: 15, name: "Esteadol", price: "$65.99", pharmacies: 4, pharmacy: "Rush Pharmacy TX", shippingState: "New York", areaOfTreatment: "Women's Health", dosage: "Gel", img: img433, imgW: 99, imgH: 166, imgL: 49.8, imgT: 21, btnOffsetX: 168.8, heartVariant: "black" },
-  { id: 16, name: "NAD+ Injecton", price: "$15.98", pharmacies: 4, pharmacy: "1st Choice Compounding Pharmacy", shippingState: "New York", areaOfTreatment: "Wellness", dosage: "Injection", img: img437, imgW: 130, imgH: 193, imgL: 33.6, imgT: 18, btnOffsetX: 168.6, heartVariant: "black" },
-  { id: 17, name: "Testosterone Cypionate Injection", price: "$135.99", pharmacies: 5, pharmacy: "DCA Pharmacy", shippingState: "New York", areaOfTreatment: "Men's Health", dosage: "Injection", img: img452dash, imgW: 166, imgH: 181, imgL: 21, imgT: 19.48, btnOffsetX: 168, heartVariant: "black" },
-  ...NEW_INJECTION_CARDS,
-];
+const ALL_CARDS: CardDef[] = INJECTION_CARDS;
 
 const PHARMACIES_MULTI = [
   { name: "All Pharmacies", count: 200 },
@@ -1785,7 +1768,7 @@ function ProductsPage({
     Bottle: 6,
     Enema: 2,
     Capsule: 1,
-    Injection: 12,
+    Injection: INJECTION_CARDS.length,
     Gel: 6,
     Lollipop: 2,
     "Iv Bag": 1,
@@ -1794,7 +1777,7 @@ function ProductsPage({
     Jan: 6,
   };
   const dosageOptions = ["Bottle", "Enema", "Capsule", "Injection", "Gel", "Lollipop", "Iv Bag", "Jar", "Iv Bag 15", "Jan"];
-  const areaCounts = [...POPULAR_CARDS, ...ALL_CARDS].reduce<Record<string, number>>((counts, card) => {
+  const areaCounts = ALL_CARDS.reduce<Record<string, number>>((counts, card) => {
     counts[card.areaOfTreatment] = (counts[card.areaOfTreatment] ?? 0) + 1;
     return counts;
   }, {});
@@ -2038,7 +2021,9 @@ function ProductsPage({
           <section>
             <h2 className="font-['Inter',sans-serif] font-medium text-black text-[18px] mb-4 leading-none">
               {search ? `Results for "${search}"` : "All Products"}
-              {search && <span className="text-[14px] text-[#9d9d9d] font-normal ml-2">({filtered.length} found)</span>}
+              <span className="text-[14px] text-[#9d9d9d] font-normal ml-2">
+                ({filtered.length} {search ? "found" : "items"})
+              </span>
             </h2>
             {filtered.length > 0 ? (
               <div className="grid justify-items-start gap-[13px] [grid-template-columns:repeat(auto-fit,268px)]">
@@ -2160,8 +2145,9 @@ function ManualVialPreview({
       const canvas = labelCanvasRef.current;
       if (!canvas || cancelled) return;
 
-      const width = 1400;
-      const height = 1500;
+      const renderScale = compact ? 0.4 : 1;
+      const width = Math.round(1400 * renderScale);
+      const height = Math.round(1500 * renderScale);
       canvas.width = width;
       canvas.height = height;
 
@@ -2193,7 +2179,12 @@ function ManualVialPreview({
 
       const nameLines = secondLine ? [firstLine, secondLine] : [firstLine];
       const nameFontSize = Math.min(
-        ...nameLines.map((line) => fitFont(line, width * (compact ? 0.92 : 0.9), compact ? 226 : 210, compact ? 106 : 98)),
+        ...nameLines.map((line) => fitFont(
+          line,
+          width * (compact ? 0.92 : 0.9),
+          (compact ? 226 : 210) * renderScale,
+          (compact ? 106 : 98) * renderScale,
+        )),
       );
       sourceContext.font = `400 ${nameFontSize}px "Bebas Neue", Impact, sans-serif`;
       sourceContext.globalAlpha = 0.98;
@@ -2256,7 +2247,12 @@ function ManualVialPreview({
       sourceContext.globalAlpha = 1;
 
       const strengthText = strength.toUpperCase();
-      const strengthFontSize = fitFont(strengthText, mainBandWidth * 0.76, compact ? 104 : 94, compact ? 47 : 43);
+      const strengthFontSize = fitFont(
+        strengthText,
+        mainBandWidth * 0.76,
+        (compact ? 104 : 94) * renderScale,
+        (compact ? 47 : 43) * renderScale,
+      );
       sourceContext.font = `400 ${strengthFontSize}px "Bebas Neue", Impact, sans-serif`;
       sourceContext.fillStyle = "#fff";
       sourceContext.textAlign = "left";
@@ -2267,7 +2263,7 @@ function ManualVialPreview({
       sourceContext.fillText(strengthText, 0, 0);
       sourceContext.restore();
 
-      sourceContext.font = `400 35px "Bebas Neue", Impact, sans-serif`;
+      sourceContext.font = `400 ${35 * renderScale}px "Bebas Neue", Impact, sans-serif`;
       sourceContext.fillStyle = "rgba(66, 66, 66, 0.78)";
       sourceContext.textAlign = "right";
       sourceContext.textBaseline = "alphabetic";
@@ -2278,8 +2274,8 @@ function ManualVialPreview({
       outputContext.imageSmoothingQuality = "high";
       const thetaMax = 0.72;
       const sinMax = Math.sin(thetaMax);
-      const curveDepth = 28;
-      const sourceSliceWidth = 2;
+      const curveDepth = 28 * renderScale;
+      const sourceSliceWidth = compact ? 1 : 2;
 
       for (let sourceX = 0; sourceX < width; sourceX += sourceSliceWidth) {
         const nextSourceX = Math.min(sourceX + sourceSliceWidth, width);
@@ -8331,10 +8327,10 @@ export default function App() {
   const [selectedProduct, setSelectedProduct] = useState<CardDef>(POPULAR_CARDS[0]);
   const [selectedOrder, setSelectedOrder] = useState<typeof ORDERS[number]>(ORDERS[0]);
   const [favoriteProductIds, setFavoriteProductIds] = useState<Set<number>>(
-    () => new Set([...POPULAR_CARDS, ...ALL_CARDS].filter((card) => card.heartVariant === "green").map((card) => card.id)),
+    () => new Set(ALL_CARDS.filter((card) => card.heartVariant === "green").map((card) => card.id)),
   );
   const favoriteProducts = useMemo(
-    () => [...POPULAR_CARDS, ...ALL_CARDS].filter((card) => favoriteProductIds.has(card.id)),
+    () => ALL_CARDS.filter((card) => favoriteProductIds.has(card.id)),
     [favoriteProductIds],
   );
   const cartPage: Page = "cart-multi";
