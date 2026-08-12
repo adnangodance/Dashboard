@@ -1155,6 +1155,10 @@ function FigmaCard({
 }) {
   const [pharmacyMenuOpen, setPharmacyMenuOpen] = useState(false);
   const cardPharmacies = ["Altin Compounding Pharmacy", "Emerald Pharmacy SandBox", "Partel Sandbox"];
+  const usesManualVial = img === blankVialReference;
+  const productImageStyle = usesManualVial
+    ? { marginLeft: 16.5, marginTop: 2, width: 172, height: 215 }
+    : { marginLeft: imgL, marginTop: imgT, width: imgW, height: imgH };
 
   return (
     <div
@@ -1164,8 +1168,8 @@ function FigmaCard({
     >
       <div className="col-1 row-1 h-[302px] w-[205.6px] rounded-[12.13px] bg-gradient-to-b from-[rgba(247,239,233,0.1)] to-[rgba(236,229,182,0.1)]" />
 
-      <div className="pointer-events-none col-1 row-1" style={{ marginLeft: imgL, marginTop: imgT, width: imgW, height: imgH }}>
-        {img === blankVialReference ? (
+      <div className="pointer-events-none col-1 row-1" style={productImageStyle}>
+        {usesManualVial ? (
           <ManualVialPreview name={name} strength={strength ?? "20mg/25mg/mL"} size="1 (5mL) Vial" palette={vialPalette} compact />
         ) : (
           <img
@@ -2147,37 +2151,188 @@ function ManualVialPreview({
   const secondLine = selectedBreak ? name.slice(selectedBreak.index + 1).trim() : "";
   const volumeMatch = size.match(/(\d+(?:\.\d+)?)\s*mL/i);
   const sizeLabel = volumeMatch ? `${volumeMatch[1]}mL VIAL` : size.replace(/^\d+\s*/, "");
-  const longestNameLine = Math.max(firstLine.length, secondLine.length || 0, 1);
-  const nameFontSize = Math.max(5.15, Math.min(9.15, 137 / longestNameLine));
-  const strengthFontSize = Math.max(1.9, Math.min(4.8, (4.8 * 14) / Math.max(strength.length, 1)));
-  const previewStyle = {
-    "--vial-band-start": palette?.start ?? "#282e84",
-    "--vial-band-middle": palette?.middle ?? "#5d55bd",
-    "--vial-band-end": palette?.end ?? "#9680ef",
-    "--vial-mark": palette?.mark ?? "#9680ef",
-  } as CSSProperties;
+  const labelCanvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const drawLabel = () => {
+      const canvas = labelCanvasRef.current;
+      if (!canvas || cancelled) return;
+
+      const width = 1400;
+      const height = 1500;
+      canvas.width = width;
+      canvas.height = height;
+
+      const source = document.createElement("canvas");
+      source.width = width;
+      source.height = height;
+      const sourceContext = source.getContext("2d");
+      const outputContext = canvas.getContext("2d");
+      if (!sourceContext || !outputContext) return;
+
+      const colors = {
+        start: palette?.start ?? "#282e84",
+        middle: palette?.middle ?? "#5d55bd",
+        end: palette?.end ?? "#9680ef",
+        mark: palette?.mark ?? "#9680ef",
+      };
+
+      const fitFont = (text: string, maxWidth: number, maximum: number, minimum: number) => {
+        sourceContext.font = `400 ${maximum}px "Bebas Neue", Impact, sans-serif`;
+        const measured = Math.max(sourceContext.measureText(text.toUpperCase()).width, 1);
+        const fitted = Math.min(maximum, maximum * (maxWidth / measured));
+        return Math.max(minimum, fitted);
+      };
+
+      sourceContext.clearRect(0, 0, width, height);
+      sourceContext.textBaseline = "top";
+      sourceContext.textAlign = "left";
+      sourceContext.fillStyle = "#050505";
+
+      const nameLines = secondLine ? [firstLine, secondLine] : [firstLine];
+      const nameFontSize = Math.min(
+        ...nameLines.map((line) => fitFont(line, width * (compact ? 0.92 : 0.9), compact ? 226 : 210, compact ? 106 : 98)),
+      );
+      sourceContext.font = `400 ${nameFontSize}px "Bebas Neue", Impact, sans-serif`;
+      sourceContext.globalAlpha = 0.98;
+      const nameX = width * 0.067;
+      const firstNameY = secondLine ? height * 0.15 : height * 0.235;
+      const nameLineGap = height * 0.17;
+      nameLines.forEach((line, index) => {
+        sourceContext.save();
+        sourceContext.translate(nameX, firstNameY + index * nameLineGap);
+        sourceContext.scale(1, 1.22);
+        sourceContext.fillText(line.toUpperCase(), 0, 0);
+        sourceContext.restore();
+      });
+      sourceContext.globalAlpha = 1;
+
+      const bandX = width * 0.0183;
+      const bandY = height * 0.629;
+      const bandWidth = width * 0.9232;
+      const bandHeight = height * 0.219;
+      const mainBandWidth = bandWidth * 0.876;
+      const markX = bandX + mainBandWidth;
+      const markWidth = bandWidth - mainBandWidth;
+
+      const bandGradient = sourceContext.createLinearGradient(bandX, 0, bandX + mainBandWidth, 0);
+      bandGradient.addColorStop(0, colors.start);
+      bandGradient.addColorStop(0.18, colors.start);
+      bandGradient.addColorStop(0.5, colors.middle);
+      bandGradient.addColorStop(0.82, colors.end);
+      bandGradient.addColorStop(1, colors.end);
+      sourceContext.fillStyle = bandGradient;
+      sourceContext.fillRect(bandX, bandY, mainBandWidth + 1, bandHeight);
+
+      const bandLight = sourceContext.createLinearGradient(bandX, 0, bandX + mainBandWidth, 0);
+      bandLight.addColorStop(0, "rgba(7, 10, 35, 0.10)");
+      bandLight.addColorStop(0.22, "rgba(255, 255, 255, 0.015)");
+      bandLight.addColorStop(0.58, "rgba(255, 255, 255, 0.07)");
+      bandLight.addColorStop(0.82, "rgba(255, 255, 255, 0.025)");
+      bandLight.addColorStop(1, "rgba(255, 255, 255, 0.09)");
+      sourceContext.fillStyle = bandLight;
+      sourceContext.fillRect(bandX, bandY, mainBandWidth + 1, bandHeight);
+
+      sourceContext.fillStyle = colors.mark;
+      const markPieces = [
+        [0, 0.5, 0.24, 0.5],
+        [0.24, 0, 0.15, 0.5],
+        [0.39, 0, 0.16, 1],
+        [0.55, 0.5, 0.16, 0.5],
+        [0.71, 0, 0.17, 0.5],
+        [0.88, 0.5, 0.12, 0.5],
+      ];
+      markPieces.forEach(([x, y, pieceWidth, pieceHeight], index) => {
+        sourceContext.globalAlpha = 0.9 + index * 0.018;
+        sourceContext.fillRect(
+          markX + markWidth * x,
+          bandY + bandHeight * y,
+          markWidth * pieceWidth + 1,
+          bandHeight * pieceHeight,
+        );
+      });
+      sourceContext.globalAlpha = 1;
+
+      const strengthText = strength.toUpperCase();
+      const strengthFontSize = fitFont(strengthText, mainBandWidth * 0.76, compact ? 104 : 94, compact ? 47 : 43);
+      sourceContext.font = `400 ${strengthFontSize}px "Bebas Neue", Impact, sans-serif`;
+      sourceContext.fillStyle = "#fff";
+      sourceContext.textAlign = "left";
+      sourceContext.textBaseline = "middle";
+      sourceContext.save();
+      sourceContext.translate(bandX + mainBandWidth * 0.065, bandY + bandHeight * 0.515);
+      sourceContext.scale(1, 1.12);
+      sourceContext.fillText(strengthText, 0, 0);
+      sourceContext.restore();
+
+      sourceContext.font = `400 35px "Bebas Neue", Impact, sans-serif`;
+      sourceContext.fillStyle = "rgba(66, 66, 66, 0.78)";
+      sourceContext.textAlign = "right";
+      sourceContext.textBaseline = "alphabetic";
+      sourceContext.fillText(sizeLabel.toUpperCase(), width * 0.92, height * 0.952);
+
+      outputContext.clearRect(0, 0, width, height);
+      outputContext.imageSmoothingEnabled = true;
+      outputContext.imageSmoothingQuality = "high";
+      const thetaMax = 0.72;
+      const sinMax = Math.sin(thetaMax);
+      const curveDepth = 28;
+      const sourceSliceWidth = 2;
+
+      for (let sourceX = 0; sourceX < width; sourceX += sourceSliceWidth) {
+        const nextSourceX = Math.min(sourceX + sourceSliceWidth, width);
+        const normalizedX = (sourceX / width - 0.5) * 2;
+        const nextNormalizedX = (nextSourceX / width - 0.5) * 2;
+        const destinationX = width * 0.5 + (Math.sin(normalizedX * thetaMax) / sinMax) * width * 0.5;
+        const nextDestinationX = width * 0.5 + (Math.sin(nextNormalizedX * thetaMax) / sinMax) * width * 0.5;
+        const centerAmount = 1 - normalizedX * normalizedX;
+        const yOffset = curveDepth * (centerAmount - 0.42);
+        const verticalScale = 1 + centerAmount * 0.008;
+        outputContext.drawImage(
+          source,
+          sourceX,
+          0,
+          nextSourceX - sourceX,
+          height,
+          destinationX - 0.5,
+          yOffset,
+          nextDestinationX - destinationX + 1,
+          height * verticalScale,
+        );
+      }
+
+      outputContext.globalCompositeOperation = "source-atop";
+      const cylinderLight = outputContext.createLinearGradient(0, 0, width, 0);
+      cylinderLight.addColorStop(0, "rgba(22, 18, 12, 0.13)");
+      cylinderLight.addColorStop(0.12, "rgba(22, 18, 12, 0.04)");
+      cylinderLight.addColorStop(0.34, "rgba(255, 255, 255, 0.035)");
+      cylinderLight.addColorStop(0.58, "rgba(255, 255, 255, 0.075)");
+      cylinderLight.addColorStop(0.8, "rgba(255, 255, 255, 0.02)");
+      cylinderLight.addColorStop(1, "rgba(22, 18, 12, 0.11)");
+      outputContext.fillStyle = cylinderLight;
+      outputContext.fillRect(0, 0, width, height);
+      outputContext.globalCompositeOperation = "source-over";
+    };
+
+    drawLabel();
+    document.fonts?.load('400 174px "Bebas Neue"').then(drawLabel).catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [firstLine, secondLine, strength, sizeLabel, palette, compact]);
 
   return (
     <div
       className={`manual-vial-preview ${compact ? "manual-vial-preview-compact" : ""}`}
       role="img"
       aria-label={`${name}, ${strength}, ${size}`}
-      style={previewStyle}
     >
       <img src={blankVialReference} alt="" draggable={false} />
       <div className="manual-vial-label" aria-hidden="true">
-        <div
-          className={`manual-vial-product-name ${secondLine ? "" : "manual-vial-product-name-single"}`}
-          style={{ fontSize: `${nameFontSize}cqw` }}
-        >
-          <span>{firstLine}</span>
-          {secondLine && <span>{secondLine}</span>}
-        </div>
-        <span className="manual-vial-size">{sizeLabel}</span>
-        <div className="manual-vial-strength-band">
-          <strong style={{ fontSize: `${strengthFontSize}cqw` }}>{strength}</strong>
-          <span className="manual-vial-mark"><i /><i /><i /><i /><i /><i /></span>
-        </div>
+        <canvas ref={labelCanvasRef} className="manual-vial-art" />
       </div>
     </div>
   );
