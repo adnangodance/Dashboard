@@ -109,6 +109,7 @@ type Page =
   | "orders"
   | "order-detail"
   | "order-history"
+  | "pending-approvals"
   | "support"
   | "users"
   | "settings"
@@ -410,6 +411,7 @@ const INITIAL_MAIN: MenuItem[] = [
   { icon: BookOpen, label: "Catalog", page: "products" },
   { icon: ClipboardList, label: "Orders", page: "orders" },
   { icon: History, label: "Order History", page: "order-history" },
+  { icon: CheckCircle2, label: "Pending Approvals", page: "pending-approvals" },
   { icon: ShoppingCart, label: "Cart", page: "cart-multi" },
   { icon: Users, label: "Patients", page: "users" },
   { icon: MessageSquare, label: "Support Tickets", page: "support" },
@@ -4807,7 +4809,7 @@ function OrderHistoryStatusChip({ status }: { status: OrderHistoryEntry["order_s
   );
 }
 
-function OrderHistoryPayByChip({ payBy }: { payBy: OrderHistoryEntry["payment_method"] }) {
+function OrderHistoryPayByChip({ payBy, showStatus = false }: { payBy: OrderHistoryEntry["payment_method"]; showStatus?: boolean }) {
   const isPatient = payBy === "patient";
   return (
     <span
@@ -4823,6 +4825,7 @@ function OrderHistoryPayByChip({ payBy }: { payBy: OrderHistoryEntry["payment_me
         )}
       </span>
       {payBy === "clinic_ach" && <span className="rounded-3xl bg-[#f97316] px-1.5 py-px text-[8px] font-bold text-white">ACH</span>}
+      {showStatus && payBy !== "clinic_ach" && <span className="rounded-3xl bg-[#fb3e75] px-2 py-0.5 text-[9px] font-bold text-[#fcfcfc]">UNPAID</span>}
     </span>
   );
 }
@@ -10317,6 +10320,8 @@ export default function App() {
         return <OrderDetailPage order={selectedOrder} onNavigate={setPage} />;
       case "order-history":
         return <OrderHistoryPage onNavigate={setPage} />;
+      case "pending-approvals":
+        return <PendingApprovalsPage onNavigate={setPage} />;
       case "support":
         return <SupportPage onNavigate={setPage} />;
       case "users":
