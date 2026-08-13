@@ -1298,15 +1298,15 @@ function OldCatalogCard({
       <div className="flex h-[276px] items-center justify-center px-7 pt-5">
         {img === blankVialReference || img === blankLyophilizedVialReference ? (
           <div className="h-[245px] w-[196px]">
-            <ManualVialPreview name={name} strength={strength ?? "20mg/25mg/mL"} size="1 (5mL) Vial" palette={vialPalette} baseImage={img} compact />
+            <ManualVialPreview name={name} strength={strength ?? "20mg/25mg/mL"} size="1 (5mL) Vial" palette={vialPalette} baseImage={img} compact flatLabel />
           </div>
         ) : img === blankNasalSprayReference ? (
           <div className="h-[260px] w-[223px]">
-            <ManualNasalSprayPreview name={name} strength={strength ?? "100mg/mL"} palette={vialPalette} compact />
+            <ManualNasalSprayPreview name={name} strength={strength ?? "100mg/mL"} palette={vialPalette} compact flatLabel />
           </div>
         ) : img === blankTopicalDropperReference ? (
           <div className="h-[245px] w-[196px]">
-            <ManualNasalSprayPreview name={name} strength={strength ?? "2%"} palette={vialPalette} baseImage={img} variant="topical" compact />
+            <ManualNasalSprayPreview name={name} strength={strength ?? "2%"} palette={vialPalette} baseImage={img} variant="topical" compact flatLabel />
           </div>
         ) : img === blankPatchPackageReference ? (
           <div className="size-[220px]">
@@ -1314,7 +1314,7 @@ function OldCatalogCard({
           </div>
         ) : img === blankCapsuleBottleReference ? (
           <div className="h-[255px] w-[205px]">
-            <ManualCapsulePreview name={name} strength={strength ?? "200mg/mL"} palette={vialPalette} compact />
+            <ManualCapsulePreview name={name} strength={strength ?? "200mg/mL"} palette={vialPalette} compact flatLabel />
           </div>
         ) : (
           <img src={img} alt={name} className="max-h-[245px] max-w-[205px] object-contain mix-blend-multiply" />
@@ -1421,8 +1421,11 @@ function PharmacyCatalogCard({
 }
 
 type VialPalette = {
-  primary: string;
-  foreground: string;
+  start: string;
+  middle: string;
+  end: string;
+  mark: string;
+  foreground?: string;
 };
 
 // Product definitions matching the Figma dashboard export exactly
@@ -1454,62 +1457,43 @@ function injectionArea(name: string) {
   return "Wellness";
 }
 
-const PROVIDED_LABEL_COLOR_FAMILIES: VialPalette[][] = [
-  [
-    { primary: "#B7CFDA", foreground: "#314E68" },
-    { primary: "#8E7AD9", foreground: "#FFFFFF" },
-    { primary: "#6C5BC8", foreground: "#FFFFFF" },
-    { primary: "#DAB8F4", foreground: "#4F356D" },
-    { primary: "#2F348E", foreground: "#FFFFFF" },
-  ],
-  [
-    { primary: "#F7B0A3", foreground: "#683245" },
-    { primary: "#F39572", foreground: "#683245" },
-    { primary: "#FFAA75", foreground: "#683245" },
-    { primary: "#E88478", foreground: "#683245" },
-    { primary: "#C6535F", foreground: "#FFFFFF" },
-  ],
-  [
-    { primary: "#BFD5D2", foreground: "#4F4A57" },
-    { primary: "#ACD7D2", foreground: "#4F4A57" },
-    { primary: "#6FAEA1", foreground: "#FFFFFF" },
-    { primary: "#A9E2B0", foreground: "#35553E" },
-    { primary: "#82DDA2", foreground: "#35553E" },
-  ],
-  [
-    { primary: "#EFE8A8", foreground: "#4F1D3A" },
-    { primary: "#E8D769", foreground: "#4F1D3A" },
-    { primary: "#DDE862", foreground: "#39391D" },
-    { primary: "#DDE8AC", foreground: "#4F356D" },
-    { primary: "#D8E49A", foreground: "#35553E" },
-  ],
-];
-
-function referenceLabelPalette(catalogNumber: number, offset = 0): VialPalette {
-  const colorIndex = Math.max(0, catalogNumber - 1 + offset);
-  const familySize = PROVIDED_LABEL_COLOR_FAMILIES[0].length;
-  const family = PROVIDED_LABEL_COLOR_FAMILIES[Math.floor(colorIndex / familySize) % PROVIDED_LABEL_COLOR_FAMILIES.length];
-  return family[colorIndex % familySize];
+function gradientLabelPalette(catalogNumber: number, offset = 0): VialPalette {
+  const hue = (218 + (catalogNumber + offset) * 47) % 360;
+  const middleHue = (hue + 7) % 360;
+  const endHue = (hue + 14) % 360;
+  return {
+    start: `hsl(${hue} 56% 25%)`,
+    middle: `hsl(${middleHue} 58% 45%)`,
+    end: `hsl(${endHue} 72% 68%)`,
+    mark: `hsl(${endHue} 76% 73%)`,
+    foreground: "#FFFFFF",
+  };
 }
 
 function injectionPalette(catalogNumber: number): VialPalette {
-  return referenceLabelPalette(catalogNumber);
+  return gradientLabelPalette(catalogNumber);
 }
 
 function nasalSprayPalette(catalogNumber: number): VialPalette {
-  return referenceLabelPalette(catalogNumber);
+  return gradientLabelPalette(catalogNumber, 6);
 }
 
 function lyophilizedPalette(catalogNumber: number): VialPalette {
-  return referenceLabelPalette(catalogNumber);
+  return gradientLabelPalette(catalogNumber, 12);
 }
 
 function topicalPalette(catalogNumber: number): VialPalette {
-  return referenceLabelPalette(catalogNumber);
+  return gradientLabelPalette(catalogNumber, 18);
 }
 
 function capsulePalette(): VialPalette {
-  return { primary: "#581C3B", foreground: "#F2C15A" };
+  return {
+    start: "#581C3B",
+    middle: "#7D2D59",
+    end: "#B690C8",
+    mark: "#B690C8",
+    foreground: "#F2C15A",
+  };
 }
 
 const INJECTION_CARDS: CardDef[] = INJECTION_PRODUCT_SEEDS.map((product, index) => ({
@@ -2317,6 +2301,7 @@ function ManualVialPreview({
   palette,
   baseImage = blankVialReference,
   compact = false,
+  flatLabel = false,
 }: {
   name: string;
   strength: string;
@@ -2324,6 +2309,7 @@ function ManualVialPreview({
   palette?: VialPalette;
   baseImage?: string;
   compact?: boolean;
+  flatLabel?: boolean;
 }) {
   const breakCandidates = Array.from(name).flatMap((character, index) =>
     character === " " || character === "/" ? [{ index, character }] : [],
@@ -2378,7 +2364,10 @@ function ManualVialPreview({
       if (!sourceContext || !outputContext) return;
 
       const colors = {
-        primary: palette?.primary ?? "#8E7AD9",
+        start: palette?.start ?? "#282e84",
+        middle: palette?.middle ?? "#5d55bd",
+        end: palette?.end ?? "#9680ef",
+        mark: palette?.mark ?? "#9680ef",
         foreground: palette?.foreground ?? "#FFFFFF",
       };
 
@@ -2433,10 +2422,31 @@ function ManualVialPreview({
       const markX = bandX + mainBandWidth;
       const markWidth = bandWidth - mainBandWidth;
 
-      sourceContext.fillStyle = colors.primary;
+      if (flatLabel) {
+        sourceContext.fillStyle = colors.middle;
+      } else {
+        const bandGradient = sourceContext.createLinearGradient(bandX, 0, bandX + mainBandWidth, 0);
+        bandGradient.addColorStop(0, colors.start);
+        bandGradient.addColorStop(0.18, colors.start);
+        bandGradient.addColorStop(0.5, colors.middle);
+        bandGradient.addColorStop(0.82, colors.end);
+        bandGradient.addColorStop(1, colors.end);
+        sourceContext.fillStyle = bandGradient;
+      }
       sourceContext.fillRect(bandX, bandY, mainBandWidth + 1, bandHeight);
 
-      sourceContext.fillStyle = colors.primary;
+      if (!flatLabel) {
+        const bandLight = sourceContext.createLinearGradient(bandX, 0, bandX + mainBandWidth, 0);
+        bandLight.addColorStop(0, "rgba(7, 10, 35, 0.10)");
+        bandLight.addColorStop(0.22, "rgba(255, 255, 255, 0.015)");
+        bandLight.addColorStop(0.58, "rgba(255, 255, 255, 0.07)");
+        bandLight.addColorStop(0.82, "rgba(255, 255, 255, 0.025)");
+        bandLight.addColorStop(1, "rgba(255, 255, 255, 0.09)");
+        sourceContext.fillStyle = bandLight;
+        sourceContext.fillRect(bandX, bandY, mainBandWidth + 1, bandHeight);
+      }
+
+      sourceContext.fillStyle = flatLabel ? colors.middle : colors.mark;
       const markPieces = [
         [0, 0.5, 0.24, 0.5],
         [0.24, 0, 0.15, 0.5],
@@ -2445,7 +2455,8 @@ function ManualVialPreview({
         [0.71, 0, 0.17, 0.5],
         [0.88, 0.5, 0.12, 0.5],
       ];
-      markPieces.forEach(([x, y, pieceWidth, pieceHeight]) => {
+      markPieces.forEach(([x, y, pieceWidth, pieceHeight], index) => {
+        sourceContext.globalAlpha = flatLabel ? 1 : 0.9 + index * 0.018;
         sourceContext.fillRect(
           markX + markWidth * x,
           bandY + bandHeight * y,
@@ -2453,6 +2464,7 @@ function ManualVialPreview({
           bandHeight * pieceHeight,
         );
       });
+      sourceContext.globalAlpha = 1;
       const strengthText = strength.toUpperCase();
       const strengthFontSize = fitFont(
         strengthText,
@@ -2538,7 +2550,7 @@ function ManualVialPreview({
       densityQuery?.removeEventListener("change", handleDensityChange);
       window.removeEventListener("resize", scheduleDraw);
     };
-  }, [firstLine, secondLine, strength, palette, compact]);
+  }, [firstLine, secondLine, strength, palette, compact, flatLabel]);
 
   return (
     <div
@@ -2561,6 +2573,7 @@ function ManualNasalSprayPreview({
   baseImage = blankNasalSprayReference,
   variant = "nasal",
   compact = false,
+  flatLabel = false,
 }: {
   name: string;
   strength: string;
@@ -2568,6 +2581,7 @@ function ManualNasalSprayPreview({
   baseImage?: string;
   variant?: "nasal" | "topical";
   compact?: boolean;
+  flatLabel?: boolean;
 }) {
   const labelCanvasRef = useRef<HTMLCanvasElement>(null);
   const desiredLineCount = variant === "topical"
@@ -2615,8 +2629,11 @@ function ManualNasalSprayPreview({
       if (!sourceContext || !outputContext) return;
 
       const colors = {
-        primary: palette?.primary ?? "#BFD5D2",
-        foreground: palette?.foreground ?? "#683245",
+        start: palette?.start ?? "#BFD5D2",
+        middle: palette?.middle ?? "#6FAEA1",
+        end: palette?.end ?? "#A9E2B0",
+        mark: palette?.mark ?? "#A9E2B0",
+        foreground: palette?.foreground ?? "#FFFFFF",
       };
       const renderScale = width / 720;
       const fitFont = (text: string, maxWidth: number, maximum: number, minimum: number) => {
@@ -2676,12 +2693,22 @@ function ManualNasalSprayPreview({
       const bandWidth = width * (variant === "topical" ? 0.89 : 0.91);
       const bandHeight = height * (variant === "topical" ? 0.15 : 0.19);
       const mainBandWidth = bandWidth * 0.84;
-      sourceContext.fillStyle = colors.primary;
+      if (flatLabel) {
+        sourceContext.fillStyle = colors.middle;
+      } else {
+        const bandGradient = sourceContext.createLinearGradient(bandX, 0, bandX + mainBandWidth, 0);
+        bandGradient.addColorStop(0, colors.start);
+        bandGradient.addColorStop(0.2, colors.start);
+        bandGradient.addColorStop(0.54, colors.middle);
+        bandGradient.addColorStop(0.86, colors.end);
+        bandGradient.addColorStop(1, colors.end);
+        sourceContext.fillStyle = bandGradient;
+      }
       sourceContext.fillRect(bandX, bandY, mainBandWidth + 1, bandHeight);
 
       const markX = bandX + mainBandWidth;
       const markWidth = bandWidth - mainBandWidth;
-      sourceContext.fillStyle = colors.primary;
+      sourceContext.fillStyle = flatLabel ? colors.middle : colors.mark;
       [
         [0, 0.5, 0.28, 0.5],
         [0.28, 0, 0.2, 0.5],
@@ -2766,7 +2793,7 @@ function ManualNasalSprayPreview({
       densityQuery?.removeEventListener("change", handleDensityChange);
       window.removeEventListener("resize", scheduleDraw);
     };
-  }, [name, strength, palette, compact, variant]);
+  }, [name, strength, palette, compact, variant, flatLabel]);
 
   return (
     <div className={`${variant === "topical" ? "manual-topical-preview" : "manual-nasal-preview"} ${compact ? variant === "topical" ? "manual-topical-preview-compact" : "manual-nasal-preview-compact" : ""}`} role="img" aria-label={`${name}, ${strength}, ${variant}`}>
@@ -2898,11 +2925,13 @@ function ManualCapsulePreview({
   strength,
   palette,
   compact = false,
+  flatLabel = false,
 }: {
   name: string;
   strength: string;
   palette?: VialPalette;
   compact?: boolean;
+  flatLabel?: boolean;
 }) {
   const labelCanvasRef = useRef<HTMLCanvasElement>(null);
   const desiredLineCount = name.length > 56 ? 4 : name.length > 36 ? 3 : name.length > 18 ? 2 : 1;
@@ -2980,16 +3009,34 @@ function ManualCapsulePreview({
       const bandWidth = width * 0.88;
       const bandHeight = height * 0.185;
       const mainBandWidth = bandWidth * 0.875;
-      sourceContext.fillStyle = palette?.primary ?? "#581C3B";
+      const colors = {
+        start: palette?.start ?? "#581C3B",
+        middle: palette?.middle ?? "#7D2D59",
+        end: palette?.end ?? "#B690C8",
+        mark: palette?.mark ?? "#B690C8",
+        foreground: palette?.foreground ?? "#F1C9A8",
+      };
+      if (flatLabel) {
+        sourceContext.fillStyle = colors.middle;
+      } else {
+        const bandGradient = sourceContext.createLinearGradient(bandX, 0, bandX + mainBandWidth, 0);
+        bandGradient.addColorStop(0, colors.start);
+        bandGradient.addColorStop(0.24, colors.start);
+        bandGradient.addColorStop(0.55, colors.middle);
+        bandGradient.addColorStop(0.86, colors.end);
+        bandGradient.addColorStop(1, colors.end);
+        sourceContext.fillStyle = bandGradient;
+      }
       sourceContext.fillRect(bandX, bandY, mainBandWidth, bandHeight);
       const markX = bandX + mainBandWidth;
       const markWidth = bandWidth - mainBandWidth;
+      sourceContext.fillStyle = flatLabel ? colors.middle : colors.mark;
       [[0, .5, .24, .5], [.24, 0, .15, .5], [.39, 0, .16, 1], [.55, .5, .16, .5], [.71, 0, .17, .5], [.88, .5, .12, .5]].forEach(([x, y, w, h]) => {
         sourceContext.fillRect(markX + markWidth * x, bandY + bandHeight * y, markWidth * w + 1, bandHeight * h);
       });
       const strengthSize = fitFont(strength, mainBandWidth * 0.72, 68 * renderScale, 34 * renderScale);
       sourceContext.font = `400 ${strengthSize}px "Bebas Neue", Impact, sans-serif`;
-      sourceContext.fillStyle = palette?.foreground ?? "#F1C9A8";
+      sourceContext.fillStyle = colors.foreground;
       sourceContext.textBaseline = "middle";
       sourceContext.fillText(strength.toUpperCase(), bandX + mainBandWidth * 0.075, bandY + bandHeight * 0.53);
 
@@ -3026,7 +3073,7 @@ function ManualCapsulePreview({
       observer?.disconnect();
       window.removeEventListener("resize", scheduleDraw);
     };
-  }, [name, strength, palette, compact]);
+  }, [name, strength, palette, compact, flatLabel]);
 
   return (
     <div className={`manual-capsule-preview ${compact ? "manual-capsule-preview-compact" : ""}`} role="img" aria-label={`${name}, ${strength}, capsule`}>
