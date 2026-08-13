@@ -55,6 +55,7 @@ import {
   Snowflake,
   Copy,
   Tag,
+  History,
 } from "lucide-react";
 
 import img430 from "@/imports/ScriptlinkrxDashboard/9b6fa0a3b334659006bcf39e91b4da387a7b4cf0.png";
@@ -107,6 +108,7 @@ type Page =
   | "pharmacies"
   | "orders"
   | "order-detail"
+  | "order-history"
   | "support"
   | "users"
   | "settings"
@@ -407,6 +409,7 @@ const INITIAL_FAVORITES: MenuItem[] = [
 const INITIAL_MAIN: MenuItem[] = [
   { icon: BookOpen, label: "Catalog", page: "products" },
   { icon: ClipboardList, label: "Orders", page: "orders" },
+  { icon: History, label: "Order History", page: "order-history" },
   { icon: ShoppingCart, label: "Cart", page: "cart-multi" },
   { icon: Users, label: "Patients", page: "users" },
   { icon: MessageSquare, label: "Support Tickets", page: "support" },
@@ -4672,6 +4675,399 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
           </> : <section className="rounded-[18px] bg-white p-6 shadow-[0_18px_50px_rgba(20,26,23,0.06)]"><h2 className="text-[18px] font-semibold">Receipt</h2><p className="mt-1 text-[11px] text-[#667085]">Order {order.id}</p><div className="mt-5 space-y-3">{order.items.map(item => <div key={item.name} className="flex justify-between gap-3 text-[11px]"><span className="text-[#667085]">{item.name}</span><span className="font-semibold">{item.price}</span></div>)}</div><div className="mt-5 border-t border-[#e8e3df] pt-4"><div className="flex justify-between text-[12px]"><span>Shipping</span><span className="font-semibold">Included</span></div><div className="mt-3 flex justify-between text-[15px] font-bold"><span>Total</span><span className="text-[#183229]">{order.total}</span></div></div><button className="mt-5 flex h-10 w-full items-center justify-center gap-2 rounded-[8px] bg-[#111] text-[11px] font-semibold text-white"><Download size={13} /> Download receipt</button></section>}
         </aside>
       </div>
+      </div>
+    </>
+  );
+}
+
+// ─── Order History ────────────────────────────────────────────────────────────
+
+const ORDER_HISTORY_RANGE_PRESETS = [
+  { value: "all", label: "All time" },
+  { value: "this_month", label: "This month" },
+  { value: "last_month", label: "Last month" },
+  { value: "this_year", label: "This year" },
+  { value: "custom", label: "Custom range" },
+];
+
+const ORDER_HISTORY_PAYER_OPTIONS = [
+  { value: "all", label: "All payers" },
+  { value: "clinic", label: "Paid by Clinic (Card)" },
+  { value: "clinic_ach", label: "Paid by Clinic (ACH)" },
+  { value: "patient", label: "Paid by Patient" },
+];
+
+interface OrderHistoryEntry {
+  order_id: string;
+  created_at: string;
+  patient_name: string;
+  is_multi_patient: boolean;
+  order_type: "order" | "refill";
+  is_custom: boolean;
+  order_status: "processing" | "pending_payment" | "cancelled" | "shipped" | "delivered";
+  payment_method: "clinic" | "clinic_ach" | "patient";
+  is_paid: boolean;
+  is_cancelled: boolean;
+  total_price: number;
+  refunded_amount: number;
+  net_paid: number;
+  payment_timestamp: string | null;
+}
+
+const orderHistoryDaysAgo = (days: number, hour = 10, minute = 24) => {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  d.setHours(hour, minute, 0, 0);
+  return d.toISOString();
+};
+
+const ORDER_HISTORY_ENTRIES: OrderHistoryEntry[] = [
+  { order_id: "8f2c91d34a6e47b1905cfd12e8a3f82c9a3f82c1", created_at: orderHistoryDaysAgo(0, 9, 14), patient_name: "Sarah Mitchell", is_multi_patient: false, order_type: "order", is_custom: false, order_status: "pending_payment", payment_method: "patient", is_paid: false, is_cancelled: false, total_price: 215.98, refunded_amount: 0, net_paid: 0, payment_timestamp: null },
+  { order_id: "1d84f7a2c95b40e3871a6f0d24b7c1e94d67b2e0", created_at: orderHistoryDaysAgo(1, 15, 42), patient_name: "", is_multi_patient: true, order_type: "order", is_custom: false, order_status: "processing", payment_method: "clinic", is_paid: true, is_cancelled: false, total_price: 431.96, refunded_amount: 0, net_paid: 431.96, payment_timestamp: orderHistoryDaysAgo(1, 15, 44) },
+  { order_id: "6b09e3d18f4a42c7953e2a8b06d1f7358c2ad490", created_at: orderHistoryDaysAgo(2, 11, 8), patient_name: "David Lim", is_multi_patient: false, order_type: "refill", is_custom: false, order_status: "shipped", payment_method: "clinic_ach", is_paid: true, is_cancelled: false, total_price: 55.88, refunded_amount: 0, net_paid: 55.88, payment_timestamp: orderHistoryDaysAgo(2, 11, 9) },
+  { order_id: "4e71a0c58d2b46f9812c5e3a97b0d64125f8ce37", created_at: orderHistoryDaysAgo(4, 14, 31), patient_name: "Maria Santos", is_multi_patient: false, order_type: "order", is_custom: true, order_status: "delivered", payment_method: "patient", is_paid: true, is_cancelled: false, total_price: 189.5, refunded_amount: 0, net_paid: 189.5, payment_timestamp: orderHistoryDaysAgo(4, 14, 35) },
+  { order_id: "9c35b8e07f1d49a2864b0d7c53e9a18670e4b9a5", created_at: orderHistoryDaysAgo(6, 10, 2), patient_name: "John Reynolds", is_multi_patient: false, order_type: "order", is_custom: false, order_status: "cancelled", payment_method: "clinic", is_paid: true, is_cancelled: true, total_price: 65.99, refunded_amount: 65.99, net_paid: 0, payment_timestamp: orderHistoryDaysAgo(6, 10, 5) },
+  { order_id: "2a68d4f19c0e47b5923f8a1d65c0b39784c1d5f8", created_at: orderHistoryDaysAgo(8, 16, 55), patient_name: "Allison Johnson", is_multi_patient: false, order_type: "order", is_custom: false, order_status: "delivered", payment_method: "clinic", is_paid: true, is_cancelled: false, total_price: 145.0, refunded_amount: 25.0, net_paid: 120.0, payment_timestamp: orderHistoryDaysAgo(8, 17, 1) },
+  { order_id: "7f50c2e94b8d41a6879e3c5f02a6d81b39e7f0a2", created_at: orderHistoryDaysAgo(10, 8, 47), patient_name: "Emily Krause", is_multi_patient: false, order_type: "refill", is_custom: false, order_status: "shipped", payment_method: "patient", is_paid: true, is_cancelled: false, total_price: 89.99, refunded_amount: 0, net_paid: 89.99, payment_timestamp: orderHistoryDaysAgo(10, 9, 0) },
+  { order_id: "0d97e5a36c2f48b1904a7e6d31f5c08246a9d3b7", created_at: orderHistoryDaysAgo(12, 13, 19), patient_name: "", is_multi_patient: true, order_type: "order", is_custom: false, order_status: "delivered", payment_method: "clinic_ach", is_paid: true, is_cancelled: false, total_price: 325.75, refunded_amount: 0, net_paid: 325.75, payment_timestamp: orderHistoryDaysAgo(12, 13, 25) },
+  { order_id: "5b23f8d60a9e47c3812d6b4f95e0a27158d3c6e9", created_at: orderHistoryDaysAgo(21, 12, 33), patient_name: "John Reynolds", is_multi_patient: false, order_type: "order", is_custom: false, order_status: "delivered", payment_method: "clinic", is_paid: true, is_cancelled: false, total_price: 215.98, refunded_amount: 0, net_paid: 215.98, payment_timestamp: orderHistoryDaysAgo(21, 12, 40) },
+  { order_id: "3e86a1c74f0b45d2913c8e5a60d2f94b07c5e8a1", created_at: orderHistoryDaysAgo(24, 9, 51), patient_name: "Chris Baker", is_multi_patient: false, order_type: "refill", is_custom: false, order_status: "delivered", payment_method: "patient", is_paid: true, is_cancelled: false, total_price: 74.25, refunded_amount: 0, net_paid: 74.25, payment_timestamp: orderHistoryDaysAgo(23, 11, 12) },
+  { order_id: "b49d0f2a68e1c45379a2d0f8b46e1c5392b6f0d4", created_at: orderHistoryDaysAgo(27, 15, 6), patient_name: "Dan Rahming", is_multi_patient: false, order_type: "order", is_custom: false, order_status: "cancelled", payment_method: "patient", is_paid: false, is_cancelled: true, total_price: 129.99, refunded_amount: 0, net_paid: 0, payment_timestamp: null },
+  { order_id: "c72e5b9a04d8f16385b4e7a2c90d5f18a4d7b2e5", created_at: orderHistoryDaysAgo(31, 10, 28), patient_name: "", is_multi_patient: true, order_type: "order", is_custom: false, order_status: "delivered", payment_method: "clinic_ach", is_paid: true, is_cancelled: false, total_price: 512.4, refunded_amount: 0, net_paid: 512.4, payment_timestamp: orderHistoryDaysAgo(31, 10, 30) },
+  { order_id: "e18c4a7f52b0d69347f1c8e5a2b0d69e6f9a3c70", created_at: orderHistoryDaysAgo(36, 14, 15), patient_name: "Tom Taylor", is_multi_patient: false, order_type: "order", is_custom: false, order_status: "delivered", payment_method: "clinic", is_paid: true, is_cancelled: false, total_price: 55.88, refunded_amount: 10.0, net_paid: 45.88, payment_timestamp: orderHistoryDaysAgo(36, 14, 20) },
+  { order_id: "a05f8d3c61e947b2854a0d6f13c8e5b2d1e8f4a6", created_at: orderHistoryDaysAgo(75, 11, 44), patient_name: "Alex Rahming", is_multi_patient: false, order_type: "order", is_custom: false, order_status: "delivered", payment_method: "patient", is_paid: true, is_cancelled: false, total_price: 129.99, refunded_amount: 0, net_paid: 129.99, payment_timestamp: orderHistoryDaysAgo(75, 12, 2) },
+  { order_id: "f63b0e8a25d9c47180c3f6a9d52e0b473c9e6a1d", created_at: orderHistoryDaysAgo(110, 16, 20), patient_name: "Taylor Mitchell", is_multi_patient: false, order_type: "order", is_custom: false, order_status: "delivered", payment_method: "clinic", is_paid: true, is_cancelled: false, total_price: 260.0, refunded_amount: 0, net_paid: 260.0, payment_timestamp: orderHistoryDaysAgo(110, 16, 26) },
+  { order_id: "48a7d1f0b3e6c25976e2a5f8c10d4b3985f2c7d0", created_at: orderHistoryDaysAgo(150, 9, 5), patient_name: "Mark Wood", is_multi_patient: false, order_type: "order", is_custom: true, order_status: "delivered", payment_method: "clinic_ach", is_paid: true, is_cancelled: false, total_price: 199.99, refunded_amount: 0, net_paid: 199.99, payment_timestamp: orderHistoryDaysAgo(149, 10, 40) },
+  { order_id: "d94c6e2b70a1f58324b8d1e6f0a3c57b8e1d4f69", created_at: orderHistoryDaysAgo(300, 13, 58), patient_name: "", is_multi_patient: true, order_type: "order", is_custom: false, order_status: "delivered", payment_method: "clinic", is_paid: true, is_cancelled: false, total_price: 340.12, refunded_amount: 0, net_paid: 340.12, payment_timestamp: orderHistoryDaysAgo(300, 14, 4) },
+  { order_id: "17e9b5a48c2d06f3958c0b7e4a1d6f2043a8e5b1", created_at: orderHistoryDaysAgo(340, 10, 12), patient_name: "Eve K.", is_multi_patient: false, order_type: "refill", is_custom: false, order_status: "delivered", payment_method: "patient", is_paid: true, is_cancelled: false, total_price: 96.4, refunded_amount: 0, net_paid: 96.4, payment_timestamp: orderHistoryDaysAgo(340, 10, 18) },
+];
+
+const orderHistoryMoney = (amount: number) => `$${(amount ?? 0).toFixed(2)}`;
+
+const orderHistoryDateKey = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+function resolveOrderHistoryRange(preset: string, customStart: string, customEnd: string): { startDate?: string; endDate?: string } {
+  const now = new Date();
+  switch (preset) {
+    case "this_month":
+      return { startDate: orderHistoryDateKey(new Date(now.getFullYear(), now.getMonth(), 1)), endDate: orderHistoryDateKey(now) };
+    case "last_month":
+      return {
+        startDate: orderHistoryDateKey(new Date(now.getFullYear(), now.getMonth() - 1, 1)),
+        endDate: orderHistoryDateKey(new Date(now.getFullYear(), now.getMonth(), 0)),
+      };
+    case "this_year":
+      return { startDate: orderHistoryDateKey(new Date(now.getFullYear(), 0, 1)), endDate: orderHistoryDateKey(now) };
+    case "custom": {
+      const startDate = customStart || undefined;
+      const endDate = customEnd || undefined;
+      if (startDate && endDate && startDate > endDate) return { startDate };
+      return { startDate, endDate };
+    }
+    default:
+      return {};
+  }
+}
+
+const ORDER_HISTORY_STATUS_CONFIG = {
+  processing: { label: "Processing", bgColor: "#FFC766", darkText: true },
+  pending_payment: { label: "Pending Payment", bgColor: "#E70000", darkText: false },
+  cancelled: { label: "Cancelled", bgColor: "#E70000", darkText: false },
+  shipped: { label: "Shipped", bgColor: "#2563EB", darkText: false },
+  delivered: { label: "Delivered", bgColor: "#00AE30", darkText: false },
+} as const;
+
+function OrderHistoryStatusIcon({ status }: { status: OrderHistoryEntry["order_status"] }) {
+  const props = { width: 14, height: 14, viewBox: "0 0 12 12", fill: "none", xmlns: "http://www.w3.org/2000/svg" };
+  switch (status) {
+    case "processing":
+      return <svg {...props}><path d="M8.01138 4.6742H10.5077V4.67332M1.49207 9.82219V7.32587M1.49207 7.32587L3.98839 7.32587M1.49207 7.32587L3.08251 8.91735C3.57777 9.41354 4.2063 9.78999 4.93218 9.98449C7.13272 10.5741 9.39462 9.26822 9.98425 7.06767M2.01536 4.93242C2.605 2.73187 4.86689 1.42597 7.06744 2.0156C7.79332 2.2101 8.42185 2.58656 8.91711 3.08275L10.5077 4.67332M10.5077 2.1779V4.67332" stroke="#020202" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+    case "pending_payment":
+      return <svg {...props}><path d="M1.125 9.375C3.8586 9.375 6.5068 9.74062 9.02338 10.4256C9.38688 10.5246 9.75 10.2543 9.75 9.87756V9.375M1.875 2.25V2.625C1.875 2.83211 1.70711 3 1.5 3H1.125M1.125 3V2.8125C1.125 2.50184 1.37684 2.25 1.6875 2.25H10.125M1.125 3V7.5M10.125 2.25V2.625C10.125 2.83211 10.2929 3 10.5 3H10.875M10.125 2.25H10.3125C10.6232 2.25 10.875 2.50184 10.875 2.8125V7.6875C10.875 7.99816 10.6232 8.25 10.3125 8.25H10.125M10.875 7.5H10.5C10.2929 7.5 10.125 7.66789 10.125 7.875V8.25M10.125 8.25H1.875M1.875 8.25H1.6875C1.37684 8.25 1.125 7.99816 1.125 7.6875V7.5M1.875 8.25V7.875C1.875 7.66789 1.70711 7.5 1.5 7.5H1.125M7.5 5.25C7.5 6.07843 6.82843 6.75 6 6.75C5.17157 6.75 4.5 6.07843 4.5 5.25C4.5 4.42157 5.17157 3.75 6 3.75C6.82843 3.75 7.5 4.42157 7.5 5.25ZM9 5.25H9.00375V5.25375H9V5.25ZM3 5.25H3.00375V5.25375H3V5.25Z" stroke="#FCFCFC" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+    case "cancelled":
+      return <svg {...props}><path d="M5.99989 4.49997V6.37497M1.34826 8.06278C0.915571 8.81278 1.45686 9.74997 2.32272 9.74997H9.67705C10.5429 9.74997 11.0842 8.81278 10.6515 8.06278L6.97434 1.68903C6.54141 0.938617 5.45836 0.938617 5.02543 1.68903L1.34826 8.06278ZM5.99989 7.87497H6.00364V7.87872H5.99989V7.87497Z" stroke="#FCFCFC" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+    case "shipped":
+      return <svg {...props}><path d="M2.99986 6L1.6344 1.56226C4.94197 2.52308 8.01379 4.038 10.7427 5.99987C8.01381 7.96177 4.942 9.47673 1.63445 10.4376L2.99986 6ZM2.99986 6L6.75 6" stroke="#FCFCFC" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+    case "delivered":
+      return <svg {...props}><path d="M4.5 6.375L5.625 7.5L7.5 4.875M10.5 6C10.5 8.48528 8.48528 10.5 6 10.5C3.51472 10.5 1.5 8.48528 1.5 6C1.5 3.51472 3.51472 1.5 6 1.5C8.48528 1.5 10.5 3.51472 10.5 6Z" stroke="#FCFCFC" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+  }
+}
+
+function OrderHistoryStatusChip({ status }: { status: OrderHistoryEntry["order_status"] }) {
+  const config = ORDER_HISTORY_STATUS_CONFIG[status];
+  return (
+    <span
+      className={`inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[11px] font-semibold ${config.darkText ? "text-[#020202]" : "text-white"}`}
+      style={{ backgroundColor: config.bgColor }}
+    >
+      {config.label}
+      <span className="flex size-3.5 items-center justify-center"><OrderHistoryStatusIcon status={status} /></span>
+    </span>
+  );
+}
+
+function OrderHistoryPayByChip({ payBy }: { payBy: OrderHistoryEntry["payment_method"] }) {
+  const isPatient = payBy === "patient";
+  return (
+    <span
+      className="inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full pl-3 pr-2 text-[11px] font-semibold text-[#282828]"
+      style={{ backgroundColor: isPatient ? "#ADEBBE" : "#0FECEF" }}
+    >
+      {isPatient ? "Pay by Patient" : "Pay by Clinic"}
+      <span className="flex size-3.5 items-center justify-center">
+        {isPatient ? (
+          <svg width="14" height="14" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.99077 9.3624C8.30605 8.45873 7.2212 7.875 6 7.875C4.7788 7.875 3.69395 8.45873 3.00923 9.3624M8.99077 9.3624C9.91675 8.53817 10.5 7.3372 10.5 6C10.5 3.51472 8.48528 1.5 6 1.5C3.51472 1.5 1.5 3.51472 1.5 6C1.5 7.3372 2.08325 8.53817 3.00923 9.3624M8.99077 9.3624C8.19575 10.0701 7.14808 10.5 6 10.5C4.85192 10.5 3.80425 10.0701 3.00923 9.3624M7.5 4.875C7.5 5.70343 6.82843 6.375 6 6.375C5.17157 6.375 4.5 5.70343 4.5 4.875C4.5 4.04657 5.17157 3.375 6 3.375C6.82843 3.375 7.5 4.04657 7.5 4.875Z" stroke="#020202" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.125 10.5H10.875M1.875 1.5V10.5M7.125 1.5V10.5M10.125 3.75V10.5M3.375 3.375H3.75M3.375 4.875H3.75M3.375 6.375H3.75M5.25 3.375H5.625M5.25 4.875H5.625M5.25 6.375H5.625M3.375 10.5V8.8125C3.375 8.50184 3.62684 8.25 3.9375 8.25H5.0625C5.37316 8.25 5.625 8.50184 5.625 8.8125V10.5M1.5 1.5H7.5M7.125 3.75H10.5M8.625 5.625H8.62875V5.62875H8.625V5.625ZM8.625 7.125H8.62875V7.12875H8.625V7.125ZM8.625 8.625H8.62875V8.62875H8.625V8.625Z" stroke="#020202" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        )}
+      </span>
+      {payBy === "clinic_ach" && <span className="rounded-3xl bg-[#f97316] px-1.5 py-px text-[8px] font-bold text-white">ACH</span>}
+    </span>
+  );
+}
+
+function OrderHistorySelect({ label, options, value, onChange }: { label: string; options: { value: string; label: string }[]; value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex w-full flex-col">
+      <label className="mb-1 block text-[14px] font-medium leading-none text-[#121212]">{label}</label>
+      <div className="relative w-full">
+        <select
+          value={value}
+          onChange={event => onChange(event.target.value)}
+          className="h-[45px] w-full cursor-pointer appearance-none rounded-lg border border-[#dbdbdb] bg-white py-1 pl-4 pr-10 text-[16px] leading-5 text-[#121212] shadow-[0px_3px_6px_-3px_#0000000d,0px_2px_4px_-2px_#0000000d,0px_1px_2px_-1px_#0000000d,0px_1px_0px_-1px_#0000000d] outline-none transition-all duration-200 focus:border-[#132F19] focus:shadow-[0_0_0_1px_#132F19,0_0_0_3px_rgba(0,174,48,0.1)]"
+        >
+          {options.map(option => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+        <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fillRule="evenodd" clipRule="evenodd" d="M8.35355 10.3536C8.15829 10.5488 7.84171 10.5488 7.64645 10.3536L3.64645 6.35355C3.45118 6.15829 3.45118 5.84171 3.64645 5.64645C3.84171 5.45119 4.15829 5.45119 4.35355 5.64645L8 9.29289L11.6464 5.64645C11.8417 5.45118 12.1583 5.45118 12.3536 5.64645C12.5488 5.84171 12.5488 6.15829 12.3536 6.35355L8.35355 10.3536Z" fill="#A5A5A5" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OrderHistoryDateInput({ label, value, onChange, min, max }: { label: string; value: string; onChange: (v: string) => void; min?: string; max?: string }) {
+  const formatForDisplay = (dateStr: string) => {
+    const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return match ? `${match[2]}/${match[3]}/${match[1]}` : dateStr;
+  };
+  const [displayValue, setDisplayValue] = useState(() => formatForDisplay(value));
+
+  useEffect(() => {
+    setDisplayValue(formatForDisplay(value));
+  }, [value]);
+
+  function handleTextChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const raw = event.target.value;
+    if (raw.length < displayValue.length) {
+      setDisplayValue(raw);
+      return;
+    }
+    const digits = raw.replace(/\D/g, "");
+    const formatted = digits.length <= 2 ? digits : digits.length <= 4 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`;
+    setDisplayValue(formatted);
+    const match = formatted.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (match) onChange(`${match[3]}-${match[1]}-${match[2]}`);
+  }
+
+  return (
+    <div className="flex w-full flex-col">
+      <label className="mb-1 block text-[14px] font-medium leading-none text-[#121212]">{label}</label>
+      <div className="relative flex w-full items-center">
+        <input
+          type="text"
+          value={displayValue}
+          onChange={handleTextChange}
+          placeholder="MM/DD/YYYY"
+          maxLength={10}
+          inputMode="numeric"
+          className="h-[45px] w-full rounded-lg border border-[#dbdbdb] bg-white py-3 pl-4 pr-12 text-[16px] leading-5 text-[#121212] shadow-[0px_3px_6px_-3px_#0000000d,0px_2px_4px_-2px_#0000000d,0px_1px_2px_-1px_#0000000d,0px_1px_0px_-1px_#0000000d] outline-none transition-all duration-200 placeholder:font-medium placeholder:text-[#999999] focus:border-[#132F19] focus:shadow-[0_0_0_1px_#132F19,0_0_0_3px_rgba(0,174,48,0.1)]"
+        />
+        <span className="pointer-events-none absolute right-3 top-1/2 z-[1] flex -translate-y-1/2 items-center justify-center p-1 text-[#6b7280]">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M15.6947 13.7H15.7037M15.6947 16.7H15.7037M11.9955 13.7H12.0045M11.9955 16.7H12.0045M8.29431 13.7H8.30329M8.29431 16.7H8.30329" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+        <input
+          type="date"
+          value={value}
+          onChange={event => event.target.value && onChange(event.target.value)}
+          min={min}
+          max={max}
+          tabIndex={-1}
+          className="absolute right-2 top-1/2 z-[2] size-8 -translate-y-1/2 cursor-pointer opacity-0"
+        />
+      </div>
+    </div>
+  );
+}
+
+function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
+  const { showToast } = useAppLoading();
+  const [rangePreset, setRangePreset] = useState("this_month");
+  const [customStart, setCustomStart] = useState("");
+  const [customEnd, setCustomEnd] = useState("");
+  const [payer, setPayer] = useState("all");
+  const [downloadingOrderId, setDownloadingOrderId] = useState<string | null>(null);
+
+  const { startDate, endDate } = useMemo(
+    () => resolveOrderHistoryRange(rangePreset, customStart, customEnd),
+    [rangePreset, customStart, customEnd],
+  );
+
+  const orders = useMemo(() => {
+    const sorted = [...ORDER_HISTORY_ENTRIES].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return sorted.filter(order => {
+      const dateKey = orderHistoryDateKey(new Date(order.created_at));
+      if (startDate && dateKey < startDate) return false;
+      if (endDate && dateKey > endDate) return false;
+      if (payer !== "all" && order.payment_method !== payer) return false;
+      return true;
+    });
+  }, [startDate, endDate, payer]);
+
+  const hasActiveFilters = rangePreset !== "all" || payer !== "all";
+
+  function handleDownloadInvoice(orderId: string) {
+    if (downloadingOrderId) return;
+    setDownloadingOrderId(orderId);
+    window.setTimeout(() => {
+      setDownloadingOrderId(null);
+      showToast("Invoice downloaded successfully");
+    }, 900);
+  }
+
+  const formatDate = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+  return (
+    <>
+      {/* Top bar */}
+      <div className="sticky top-0 z-40 -mx-7 -mt-7 rounded-t-[10px] border-b border-[#e5e7eb] bg-white px-6 py-4">
+        <div className="flex items-center justify-between">
+          <h1 className="shrink-0 text-[24px] font-bold leading-[29px] text-[#111827]">
+            Order History<span className="ml-2 font-medium text-[#6b7280]">({orders.length})</span>
+          </h1>
+          <button type="button" className="ml-4 flex size-10 items-center justify-center rounded-[10px] bg-[#f0fdf4] transition-colors hover:bg-[#dcfce7]" aria-label="Announcements">
+            <span className="relative flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: SUPPORT_PRIMARY }}>
+                <path d="M8.60124 1.25086C8.60124 1.75459 8.26278 2.17927 7.80087 2.30989C10.1459 2.4647 12 4.41582 12 6.79999V10.25C12 11.0563 12.0329 11.7074 12.7236 12.0528C12.931 12.1565 13.0399 12.3892 12.9866 12.6149C12.9333 12.8406 12.7319 13 12.5 13H8.16144C8.36904 13.1832 8.49997 13.4513 8.49997 13.75C8.49997 14.3023 8.05226 14.75 7.49997 14.75C6.94769 14.75 6.49997 14.3023 6.49997 13.75C6.49997 13.4513 6.63091 13.1832 6.83851 13H2.49999C2.2681 13 2.06664 12.8406 2.01336 12.6149C1.96009 12.3892 2.06897 12.1565 2.27638 12.0528C2.96708 11.7074 2.99999 11.0563 2.99999 10.25V6.79999C2.99999 4.41537 4.85481 2.46396 7.20042 2.3098C6.73867 2.17908 6.40036 1.75448 6.40036 1.25086C6.40036 0.643104 6.89304 0.150421 7.5008 0.150421C8.10855 0.150421 8.60124 0.643104 8.60124 1.25086ZM7.49999 3.29999C5.56699 3.29999 3.99999 4.86699 3.99999 6.79999V10.25L4.00002 10.3009C4.0005 10.7463 4.00121 11.4084 3.69929 12H11.3007C10.9988 11.4084 10.9995 10.7463 11 10.3009L11 10.25V6.79999C11 4.86699 9.43299 3.29999 7.49999 3.29999Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd" />
+              </svg>
+              <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ background: SUPPORT_PRIMARY }}>2</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-col gap-5">
+        {/* Filters */}
+        <div className="flex flex-wrap items-end gap-3.5">
+          <div className="w-[180px]">
+            <OrderHistorySelect label="Period" options={ORDER_HISTORY_RANGE_PRESETS} value={rangePreset} onChange={setRangePreset} />
+          </div>
+          {rangePreset === "custom" && (
+            <>
+              <div className="w-[180px]">
+                <OrderHistoryDateInput label="From" value={customStart} onChange={setCustomStart} max={customEnd || undefined} />
+              </div>
+              <div className="w-[180px]">
+                <OrderHistoryDateInput label="To" value={customEnd} onChange={setCustomEnd} min={customStart || undefined} />
+              </div>
+            </>
+          )}
+          <div className="w-[180px]">
+            <OrderHistorySelect label="Paid by" options={ORDER_HISTORY_PAYER_OPTIONS} value={payer} onChange={setPayer} />
+          </div>
+        </div>
+
+        {orders.length === 0 ? (
+          <div className="flex w-full flex-col items-center justify-center rounded-lg border border-[#e5e7eb] bg-white px-5 py-[60px] text-center">
+            <div className="mb-2.5">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14.6667 28.9739C15.0721 29.2079 15.5319 29.3311 16 29.3311C16.4681 29.3311 16.9279 29.2079 17.3333 28.9739L26.6667 23.6405C27.0717 23.4067 27.408 23.0705 27.6421 22.6656C27.8761 22.2608 27.9995 21.8015 28 21.3339V10.6672C27.9995 10.1996 27.8761 9.74027 27.6421 9.3354C27.408 8.93054 27.0717 8.59434 26.6667 8.36052L17.3333 3.02719C16.9279 2.79314 16.4681 2.66992 16 2.66992C15.5319 2.66992 15.0721 2.79314 14.6667 3.02719L5.33333 8.36052C4.92835 8.59434 4.59197 8.93054 4.35795 9.3354C4.12392 9.74027 4.00048 10.1996 4 10.6672V21.3339C4.00048 21.8015 4.12392 22.2608 4.35795 22.6656C4.59197 23.0705 4.92835 23.4067 5.33333 23.6405L14.6667 28.9739Z" stroke="#999999" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M16 29.3333V16" stroke="#999999" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M4.38672 9.33398L16.0001 16.0007L27.6134 9.33398" stroke="#999999" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M10 5.69336L22 12.56" stroke="#999999" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <h3 className="text-[14px] font-bold text-[#121212]">No orders found</h3>
+            <p className="mb-4 mt-1.5 text-[12px] text-[#999999]">
+              {hasActiveFilters
+                ? "No orders match the selected filters. Try widening the date range."
+                : "No orders yet. Your billing history will appear here once orders are placed."}
+            </p>
+          </div>
+        ) : (
+          <div className="rounded-xl bg-white">
+            <div className="w-max max-w-full overflow-x-auto rounded-lg border border-[#e5e7eb] bg-white">
+              <table className="w-full min-w-max border-collapse text-left text-sm">
+                <thead>
+                  <tr>
+                    {["Date", "Order", "Patient", "Type", "Status", "Paid By", "Total", "Refunded", "Paid", ""].map((header, index) => (
+                      <th key={index} className="whitespace-nowrap border-b border-[#e5e7eb] bg-[#fbfbfb] px-4 py-2 text-[12px] font-bold uppercase leading-5 text-[#999999]">
+                        {header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map(order => (
+                    <tr
+                      key={order.order_id}
+                      onClick={() => onNavigate("orders")}
+                      className="cursor-pointer transition-colors even:bg-[#fbfbfb] hover:bg-[#E0FAE7] even:hover:bg-[#E0FAE7]"
+                    >
+                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">{formatDate(order.created_at)}</td>
+                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">#{order.order_id.slice(-8).toUpperCase()}</td>
+                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">{order.is_multi_patient ? "Multiple Patients" : order.patient_name || "—"}</td>
+                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">{order.is_custom ? "Custom" : order.order_type === "refill" ? "Refill" : "Order"}</td>
+                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]"><OrderHistoryStatusChip status={order.order_status} /></td>
+                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]"><OrderHistoryPayByChip payBy={order.payment_method} /></td>
+                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">{orderHistoryMoney(order.total_price)}</td>
+                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">{order.refunded_amount > 0 ? `-${orderHistoryMoney(order.refunded_amount)}` : "—"}</td>
+                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">
+                        {order.is_paid ? (
+                          <span className="flex flex-col gap-0.5 font-semibold text-[#37703b]">
+                            {orderHistoryMoney(order.net_paid)}
+                            {order.payment_timestamp && <span className="text-[12px] font-medium text-[#9a9a90]">{formatDate(order.payment_timestamp)}</span>}
+                          </span>
+                        ) : order.is_cancelled ? (
+                          "—"
+                        ) : (
+                          <span className="font-semibold text-[#9a4b3c]">Unpaid</span>
+                        )}
+                      </td>
+                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">
+                        <button
+                          type="button"
+                          onClick={event => { event.stopPropagation(); handleDownloadInvoice(order.order_id); }}
+                          disabled={downloadingOrderId === order.order_id}
+                          aria-label="Download invoice"
+                          title="Download invoice"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-[#d8d8d2] bg-white px-3 py-[7px] text-[12.5px] font-semibold text-[#183229] transition-colors hover:border-[#183229] hover:bg-[#f6f8f2] disabled:cursor-default disabled:opacity-60 disabled:hover:border-[#d8d8d2] disabled:hover:bg-white"
+                        >
+                          {downloadingOrderId === order.order_id ? (
+                            <span className="size-[13px] animate-spin rounded-full border-2 border-[#d8d8d2] border-t-[#183229]" aria-hidden="true" />
+                          ) : (
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                              <path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 19h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          )}
+                          <span>Invoice</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
@@ -9919,6 +10315,8 @@ export default function App() {
         return <OrdersPage onNavigate={setPage} onOrderSelect={(order) => { setSelectedOrder(order); setPage("order-detail"); }} extraVariants={extraVariants} />;
       case "order-detail":
         return <OrderDetailPage order={selectedOrder} onNavigate={setPage} />;
+      case "order-history":
+        return <OrderHistoryPage onNavigate={setPage} />;
       case "support":
         return <SupportPage onNavigate={setPage} />;
       case "users":
