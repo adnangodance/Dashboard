@@ -205,6 +205,10 @@
     cursor: pointer;
   }
 
+  [data-payment-methods] button:not([role="tab"]) {
+    border-radius: 9999px !important;
+  }
+
   input {
     font-size: var(--text-base);
     font-weight: var(--font-weight-normal);

@@ -173,7 +173,7 @@ function CheckoutSubmissionFooter({
           <ChevronLeft size={15} /> Edit order
         </button>
       )}
-      <button onClick={onSubmit} className={`${onEdit ? "h-10 flex-1 rounded-[8px]" : "h-[52px] w-full rounded-full"} flex items-center justify-center gap-2 bg-[#111] text-[13px] font-semibold text-white transition-colors hover:bg-[#183229]`}>
+      <button onClick={onSubmit} className={`${onEdit ? "h-10 flex-1 rounded-[8px]" : "h-[52px] w-full rounded-full"} flex items-center justify-center gap-2 bg-[#111] text-[13px] font-semibold text-white transition-colors ${submitLabel === "Review and submit" ? "hover:bg-[#f1f1f1] hover:text-[#111]" : "hover:bg-[#183229]"}`}>
         {onEdit && <CheckCircle2 size={15} />}
         {submitLabel}
       </button>
@@ -713,7 +713,6 @@ function SidebarSupportVersion({ onNavigate, onLogout }: { onNavigate: (p: Page)
       </div>
       {(!clinicPaymentEnabled || clinicPaymentNoticeVisible) && (
         <div className={`mt-2 rounded-[18px] border border-white/70 p-3 shadow-[0_10px_28px_rgba(38,54,45,0.08)] ${clinicPaymentEnabled ? "bg-[radial-gradient(circle_at_90%_0%,rgba(219,232,255,0.98),transparent_52%),linear-gradient(145deg,#f8fbff_0%,#edf4ff_100%)]" : "bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)]"}`}>
-            {clinicPaymentEnabled && <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[9px] font-semibold text-[#2563EB]"><CheckCircle2 size={11} strokeWidth={2.2} /> Card updated</span>}
             <h3 className="text-[15px] font-semibold leading-[19px] tracking-[-0.01em] text-[#171A18]">{clinicPaymentEnabled ? "Pay by Clinic enabled" : "Enable Pay by Clinic"}</h3>
             <p className="mt-1.5 text-[11px] leading-[16px] text-[#737A75]">{clinicPaymentEnabled ? "Your card and ACH account are ready for patient purchases." : "Use your clinic’s card or ACH account for patient purchases."}</p>
             <button
@@ -3629,7 +3628,7 @@ function ProductDetailPage({
                 role="tab"
                 aria-selected={activeInfoTab === tab.id}
                 onClick={() => setActiveInfoTab(tab.id as typeof activeInfoTab)}
-                className={`h-12 border-b-2 text-[12px] font-semibold transition-colors ${activeInfoTab === tab.id ? "border-[#183229] text-[#183229]" : "border-transparent text-[#737b77] hover:text-[#183229]"}`}
+                className={`h-12 border-b-2 text-[12px] font-semibold transition-colors ${activeInfoTab === tab.id ? "border-black text-black" : "border-transparent text-[#737b77] hover:text-black"}`}
               >
                 {tab.label}
               </button>
@@ -4053,10 +4052,10 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
   });
   const [shippingMethod, setShippingMethod] = useState<"standard" | "overnight">("standard");
   const [reviewOpen, setReviewOpen] = useState(false);
-  const [orderCardVariant, setOrderCardVariant] = useState<"current" | "cart" | "optimized" | "silver" | "multi">("multi");
+  const [orderCardVariant, setOrderCardVariant] = useState<"current" | "cart" | "optimized" | "silver" | "multi">("cart");
 
   useEffect(() => {
-    if (!extraVariants) setOrderCardVariant("multi");
+    if (!extraVariants) setOrderCardVariant("cart");
   }, [extraVariants]);
 
   const tabs = ["Overall", "Pending Payment", "Pending Approval", "Cancellation Requested", "Processing", "Pending eScript", "Shipped", "Delivered", "Flagged", "Cancelled"];
@@ -6680,7 +6679,7 @@ function PatientDetailsView({ patient, onBack, onEdit }: { patient: typeof PATIE
             <h1 className="text-[22px] font-semibold text-[#171717]">{patient.firstName} {patient.lastName} <span className="text-[16px] font-semibold text-[#666]">({patient.gender})</span></h1>
             <p className="mt-1 text-[11px] text-[#7a7a7a]">Date of birth {patient.birthDate}</p>
           </div>
-          <button onClick={onEdit} className="inline-flex h-9 items-center gap-2 rounded-full bg-white px-4 text-[11px] font-semibold text-[#31583F] shadow-sm"><Edit3 size={13} /> Edit patient</button>
+          <button onClick={onEdit} className="inline-flex h-9 items-center gap-2 rounded-full bg-white px-4 text-[11px] font-semibold text-black shadow-sm"><Edit3 size={13} /> Edit patient</button>
         </div>
       </section>
 
@@ -6743,7 +6742,7 @@ function UsersPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             <span className="text-[16px] font-normal text-[#9d9d9d]">({patients.length})</span>
           </h1>
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1.5 rounded-full border border-[#d8dedb] bg-white px-4 py-2 text-[11px] font-semibold text-[#31583F] transition-colors hover:bg-[#f7f8f7]">
+            <button className="flex items-center gap-1.5 rounded-full border border-[#d8dedb] bg-white px-4 py-2 text-[11px] font-semibold text-black transition-colors hover:bg-[#f7f8f7]">
               <Upload size={12} />
               Upload Patients
             </button>
@@ -6836,7 +6835,8 @@ function UsersPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const shouldOpenPaymentSetup = () => window.sessionStorage.getItem("open-payment-setup") === "true";
   const shouldOpenPaymentOverview = () => window.sessionStorage.getItem("open-payment-overview") === "true";
-  const [activeTab, setActiveTab] = useState(() => shouldOpenPaymentSetup() || shouldOpenPaymentOverview() ? "Pay by Clinic Card" : "Business Account");
+  const [activeTab, setActiveTab] = useState(() => shouldOpenPaymentSetup() || shouldOpenPaymentOverview() ? "Payment Methods" : "Business Account");
+  const [paymentTab, setPaymentTab] = useState<"Pay by Clinic Card" | "Payouts ACH">("Pay by Clinic Card");
   const [creditCardOpen, setCreditCardOpen] = useState(() => shouldOpenPaymentSetup());
   const [cardType, setCardType] = useState("Visa");
   const [cardAuthorized, setCardAuthorized] = useState(true);
@@ -6849,13 +6849,15 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
     window.sessionStorage.removeItem("open-payment-setup");
     window.sessionStorage.removeItem("open-payment-overview");
     const openPaymentSetup = () => {
-      setActiveTab("Pay by Clinic Card");
+      setActiveTab("Payment Methods");
+      setPaymentTab("Pay by Clinic Card");
       setCreditCardOpen(true);
       window.sessionStorage.removeItem("open-payment-setup");
     };
     window.addEventListener("open-payment-setup", openPaymentSetup);
     const openPaymentOverview = () => {
-      setActiveTab("Pay by Clinic Card");
+      setActiveTab("Payment Methods");
+      setPaymentTab("Pay by Clinic Card");
       setCreditCardOpen(false);
       window.sessionStorage.removeItem("open-payment-overview");
     };
@@ -6941,7 +6943,6 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
     }, 1100);
   }
 
-  const tabs = ["Business Account", "Users", "Prescribers", "Pay by Clinic Card", "ACH Bank Account"];
   const users = [
     ["1", "Adnan Godanci", "(646)-617-9881", "adnan@batchrx.com", "Manager"],
     ["2", "Anna Robinson", "(646)-690-9596", "anna@scriptlinkrx.com", "Prescriber"],
@@ -7012,8 +7013,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             { icon: Building2, label: "Business Account" },
             { icon: Users, label: "Users" },
             { icon: User, label: "Prescribers" },
-            { icon: CreditCard, label: "Pay by Clinic Card" },
-            { icon: Building2, label: "ACH Bank Account" },
+            { icon: CreditCard, label: "Payment Methods" },
           ].map(({ icon: Icon, label }) => (
             <button
               key={label}
@@ -7024,11 +7024,6 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             >
               <Icon size={15} strokeWidth={1.5} className="shrink-0" />
               <span className="min-w-0 flex-1">{label}</span>
-              {label === "Pay by Clinic Card" && savedClinicCard && (
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white px-2 py-1 text-[9px] font-medium text-[#222]">
-                  Card on file <CheckCircle2 size={14} strokeWidth={2.1} className="text-[#2563EB]" />
-                </span>
-              )}
             </button>
           ))}
         </nav>
@@ -7088,7 +7083,24 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           </div>
           )}
 
-          {activeTab === "Pay by Clinic Card" && (
+          {activeTab === "Payment Methods" && (
+            <div data-payment-methods>
+              <div className="mb-4 flex items-end gap-5 border-b border-[#e3e3e3] px-1" role="tablist" aria-label="Payment methods">
+                {(["Pay by Clinic Card", "Payouts ACH"] as const).map(tab => (
+                  <button
+                    key={tab}
+                    type="button"
+                    role="tab"
+                    aria-selected={paymentTab === tab}
+                    onClick={() => setPaymentTab(tab)}
+                    className={`relative h-[46px] whitespace-nowrap px-0.5 text-[12px] font-medium transition-colors after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:transition-colors ${paymentTab === tab ? "text-[#171717] after:bg-[#183229]" : "text-[#7b827e] after:bg-transparent hover:text-[#171717]"}`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              {paymentTab === "Pay by Clinic Card" && (
             <div className="rounded-[14px] bg-[#FBFBFB] p-6">
               <div className="mb-5 flex items-center justify-between gap-3 border-b border-[#e8e9e8] pb-4">
                 <div>
@@ -7121,50 +7133,40 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-5"><AlertCircle size={17} className="mb-3 text-[#667085]" /><p className="text-[12px] leading-relaxed text-[#667085]">The card on file is charged when a new prescription is submitted using Pay by Clinic.</p></div>
               </div>
             </div>
-          )}
+              )}
 
-          {activeTab === "ACH Bank Account" && (
-            <div className="rounded-[14px] bg-[#FBFBFB] p-6">
-              <div className="mb-5 flex items-center justify-between gap-3 border-b border-[#e8e9e8] pb-4">
-                <div>
-                  <h3 className="text-[14px] font-semibold text-[#1a1a1a]">ACH Bank Account</h3>
-                  <p className="mt-1 text-[11px] text-[#7b827e]">Manage the bank account used for clinic ACH payments.</p>
-                </div>
-                <button className="flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Bank Account</button>
-              </div>
-              <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
-                <div className="overflow-hidden rounded-[10px] border border-[#eaeaea] bg-white">
-                  <div className="grid grid-cols-[40px_minmax(0,1fr)_100px_82px] border-b border-[#eee8e3] bg-[#fbfaf8] px-4 py-3">{["#", "Bank Accounts", "Status", ""].map(h => <span key={h} className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8c8c8c]">{h}</span>)}</div>
-                  <div className="grid grid-cols-[40px_minmax(0,1fr)_100px_82px] items-center px-4 py-4 text-[12px] text-[#1a1a1a]"><span>1</span><div className="min-w-0"><p className="truncate text-[13px] font-semibold">Chase Bank</p><p className="mt-1 text-[11px] text-[#8c8c8c]">**** **** **** 2826</p><p className="mt-1 text-[11px] text-[#667085]">Checking</p></div><span className="w-fit rounded-full bg-black px-2.5 py-1 text-[9px] font-medium text-white">Primary</span><button className="rounded-[7px] border border-[#D9DEDB] px-2.5 py-2 text-[11px] font-medium hover:bg-[#F7F8F7]">Update</button></div>
-                </div>
-                <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-5"><AlertCircle size={17} className="mb-3 text-[#667085]" /><p className="text-[12px] leading-relaxed text-[#667085]">Use this bank account for Pay by Clinic ACH payments.</p></div>
-              </div>
-
-              <section className="mt-6 border-t border-[#e8e9e8] pt-5">
-                <h4 className="mb-4 text-[13px] font-semibold text-[#1a1a1a]">ACH Agreement</h4>
-                <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
-                  <div className="rounded-[10px] border border-[#eaeaea] bg-white p-6">
-                    <div className="mb-5 flex items-center gap-4">
-                      <div className="flex size-12 items-center justify-center rounded-[10px] bg-[#F1F2F2] text-[#4e5652]">
-                        <Upload size={22} strokeWidth={1.8} />
-                      </div>
-                      <div>
-                        <p className="text-[16px] font-semibold text-[#1a1a1a]">ACH Debit Authorization Agreement</p>
-                        <p className="mt-1 text-[12px] text-[#667085]">Signed on: December 13, 2025</p>
-                      </div>
+              {paymentTab === "Payouts ACH" && (
+                <div className="rounded-[14px] bg-[#FBFBFB] p-6">
+                  <div className="mb-5 flex items-center justify-between gap-3 border-b border-[#e8e9e8] pb-4">
+                    <div>
+                      <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Payouts ACH</h3>
+                      <p className="mt-1 text-[11px] text-[#7b827e]">Manage the bank account used for clinic ACH payments.</p>
                     </div>
-                    <button className="rounded-[8px] bg-black px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
-                      View Agreement
-                    </button>
+                    <button className="flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Bank Account</button>
                   </div>
-                  <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-6">
-                    <AlertCircle size={17} className="mb-4 text-[#667085]" />
-                    <p className="max-w-[430px] text-[13px] leading-relaxed text-[#667085]">
-                      The ACH Debit Authorization Agreement authorizes ScriptLinkRx to initiate ACH debit entries to your designated bank account for payment of fees and other amounts owed.
-                    </p>
+                  <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
+                    <div className="overflow-hidden rounded-[10px] border border-[#eaeaea] bg-white">
+                      <div className="grid grid-cols-[40px_minmax(0,1fr)_100px_82px] border-b border-[#eee8e3] bg-[#fbfaf8] px-4 py-3">{["#", "Bank Accounts", "Status", ""].map(h => <span key={h} className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8c8c8c]">{h}</span>)}</div>
+                      <div className="grid grid-cols-[40px_minmax(0,1fr)_100px_82px] items-center px-4 py-4 text-[12px] text-[#1a1a1a]"><span>1</span><div className="min-w-0"><p className="truncate text-[13px] font-semibold">Chase Bank</p><p className="mt-1 text-[11px] text-[#8c8c8c]">**** **** **** 2826</p><p className="mt-1 text-[11px] text-[#667085]">Checking</p></div><span className="w-fit rounded-full bg-black px-2.5 py-1 text-[9px] font-medium text-white">Primary</span><button className="rounded-[7px] border border-[#D9DEDB] px-2.5 py-2 text-[11px] font-medium hover:bg-[#F7F8F7]">Update</button></div>
+                    </div>
+                    <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-5"><AlertCircle size={17} className="mb-3 text-[#667085]" /><p className="text-[12px] leading-relaxed text-[#667085]">Use this bank account for Pay by Clinic ACH payments.</p></div>
                   </div>
+
+                  <section className="mt-6 border-t border-[#e8e9e8] pt-5">
+                    <h4 className="mb-4 text-[13px] font-semibold text-[#1a1a1a]">ACH Agreement</h4>
+                    <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
+                      <div className="rounded-[10px] border border-[#eaeaea] bg-white p-6">
+                        <div className="mb-5 flex items-center gap-4">
+                          <div className="flex size-12 items-center justify-center rounded-[10px] bg-[#F1F2F2] text-[#4e5652]"><Upload size={22} strokeWidth={1.8} /></div>
+                          <div><p className="text-[16px] font-semibold text-[#1a1a1a]">ACH Debit Authorization Agreement</p><p className="mt-1 text-[12px] text-[#667085]">Signed on: December 13, 2025</p></div>
+                        </div>
+                        <button className="rounded-[8px] bg-black px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">View Agreement</button>
+                      </div>
+                      <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-6"><AlertCircle size={17} className="mb-4 text-[#667085]" /><p className="max-w-[430px] text-[13px] leading-relaxed text-[#667085]">The ACH Debit Authorization Agreement authorizes ScriptLinkRx to initiate ACH debit entries to your designated bank account for payment of fees and other amounts owed.</p></div>
+                    </div>
+                  </section>
                 </div>
-              </section>
+              )}
             </div>
           )}
         </div>
@@ -7664,7 +7666,7 @@ function SinglePatientCartPage({
       {previewOpen && (
         <div className="fixed inset-0 z-50 flex justify-end bg-[#111]/35 backdrop-blur-[3px]">
           <button className="absolute inset-0 cursor-default" onClick={() => { setPreviewOpen(false); setPreviewSubmissionState("idle"); }} aria-label="Close preview" />
-          <aside className="relative h-full w-full max-w-[500px] overflow-auto border-l border-[#e8e3df] bg-[#f7f6f2] shadow-[-24px_0_70px_rgba(24,24,24,0.16)]">
+          <aside className="relative h-full w-full max-w-[500px] overflow-auto border-l border-[#e8e3df] bg-[#FAFAFA] shadow-[-24px_0_70px_rgba(24,24,24,0.16)]">
             <header className="sticky top-0 z-10 border-b border-[#eee8e3] bg-white/95 px-5 pb-5 pt-6 backdrop-blur">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -7735,7 +7737,7 @@ function SinglePatientCartPage({
                       onClick={() => setPaymentMethod("patient")}
                       className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
                         paymentMethod === "patient"
-                          ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
+                          ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
                           : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
                       }`}
                     >
@@ -7745,13 +7747,13 @@ function SinglePatientCartPage({
                       onClick={() => setPaymentMethod("clinic")}
                       className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
                         paymentMethod === "clinic"
-                          ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
+                          ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
                           : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
                       }`}
                     >
                       Pay by Clinic <Building2 size={13} />
                     </button>
-                    <button className="inline-flex h-9 items-center gap-1.5 rounded-full border border-dashed border-[#17a34a] bg-white px-3 text-[12px] font-semibold text-[#0a8f3c] transition-colors hover:bg-[#f2f7f4]">
+                    <button className="inline-flex h-9 items-center gap-1.5 rounded-full border border-dashed border-[#2563EB] bg-white px-3 text-[12px] font-semibold text-[#2563EB] transition-colors hover:bg-[#EFF6FF]">
                       <Plus size={13} /> Credit Card
                     </button>
                   </div>
@@ -7771,7 +7773,7 @@ function SinglePatientCartPage({
                       onClick={() => setShipTo("patient")}
                       className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
                         shipTo === "patient"
-                          ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
+                          ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
                           : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
                       }`}
                     >
@@ -7781,7 +7783,7 @@ function SinglePatientCartPage({
                       onClick={() => setShipTo("clinic")}
                       className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
                         shipTo === "clinic"
-                          ? "border-[#0fbf9f] bg-[#d9fbf4] text-[#183229]"
+                          ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
                           : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
                       }`}
                     >
@@ -8440,7 +8442,7 @@ function MultiPatientCartPage({
                         ) : (
                           <button
                             onClick={() => setExpandedPrescriptionIds(current => cartCardVariant === 3 || cartCardVariant === 4 || cartCardVariant === 5 || cartCardVariant === 6 ? new Set([item.id]) : new Set([...current, item.id]))}
-                            className={cartCardVariant === 3 ? "ml-16 inline-flex items-center gap-2 rounded-[5px] bg-[#f3f3f3] px-3 py-2 text-[11px] font-semibold text-[#202020] transition-colors hover:bg-[#e8e8e8]" : cartCardVariant === 4 ? "ml-16 inline-flex items-center gap-2 rounded-[8px] bg-[#f5f5f3] px-3 py-2 text-[11px] font-semibold text-[#4d4d4d] transition-colors hover:bg-[#ececea] hover:text-[#202020]" : "ml-16 inline-flex items-center gap-2 rounded-[8px] bg-[#f0f0ee] px-3 py-2 text-[11px] font-semibold text-[#202020] transition-colors hover:bg-[#e5e5e2]"}
+                            className={cartCardVariant === 3 ? "ml-16 inline-flex items-center gap-2 rounded-full bg-[#f3f3f3] px-3 py-2 text-[11px] font-semibold text-[#202020] transition-colors hover:bg-[#e8e8e8]" : cartCardVariant === 4 ? "ml-16 inline-flex items-center gap-2 rounded-full bg-[#f5f5f3] px-3 py-2 text-[11px] font-semibold text-[#4d4d4d] transition-colors hover:bg-[#ececea] hover:text-[#202020]" : "ml-16 inline-flex items-center gap-2 rounded-full bg-[#f0f0ee] px-3 py-2 text-[11px] font-semibold text-[#202020] transition-colors hover:bg-[#e5e5e2]"}
                           >
                             <Plus size={14} />
                             Add a prescription
@@ -8551,7 +8553,7 @@ function MultiPatientCartPage({
                                       });
                                     }}
                                     disabled={!isPrescriptionComplete(item.id)}
-                                    className="h-8 min-w-[86px] rounded-[5px] bg-[#183229] px-4 text-[12px] font-medium text-white transition-colors hover:bg-[#0d211b] disabled:cursor-not-allowed disabled:bg-[#dfdfdc] disabled:text-[#92928f]"
+                                    className="h-8 min-w-[86px] rounded-full bg-[#183229] px-4 text-[12px] font-medium text-white transition-colors hover:bg-[#0d211b] disabled:cursor-not-allowed disabled:bg-[#dfdfdc] disabled:text-[#92928f]"
                                   >
                                     Add Order
                                   </button>
@@ -8622,7 +8624,7 @@ function MultiPatientCartPage({
 	                                      });
 	                                    }}
 	                                    disabled={!isPrescriptionComplete(item.id)}
-	                                    className="h-8 min-w-[76px] rounded-[7px] bg-[#111] px-4 text-[11px] font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-[#dfdfdc] disabled:text-[#92928f]"
+	                                    className="h-8 min-w-[76px] rounded-full bg-[#111] px-4 text-[11px] font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-[#dfdfdc] disabled:text-[#92928f]"
 	                                  >
 	                                    Add Order
 	                                  </button>
@@ -8703,7 +8705,7 @@ function MultiPatientCartPage({
                                       });
                                     }}
                                     disabled={!isPrescriptionComplete(item.id)}
-                                    className="h-8 min-w-[76px] rounded-[7px] bg-[#111] px-4 text-[11px] font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-[#dfdfdc] disabled:text-[#92928f]"
+                                    className="h-8 min-w-[76px] rounded-full bg-[#111] px-4 text-[11px] font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-[#dfdfdc] disabled:text-[#92928f]"
                                   >
                                     Add Order
                                   </button>
@@ -8786,7 +8788,7 @@ function MultiPatientCartPage({
                                       });
                                     }}
                                     disabled={!isPrescriptionComplete(item.id)}
-                                    className="h-8 min-w-[86px] rounded-[7px] bg-[#111] px-4 text-[12px] font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-[#dfdfdc] disabled:text-[#92928f]"
+                                    className="h-8 min-w-[86px] rounded-full bg-[#111] px-4 text-[12px] font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-[#dfdfdc] disabled:text-[#92928f]"
                                   >
                                     Add Order
                                   </button>
@@ -8946,7 +8948,7 @@ function MultiPatientCartPage({
       {previewOpen && (
         <div className="fixed inset-0 z-50 flex justify-end bg-[#111]/35 backdrop-blur-[3px]">
           <button className="absolute inset-0 cursor-default" onClick={() => { setPreviewOpen(false); setPreviewSubmissionState("idle"); }} aria-label="Close preview" />
-          <aside className="relative h-full w-full max-w-[500px] overflow-auto border-l border-[#e8e3df] bg-[#f7f6f2] shadow-[-24px_0_70px_rgba(24,24,24,0.16)]">
+          <aside className="relative h-full w-full max-w-[500px] overflow-auto border-l border-[#e8e3df] bg-[#FAFAFA] shadow-[-24px_0_70px_rgba(24,24,24,0.16)]">
             <header className="sticky top-0 z-10 border-b border-[#eee8e3] bg-white/95 px-5 pb-5 pt-6 backdrop-blur">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -9031,7 +9033,7 @@ function MultiPatientCartPage({
                       onClick={() => setPaymentMethod("patient")}
                       className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
                         paymentMethod === "patient"
-                          ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
+                          ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
                           : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
                       }`}
                     >
@@ -9041,13 +9043,13 @@ function MultiPatientCartPage({
                       onClick={() => setPaymentMethod("clinic")}
                       className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
                         paymentMethod === "clinic"
-                          ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
+                          ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
                           : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
                       }`}
                     >
                       Pay by Clinic <Building2 size={13} />
                     </button>
-                    <button className="inline-flex h-9 items-center gap-1.5 rounded-full border border-dashed border-[#17a34a] bg-white px-3 text-[12px] font-semibold text-[#0a8f3c] transition-colors hover:bg-[#f2f7f4]">
+                    <button className="inline-flex h-9 items-center gap-1.5 rounded-full border border-dashed border-[#2563EB] bg-white px-3 text-[12px] font-semibold text-[#2563EB] transition-colors hover:bg-[#EFF6FF]">
                       <Plus size={13} /> Credit Card
                     </button>
                   </div>
@@ -9069,7 +9071,7 @@ function MultiPatientCartPage({
                       onClick={() => setShipTo("patient")}
                       className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
                         shipTo === "patient"
-                          ? "border-[#17a34a] bg-[#d4f4e3] text-[#183229]"
+                          ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
                           : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
                       }`}
                     >
@@ -9079,7 +9081,7 @@ function MultiPatientCartPage({
                       onClick={() => setShipTo("clinic")}
                       className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
                         shipTo === "clinic"
-                          ? "border-[#0fbf9f] bg-[#d9fbf4] text-[#183229]"
+                          ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]"
                           : "border-[#d8dfdc] bg-white text-[#6f7782] hover:border-[#183229]/45"
                       }`}
                     >
