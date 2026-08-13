@@ -173,7 +173,7 @@ function CheckoutSubmissionFooter({
           <ChevronLeft size={15} /> Edit order
         </button>
       )}
-      <button onClick={onSubmit} className={`${onEdit ? "h-10 flex-1 rounded-[8px]" : "h-[52px] w-full rounded-full"} flex items-center justify-center gap-2 bg-[#111] text-[13px] font-semibold text-white transition-colors ${submitLabel === "Review and submit" ? "hover:bg-[#f1f1f1] hover:text-[#111]" : "hover:bg-[#183229]"}`}>
+      <button onClick={onSubmit} className={`${onEdit ? "h-10 flex-1 rounded-[8px]" : "h-[52px] w-full rounded-full"} flex items-center justify-center gap-2 bg-[#111] text-[13px] font-semibold text-white transition-colors ${submitLabel === "Review and submit" ? "hover:!bg-[#101010] hover:!text-white" : "hover:bg-[#183229]"}`}>
         {onEdit && <CheckCircle2 size={15} />}
         {submitLabel}
       </button>
@@ -1627,7 +1627,7 @@ const CAPSULE_CARDS: CardDef[] = CAPSULE_PRODUCT_SEEDS.map((product, index) => (
 
 const POPULAR_CARDS: CardDef[] = INJECTION_CARDS.slice(0, 8);
 
-const ALL_CARDS: CardDef[] = [...INJECTION_CARDS, ...NASAL_SPRAY_CARDS, ...LYOPHILIZED_CARDS, ...TOPICAL_CARDS, ...PATCH_CARDS, ...CAPSULE_CARDS];
+const ALL_CARDS: CardDef[] = [...INJECTION_CARDS, ...NASAL_SPRAY_CARDS, ...LYOPHILIZED_CARDS, ...PATCH_CARDS];
 
 const PHARMACIES_MULTI = [
   { name: "All Pharmacies", count: 200 },
@@ -1959,11 +1959,9 @@ function ProductsPage({
   const dosageCounts: Record<string, number> = {
     Bottle: 6,
     Enema: 2,
-    Capsule: CAPSULE_CARDS.length,
     Injection: INJECTION_CARDS.length,
     "Nasal Spray": NASAL_SPRAY_CARDS.length,
     Lyophilized: LYOPHILIZED_CARDS.length,
-    Topical: TOPICAL_CARDS.length,
     Patch: PATCH_CARDS.length,
     Gel: 6,
     Lollipop: 2,
@@ -1972,7 +1970,7 @@ function ProductsPage({
     "Iv Bag 15": 15,
     Jan: 6,
   };
-  const dosageOptions = ["Bottle", "Enema", "Capsule", "Injection", "Nasal Spray", "Lyophilized", "Topical", "Patch", "Gel", "Lollipop", "Iv Bag", "Jar", "Iv Bag 15", "Jan"];
+  const dosageOptions = ["Bottle", "Enema", "Injection", "Nasal Spray", "Lyophilized", "Patch", "Gel", "Lollipop", "Iv Bag", "Jar", "Iv Bag 15", "Jan"];
   const areaCounts = ALL_CARDS.reduce<Record<string, number>>((counts, card) => {
     counts[card.areaOfTreatment] = (counts[card.areaOfTreatment] ?? 0) + 1;
     return counts;
@@ -4132,14 +4130,10 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
 
   return (
     <>
-      <Header title="Orders" onNavigate={onNavigate} />
-
       <div className="max-w-[1300px]">
       <div className="mb-5 flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-[13px] text-[#6f7782]">Track payment status, shipping destination, prescriptions, and fulfillment state.</p>
-          </div>
+          <h1 className="text-[28px] font-semibold leading-tight text-[#1a1a1a]">Orders</h1>
           <div className="group flex h-[38px] w-full items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:border-2 focus-within:border-black sm:w-[220px] sm:focus-within:w-[310px]">
             <Search size={14} strokeWidth={1.8} className="flex-shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110" />
             <input
@@ -4832,12 +4826,12 @@ function OrderHistoryPayByChip({ payBy, showStatus = false }: { payBy: OrderHist
 function OrderHistorySelect({ label, options, value, onChange }: { label: string; options: { value: string; label: string }[]; value: string; onChange: (v: string) => void }) {
   return (
     <div className="flex w-full flex-col">
-      <label className="mb-1 block text-[14px] font-medium leading-none text-[#121212]">{label}</label>
+      <label className="mb-1.5 block text-[11px] font-medium leading-none text-[#667085]">{label}</label>
       <div className="relative w-full">
         <select
           value={value}
           onChange={event => onChange(event.target.value)}
-          className="h-[45px] w-full cursor-pointer appearance-none rounded-lg border border-[#dbdbdb] bg-white py-1 pl-4 pr-10 text-[16px] leading-5 text-[#121212] shadow-[0px_3px_6px_-3px_#0000000d,0px_2px_4px_-2px_#0000000d,0px_1px_2px_-1px_#0000000d,0px_1px_0px_-1px_#0000000d] outline-none transition-all duration-200 focus:border-[#132F19] focus:shadow-[0_0_0_1px_#132F19,0_0_0_3px_rgba(0,174,48,0.1)]"
+          className="h-[38px] w-full cursor-pointer appearance-none rounded-[9px] border border-[#cfcfcf] bg-white py-1 pl-3 pr-9 text-[12px] leading-5 text-[#121212] outline-none transition-all duration-200 focus:border-black focus:shadow-[0_0_0_2px_rgba(0,0,0,0.06)]"
         >
           {options.map(option => (
             <option key={option.value} value={option.value}>{option.label}</option>
@@ -4879,7 +4873,7 @@ function OrderHistoryDateInput({ label, value, onChange, min, max }: { label: st
 
   return (
     <div className="flex w-full flex-col">
-      <label className="mb-1 block text-[14px] font-medium leading-none text-[#121212]">{label}</label>
+      <label className="mb-1.5 block text-[11px] font-medium leading-none text-[#667085]">{label}</label>
       <div className="relative flex w-full items-center">
         <input
           type="text"
@@ -4888,7 +4882,7 @@ function OrderHistoryDateInput({ label, value, onChange, min, max }: { label: st
           placeholder="MM/DD/YYYY"
           maxLength={10}
           inputMode="numeric"
-          className="h-[45px] w-full rounded-lg border border-[#dbdbdb] bg-white py-3 pl-4 pr-12 text-[16px] leading-5 text-[#121212] shadow-[0px_3px_6px_-3px_#0000000d,0px_2px_4px_-2px_#0000000d,0px_1px_2px_-1px_#0000000d,0px_1px_0px_-1px_#0000000d] outline-none transition-all duration-200 placeholder:font-medium placeholder:text-[#999999] focus:border-[#132F19] focus:shadow-[0_0_0_1px_#132F19,0_0_0_3px_rgba(0,174,48,0.1)]"
+          className="h-[38px] w-full rounded-[9px] border border-[#cfcfcf] bg-white py-2 pl-3 pr-11 text-[12px] leading-5 text-[#121212] outline-none transition-all duration-200 placeholder:font-medium placeholder:text-[#999999] focus:border-black focus:shadow-[0_0_0_2px_rgba(0,0,0,0.06)]"
         />
         <span className="pointer-events-none absolute right-3 top-1/2 z-[1] flex -translate-y-1/2 items-center justify-center p-1 text-[#6b7280]">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -4916,6 +4910,7 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const [customStart, setCustomStart] = useState("");
   const [customEnd, setCustomEnd] = useState("");
   const [payer, setPayer] = useState("all");
+  const [search, setSearch] = useState("");
   const [downloadingOrderId, setDownloadingOrderId] = useState<string | null>(null);
 
   const { startDate, endDate } = useMemo(
@@ -4930,9 +4925,17 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       if (startDate && dateKey < startDate) return false;
       if (endDate && dateKey > endDate) return false;
       if (payer !== "all" && order.payment_method !== payer) return false;
+      const query = search.trim().toLowerCase();
+      if (query && ![
+        order.order_id,
+        order.patient_name,
+        order.order_type,
+        order.order_status.replaceAll("_", " "),
+        order.payment_method.replaceAll("_", " "),
+      ].some(value => value.toLowerCase().includes(query))) return false;
       return true;
     });
-  }, [startDate, endDate, payer]);
+  }, [startDate, endDate, payer, search]);
 
   const hasActiveFilters = rangePreset !== "all" || payer !== "all";
 
@@ -4949,41 +4952,46 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
   return (
     <>
-      {/* Top bar */}
-      <div className="sticky top-0 z-40 -mx-7 -mt-7 rounded-t-[10px] border-b border-[#e5e7eb] bg-white px-6 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="shrink-0 text-[24px] font-bold leading-[29px] text-[#111827]">
-            Order History<span className="ml-2 font-medium text-[#6b7280]">({orders.length})</span>
-          </h1>
-          <button type="button" className="ml-4 flex size-10 items-center justify-center rounded-[10px] bg-[#f0fdf4] transition-colors hover:bg-[#dcfce7]" aria-label="Announcements">
-            <span className="relative flex items-center justify-center">
-              <svg width="20" height="20" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: SUPPORT_PRIMARY }}>
-                <path d="M8.60124 1.25086C8.60124 1.75459 8.26278 2.17927 7.80087 2.30989C10.1459 2.4647 12 4.41582 12 6.79999V10.25C12 11.0563 12.0329 11.7074 12.7236 12.0528C12.931 12.1565 13.0399 12.3892 12.9866 12.6149C12.9333 12.8406 12.7319 13 12.5 13H8.16144C8.36904 13.1832 8.49997 13.4513 8.49997 13.75C8.49997 14.3023 8.05226 14.75 7.49997 14.75C6.94769 14.75 6.49997 14.3023 6.49997 13.75C6.49997 13.4513 6.63091 13.1832 6.83851 13H2.49999C2.2681 13 2.06664 12.8406 2.01336 12.6149C1.96009 12.3892 2.06897 12.1565 2.27638 12.0528C2.96708 11.7074 2.99999 11.0563 2.99999 10.25V6.79999C2.99999 4.41537 4.85481 2.46396 7.20042 2.3098C6.73867 2.17908 6.40036 1.75448 6.40036 1.25086C6.40036 0.643104 6.89304 0.150421 7.5008 0.150421C8.10855 0.150421 8.60124 0.643104 8.60124 1.25086ZM7.49999 3.29999C5.56699 3.29999 3.99999 4.86699 3.99999 6.79999V10.25L4.00002 10.3009C4.0005 10.7463 4.00121 11.4084 3.69929 12H11.3007C10.9988 11.4084 10.9995 10.7463 11 10.3009L11 10.25V6.79999C11 4.86699 9.43299 3.29999 7.49999 3.29999Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd" />
-              </svg>
-              <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ background: SUPPORT_PRIMARY }}>2</span>
-            </span>
-          </button>
-        </div>
+      <div className="mb-5 flex items-center justify-between">
+        <h1 className="text-[28px] font-semibold leading-tight text-[#1a1a1a]">
+          Order History <span className="text-[16px] font-normal text-[#9d9d9d]">({orders.length})</span>
+        </h1>
       </div>
 
-      <div className="mt-4 flex flex-col gap-5">
-        {/* Filters */}
-        <div className="flex flex-wrap items-end gap-3.5">
-          <div className="w-[180px]">
-            <OrderHistorySelect label="Period" options={ORDER_HISTORY_RANGE_PRESETS} value={rangePreset} onChange={setRangePreset} />
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-wrap items-end gap-4 border-b border-[#eeeeec] pb-4">
+          <div className="group order-2 ml-auto flex h-[38px] w-[220px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:w-[310px] focus-within:border-2 focus-within:border-black">
+            <Search size={14} strokeWidth={1.8} className="shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110" />
+            <input
+              value={search}
+              onChange={event => setSearch(event.target.value)}
+              placeholder="Search order history"
+              className="min-w-0 flex-1 bg-transparent text-[11px] font-medium text-[#1a1a1a] outline-none placeholder:font-medium placeholder:text-[#686868]"
+            />
+            {search ? (
+              <button type="button" onClick={() => setSearch("")} className="text-[14px] text-[#777] hover:text-black" aria-label="Clear search">×</button>
+            ) : (
+              <span className="shrink-0 text-[10px] text-[#686868]">⌘ F</span>
+            )}
           </div>
-          {rangePreset === "custom" && (
-            <>
-              <div className="w-[180px]">
-                <OrderHistoryDateInput label="From" value={customStart} onChange={setCustomStart} max={customEnd || undefined} />
-              </div>
-              <div className="w-[180px]">
-                <OrderHistoryDateInput label="To" value={customEnd} onChange={setCustomEnd} min={customStart || undefined} />
-              </div>
-            </>
-          )}
-          <div className="w-[180px]">
-            <OrderHistorySelect label="Paid by" options={ORDER_HISTORY_PAYER_OPTIONS} value={payer} onChange={setPayer} />
+
+          <div className="order-1 flex flex-wrap items-end gap-3.5">
+            <div className="w-[180px]">
+              <OrderHistorySelect label="Period" options={ORDER_HISTORY_RANGE_PRESETS} value={rangePreset} onChange={setRangePreset} />
+            </div>
+            {rangePreset === "custom" && (
+              <>
+                <div className="w-[180px]">
+                  <OrderHistoryDateInput label="From" value={customStart} onChange={setCustomStart} max={customEnd || undefined} />
+                </div>
+                <div className="w-[180px]">
+                  <OrderHistoryDateInput label="To" value={customEnd} onChange={setCustomEnd} min={customStart || undefined} />
+                </div>
+              </>
+            )}
+            <div className="w-[180px]">
+              <OrderHistorySelect label="Paid by" options={ORDER_HISTORY_PAYER_OPTIONS} value={payer} onChange={setPayer} />
+            </div>
           </div>
         </div>
 
@@ -5022,7 +5030,7 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                     <tr
                       key={order.order_id}
                       onClick={() => onNavigate("orders")}
-                      className="cursor-pointer transition-colors even:bg-[#fbfbfb] hover:bg-[#E0FAE7] even:hover:bg-[#E0FAE7]"
+                      className="cursor-pointer transition-colors even:bg-[#fbfbfb] hover:bg-[#f1f1f1] even:hover:bg-[#f1f1f1]"
                     >
                       <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">{formatDate(order.created_at)}</td>
                       <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">#{order.order_id.slice(-8).toUpperCase()}</td>
@@ -5051,7 +5059,7 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                           disabled={downloadingOrderId === order.order_id}
                           aria-label="Download invoice"
                           title="Download invoice"
-                          className="inline-flex items-center gap-1.5 rounded-full border border-[#d8d8d2] bg-white px-3 py-[7px] text-[12.5px] font-semibold text-[#183229] transition-colors hover:border-[#183229] hover:bg-[#f6f8f2] disabled:cursor-default disabled:opacity-60 disabled:hover:border-[#d8d8d2] disabled:hover:bg-white"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-[#d8d8d2] bg-white px-3 py-[7px] text-[12px] font-semibold text-black transition-colors hover:border-black hover:bg-[#f1f1f1] disabled:cursor-default disabled:opacity-60 disabled:hover:border-[#d8d8d2] disabled:hover:bg-white"
                         >
                           {downloadingOrderId === order.order_id ? (
                             <span className="size-[13px] animate-spin rounded-full border-2 border-[#d8d8d2] border-t-[#183229]" aria-hidden="true" />
@@ -6088,7 +6096,7 @@ function SupportChatBubbleIcon({ className }: { className?: string }) {
 
 function SupportSearchInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
   return (
-    <div className="relative w-fit content-center">
+    <div className="relative w-full content-center">
       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M17.5 17.5L13.1694 13.1694M13.1694 13.1694C14.3004 12.0384 15 10.4759 15 8.75C15 5.29822 12.2018 2.5 8.75 2.5C5.29822 2.5 2.5 5.29822 2.5 8.75C2.5 12.2018 5.29822 15 8.75 15C10.4759 15 12.0384 14.3004 13.1694 13.1694Z" stroke="#98A39B" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
@@ -6099,7 +6107,7 @@ function SupportSearchInput({ value, onChange, placeholder }: { value: string; o
         value={value}
         onChange={event => onChange(event.target.value)}
         placeholder={placeholder}
-        className="h-10 w-full max-w-[230px] rounded-lg border border-[#dbdbdb] bg-white pl-10 pr-[30px] text-[#121212] shadow-[0px_3px_6px_-3px_#0000000d,0px_2px_4px_-2px_#0000000d,0px_1px_2px_-1px_#0000000d,0px_1px_0px_-1px_#0000000d] transition-all duration-200 focus:border-[1.5px] focus:border-[#132F19] focus:shadow-[0_0_0_2px_rgba(0,174,48,0.1)] focus:outline-none"
+        className="h-[38px] w-full rounded-[9px] border border-[#cfcfcf] bg-white pl-10 pr-[30px] text-[12px] text-[#171a18] transition-all duration-200 placeholder:text-[#98a19c] focus:border-black focus:shadow-[0_0_0_2px_rgba(0,0,0,0.06)] focus:outline-none"
       />
       {value && (
         <button type="button" onClick={() => onChange("")} aria-label="Clear search" className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center justify-center p-1 text-[#888888] transition-colors hover:text-[#132F19]">
@@ -6122,14 +6130,14 @@ function SupportTicketListItem({ ticket, isActive, onClick }: { ticket: SupportT
       type="button"
       onClick={onClick}
       aria-pressed={isActive}
-      className={`flex flex-col gap-1.5 rounded-[10px] border px-3 py-2.5 text-left transition-colors ${
+      className={`flex flex-col gap-2 rounded-[12px] border px-3.5 py-3 text-left transition-all ${
         isActive
-          ? "border-[#1d5043] bg-[#eef5f1] shadow-[inset_0_0_0_1px_#1d5043]"
-          : "border-[#eef0ee] bg-white hover:border-[#e0e3e0] hover:bg-[#f6f8f7]"
+          ? "border-[#bfc3c1] bg-[#f1f1f1]"
+          : "border-[#e7e7e7] bg-white hover:border-[#cfcfcf] hover:bg-[#fafafa]"
       } ${ticket.isClosed ? "opacity-[0.78]" : ""}`}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="rounded-md bg-[#f3f4f6] px-1.5 py-0.5 font-mono text-[11px] font-bold text-[#374151]">#{ticket.id.slice(0, 8)}</span>
+        <span className="rounded-full bg-[#f1f4f2] px-2 py-1 font-mono text-[10px] font-semibold text-[#56625b]">#{ticket.id.slice(0, 8)}</span>
         <div className="inline-flex shrink-0 items-center gap-1.5">
           {hasUnread && (
             <span className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#e5532a] px-1.5 text-[10px] font-bold leading-none text-white" aria-label={`${ticket.unread} unread`}>
@@ -6150,7 +6158,7 @@ function SupportTicketListItem({ ticket, isActive, onClick }: { ticket: SupportT
         )}
       </div>
       <div className="flex items-center justify-between gap-2">
-        <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border bg-transparent px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.04em]" style={{ color: typeColor, borderColor: typeColor }}>
+        <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border bg-white/70 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.08em]" style={{ color: typeColor, borderColor: `${typeColor}55` }}>
           {typeLabel}
         </span>
       </div>
@@ -6254,7 +6262,7 @@ function SupportTicketChat({ ticket, onClose, onSend }: { ticket: SupportTicket;
                           return (
                             <div key={msg.id} className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
                               <div
-                                className={`max-w-[78%] break-words px-3.5 py-2.5 text-[14px] leading-[1.5] ${isUser ? "bg-[#1d5043] text-white" : "bg-[#f6f8f7] text-[#0d0e0d]"}`}
+                                className={`max-w-[78%] break-words px-3.5 py-2.5 text-[14px] leading-[1.5] ${isUser ? "bg-[#111] text-white" : "bg-[#f1f1f1] text-[#0d0e0d]"}`}
                                 style={{ borderRadius: isUser ? `18px ${first ? 18 : 6}px 6px 18px` : `${first ? 18 : 6}px 18px 18px 6px` }}
                               >
                                 <div className="whitespace-pre-wrap break-words">{msg.text}</div>
@@ -6264,7 +6272,7 @@ function SupportTicketChat({ ticket, onClose, onSend }: { ticket: SupportTicket;
                                   <time className="text-[11px] text-[#6b7280]" dateTime={msg.sentAt} title={new Date(msg.sentAt).toLocaleString()}>
                                     {supportMessageTime(msg.sentAt)}
                                   </time>
-                                  {isUser && <span className={`text-[11px] ${msg.isRead ? "text-[#1d5043]" : "text-[#6b7280]"}`}>{msg.isRead ? "✓✓" : "✓"}</span>}
+                                  {isUser && <span className={`text-[11px] ${msg.isRead ? "text-black" : "text-[#6b7280]"}`}>{msg.isRead ? "✓✓" : "✓"}</span>}
                                 </div>
                               )}
                             </div>
@@ -6288,7 +6296,7 @@ function SupportTicketChat({ ticket, onClose, onSend }: { ticket: SupportTicket;
             This ticket is resolved. Contact support to reopen it.
           </div>
         )}
-        <div className="flex items-end gap-2 rounded-[14px] border border-[#e0e3e0] bg-white py-1.5 pl-2.5 pr-2 transition-[border-color,box-shadow] focus-within:border-[#1d5043] focus-within:shadow-[0_0_0_3px_rgba(29,80,67,0.12)]">
+        <div className="flex items-end gap-2 rounded-[12px] border border-[#d8d8d8] bg-white py-1.5 pl-2.5 pr-2 transition-[border-color,box-shadow] focus-within:border-black focus-within:shadow-[0_0_0_2px_rgba(0,0,0,0.06)]">
           <button
             type="button"
             aria-label="Attach files"
@@ -6326,7 +6334,7 @@ function SupportTicketChat({ ticket, onClose, onSend }: { ticket: SupportTicket;
             onClick={handleSend}
             disabled={!canSend}
             aria-label="Send message"
-            className={`flex size-9 shrink-0 items-center justify-center rounded-full transition-all disabled:cursor-not-allowed ${canSend ? "bg-[#1d5043] text-white hover:opacity-90" : "bg-[#e5e7eb] text-[#9ca3af] disabled:opacity-50"}`}
+            className={`flex size-9 shrink-0 items-center justify-center rounded-full transition-all disabled:cursor-not-allowed ${canSend ? "bg-[#111] text-white hover:bg-[#2a2a2a]" : "bg-[#e5e7eb] text-[#9ca3af] disabled:opacity-50"}`}
           >
             <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="22" y1="2" x2="11" y2="13" />
@@ -6363,19 +6371,19 @@ function SupportCreateTicketModal({ open, onClose, onCreate }: { open: boolean; 
   }
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50" onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
-      <div className="max-h-[90vh] w-full max-w-[500px] overflow-y-auto rounded-2xl bg-white p-8 shadow-[0_4px_6px_rgba(0,0,0,0.1)]">
-        <div className="mb-2.5 flex items-center justify-between">
-          <h2 className="text-[20px] font-bold" style={{ color: SUPPORT_PRIMARY }}>Create Ticket</h2>
-          <button type="button" onClick={onClose} className="text-2xl leading-none text-[#9ca3af]" aria-label="Close">×</button>
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-[#15231d]/40 p-4 backdrop-blur-[2px]" onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
+      <div className="max-h-[90vh] w-full max-w-[500px] overflow-y-auto rounded-[18px] border border-white/70 bg-[#fbfcfb] p-7 shadow-[0_24px_70px_rgba(20,40,31,0.2)]">
+        <div className="mb-6 flex items-start justify-between">
+          <div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8a968f]">Support</p><h2 className="mt-1 text-[22px] font-semibold text-[#171a18]">Create ticket</h2><p className="mt-1 text-[12px] text-[#6c756f]">Tell us what you need help with.</p></div>
+          <button type="button" onClick={onClose} className="flex size-9 items-center justify-center rounded-full border border-[#e1e6e2] bg-white text-xl leading-none text-[#778079] transition-colors hover:bg-[#f1f4f2] hover:text-[#26352d]" aria-label="Close">×</button>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-8">
             <div className="mb-5">
               <label className="mb-2 block text-[14px] font-semibold leading-5 text-[#121212]">Type</label>
-              <div className="mt-2 flex gap-6">
+              <div className="mt-2 grid grid-cols-2 gap-2">
                 {([["ticket", "Ticket"], ["feature_request", "Feature Request"]] as const).map(([value, label]) => (
-                  <label key={value} className="flex cursor-pointer items-center gap-2">
+                  <label key={value} className={`flex cursor-pointer items-center gap-2.5 rounded-[10px] border px-3 py-3 transition-colors ${ticketType === value ? "border-[#31583f] bg-[#edf4ef]" : "border-[#e1e6e2] bg-white hover:border-[#cbd5ce]"}`}>
                     <input type="radio" name="ticket_type" value={value} checked={ticketType === value} onChange={() => setTicketType(value)} className="sr-only" />
                     <span className={`relative flex size-5 items-center justify-center rounded-full border-2 bg-white transition-all ${ticketType === value ? "border-[#1d5043]" : "border-[#e4e4e4] hover:border-[#1d5043]"}`}>
                       {ticketType === value && <span className="size-2.5 rounded-full bg-[#1d5043]" />}
@@ -6394,13 +6402,14 @@ function SupportCreateTicketModal({ open, onClose, onCreate }: { open: boolean; 
                 rows={3}
                 value={description}
                 onChange={event => setDescription(event.target.value)}
-                placeholder="Write..."
-                className="w-full resize-y rounded-lg border border-[#e4e4e4] p-3 text-[14px] text-[#121212] outline-none transition-colors placeholder:text-[#b8b8b5] focus:border-[#1d5043]"
+                placeholder="Describe the issue and include any relevant order or patient details..."
+                className="min-h-[120px] w-full resize-y rounded-[12px] border border-[#dce2de] bg-white p-3.5 text-[13px] leading-5 text-[#121512] outline-none transition-all placeholder:text-[#a2aaa5] focus:border-[#31583f] focus:shadow-[0_0_0_3px_rgba(49,88,63,0.1)]"
               />
             </div>
           </div>
-          <div className="flex justify-end">
-            <button type="submit" className="flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-[14px] font-medium text-white transition-colors" style={{ background: SUPPORT_PRIMARY }} onMouseEnter={event => (event.currentTarget.style.background = SUPPORT_PRIMARY_HOVER)} onMouseLeave={event => (event.currentTarget.style.background = SUPPORT_PRIMARY)}>
+          <div className="flex justify-end gap-2 border-t border-[#e5e9e6] pt-5">
+            <button type="button" onClick={onClose} className="h-10 rounded-full border border-[#d8dedb] bg-white px-5 text-[12px] font-semibold text-[#4f5e56] transition-colors hover:bg-[#f4f6f4]">Cancel</button>
+            <button type="submit" className="flex h-10 items-center justify-center gap-2 rounded-full bg-[#272727] px-5 text-[12px] font-semibold text-white transition-colors hover:bg-[#111]">
               Create Ticket
             </button>
           </div>
@@ -6479,47 +6488,33 @@ function SupportPage({ onNavigate: _onNavigate }: { onNavigate: (p: Page) => voi
 
   return (
     <>
-      {/* Top bar */}
-      <div className="sticky top-0 z-40 -mx-7 -mt-7 rounded-t-[10px] border-b border-[#e5e7eb] bg-white px-6 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="shrink-0 text-[24px] font-bold leading-[29px] text-[#111827]">
-            Support Tickets<span className="ml-2 font-medium text-[#6b7280]">({tabCounts.OPEN + tabCounts.CLOSED})</span>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-[28px] font-semibold leading-tight text-[#1a1a1a]">
+            Support Tickets <span className="ml-1 text-[16px] font-medium text-[#717680]">({tabCounts.OPEN + tabCounts.CLOSED})</span>
           </h1>
+        </div>
           <div className="flex flex-1 justify-end">
             <button
               type="button"
               onClick={() => setIsCreateModalOpen(true)}
               aria-label="Create Ticket"
-              className="flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-[14px] font-medium text-white transition-colors"
-              style={{ background: SUPPORT_PRIMARY }}
-              onMouseEnter={event => (event.currentTarget.style.background = SUPPORT_PRIMARY_HOVER)}
-              onMouseLeave={event => (event.currentTarget.style.background = SUPPORT_PRIMARY)}
+              className="flex items-center gap-1.5 rounded-full bg-[#111] px-4 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-black"
             >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 5V15M5 10H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-              <span><span className="max-md:hidden">Create </span>Ticket</span>
+              <Plus size={12} />
+              Create Ticket
             </button>
-          </div>
-          <button type="button" className="ml-4 flex size-10 items-center justify-center rounded-[10px] bg-[#f0fdf4] transition-colors hover:bg-[#dcfce7]" aria-label="Announcements">
-            <span className="relative flex items-center justify-center">
-              <svg width="20" height="20" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: SUPPORT_PRIMARY }}>
-                <path d="M8.60124 1.25086C8.60124 1.75459 8.26278 2.17927 7.80087 2.30989C10.1459 2.4647 12 4.41582 12 6.79999V10.25C12 11.0563 12.0329 11.7074 12.7236 12.0528C12.931 12.1565 13.0399 12.3892 12.9866 12.6149C12.9333 12.8406 12.7319 13 12.5 13H8.16144C8.36904 13.1832 8.49997 13.4513 8.49997 13.75C8.49997 14.3023 8.05226 14.75 7.49997 14.75C6.94769 14.75 6.49997 14.3023 6.49997 13.75C6.49997 13.4513 6.63091 13.1832 6.83851 13H2.49999C2.2681 13 2.06664 12.8406 2.01336 12.6149C1.96009 12.3892 2.06897 12.1565 2.27638 12.0528C2.96708 11.7074 2.99999 11.0563 2.99999 10.25V6.79999C2.99999 4.41537 4.85481 2.46396 7.20042 2.3098C6.73867 2.17908 6.40036 1.75448 6.40036 1.25086C6.40036 0.643104 6.89304 0.150421 7.5008 0.150421C8.10855 0.150421 8.60124 0.643104 8.60124 1.25086ZM7.49999 3.29999C5.56699 3.29999 3.99999 4.86699 3.99999 6.79999V10.25L4.00002 10.3009C4.0005 10.7463 4.00121 11.4084 3.69929 12H11.3007C10.9988 11.4084 10.9995 10.7463 11 10.3009L11 10.25V6.79999C11 4.86699 9.43299 3.29999 7.49999 3.29999Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd" />
-              </svg>
-              <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ background: SUPPORT_PRIMARY }}>2</span>
-            </span>
-          </button>
         </div>
       </div>
 
-      <div className="mt-4 flex h-[calc(100dvh-146px)] min-h-[420px] w-full overflow-hidden rounded-xl border border-[#e6e7e4] bg-white">
+      <div className="flex h-[calc(100dvh-190px)] min-h-[480px] w-full overflow-hidden rounded-[14px] border border-[#e5e5e5] bg-white">
         {/* Left: ticket list */}
-        <aside className={`flex min-h-0 w-[360px] shrink-0 flex-col border-r border-[#e6e7e4] bg-[#fafbfa] max-md:w-full max-md:border-r-0 ${mobileShowDetail ? "max-md:hidden" : ""}`}>
-          <div className="shrink-0 border-b border-[#eef0ee] bg-white px-3.5 py-3">
+        <aside className={`flex min-h-0 w-[360px] shrink-0 flex-col border-r border-[#e5e5e5] bg-[#FAFAFA] max-md:w-full max-md:border-r-0 ${mobileShowDetail ? "max-md:hidden" : ""}`}>
+          <div className="shrink-0 bg-[#FAFAFA] px-3.5 pb-2 pt-3.5">
             <SupportSearchInput value={searchValue} onChange={setSearchValue} placeholder="Search tickets" />
           </div>
 
-          <div className="flex shrink-0 gap-1 border-b border-[#eef0ee] bg-white px-2.5 py-2" role="tablist" aria-label="Filter tickets by status">
+          <div className="flex shrink-0 items-end gap-5 border-b border-[#e3e3e3] bg-[#FAFAFA] px-3" role="tablist" aria-label="Filter tickets by status">
             {([["OPEN", "Open"], ["CLOSED", "Closed"]] as const).map(([id, label]) => {
               const isActive = activeTab === id;
               return (
@@ -6529,12 +6524,12 @@ function SupportPage({ onNavigate: _onNavigate }: { onNavigate: (p: Page) => voi
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => setActiveTab(id)}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-semibold transition-colors ${
-                    isActive ? "border-[#1d5043] bg-[#1d5043] text-white hover:bg-[#143b32]" : "border-transparent bg-transparent text-[#6b7280] hover:bg-[#f3f4f6] hover:text-[#374151]"
+                  className={`relative inline-flex h-[42px] items-center gap-1.5 px-0.5 text-[12px] font-medium transition-colors after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full ${
+                    isActive ? "text-black after:bg-black" : "text-[#707a74] after:bg-transparent hover:text-black"
                   }`}
                 >
                   {label}
-                  <span className={`inline-flex h-4 min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10px] font-bold ${isActive ? "bg-white/20" : "bg-[#e5e7eb] text-[#4b5563]"}`}>
+                  <span className={`inline-flex h-4 min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10px] font-bold ${isActive ? "bg-black text-white" : "bg-[#e5e7eb] text-[#4b5563]"}`}>
                     {tabCounts[id]}
                   </span>
                 </button>
@@ -6542,7 +6537,7 @@ function SupportPage({ onNavigate: _onNavigate }: { onNavigate: (p: Page) => voi
             })}
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto px-2 pb-3 pt-2">
+          <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2.5 pb-3 pt-2.5">
             {filteredTickets.length === 0 ? (
               <div className="flex flex-col items-center justify-center gap-1.5 px-4 py-8 text-center">
                 <p className="text-[14px] font-semibold text-[#374151]">
@@ -6564,9 +6559,9 @@ function SupportPage({ onNavigate: _onNavigate }: { onNavigate: (p: Page) => voi
             <SupportTicketChat key={selectedTicket.id} ticket={selectedTicket} onClose={() => setMobileShowDetail(false)} onSend={text => handleSendMessage(selectedTicket.id, text)} />
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center gap-2.5 p-10 text-center">
-              <SupportChatBubbleIcon className="size-14 text-[#d1d5db]" />
-              <p className="text-[18px] font-semibold text-[#374151]">Select a conversation</p>
-              <p className="max-w-[320px] text-[14px] text-[#6b7280]">Choose a ticket from the list to view messages and reply to support.</p>
+              <span className="flex size-16 items-center justify-center rounded-full bg-[#f1f1f1]"><SupportChatBubbleIcon className="size-8 text-black" /></span>
+              <p className="text-[17px] font-semibold text-[#29332d]">Select a conversation</p>
+              <p className="max-w-[320px] text-[13px] leading-5 text-[#737d77]">Choose a ticket to review the conversation and reply to support.</p>
             </div>
           )}
         </section>
