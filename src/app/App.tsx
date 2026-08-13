@@ -87,7 +87,17 @@ import supportShayne from "@/assets/support-shayne.png";
 import supportZee from "@/assets/support-zee.png";
 import userVerifiedIcon from "@/assets/user-verified.svg";
 import blankVialReference from "@/assets/blank-vial-reference.png";
+import blankNasalSprayReference from "@/assets/blank-nasal-spray-reference.png";
+import blankLyophilizedVialReference from "@/assets/blank-lyophilized-vial-reference.png";
+import blankTopicalDropperReference from "@/assets/blank-topical-dropper-reference.png";
+import blankPatchPackageReference from "@/assets/blank-patch-package-reference.png";
+import blankCapsuleBottleReference from "@/assets/blank-capsule-bottle-reference.png";
 import { INJECTION_PRODUCT_SEEDS } from "./injection-products";
+import { NASAL_SPRAY_PRODUCT_SEEDS } from "./nasal-spray-products";
+import { LYOPHILIZED_PRODUCT_SEEDS } from "./lyophilized-products";
+import { TOPICAL_PRODUCT_SEEDS } from "./topical-products";
+import { PATCH_PRODUCT_SEEDS } from "./patch-products";
+import { CAPSULE_PRODUCT_SEEDS } from "./capsule-products";
 
 type Page =
   | "dashboard"
@@ -1156,10 +1166,16 @@ function FigmaCard({
 }) {
   const [pharmacyMenuOpen, setPharmacyMenuOpen] = useState(false);
   const cardPharmacies = ["Altin Compounding Pharmacy", "Emerald Pharmacy SandBox", "Partel Sandbox"];
-  const usesManualVial = img === blankVialReference;
+  const usesManualVial = img === blankVialReference || img === blankLyophilizedVialReference;
+  const usesManualPatch = img === blankPatchPackageReference;
+  const usesManualCapsule = img === blankCapsuleBottleReference;
   const cardScale = 1.3;
   const productImageStyle = usesManualVial
     ? { marginLeft: 16.5 * cardScale, marginTop: 2 * cardScale, width: 172 * cardScale, height: 215 * cardScale }
+    : usesManualPatch
+    ? { marginLeft: 27, marginTop: 18, width: 214, height: 214 }
+    : usesManualCapsule
+    ? { marginLeft: 28, marginTop: 0, width: 212, height: 264 }
     : { marginLeft: imgL * cardScale, marginTop: imgT * cardScale, width: imgW * cardScale, height: imgH * cardScale };
 
   return (
@@ -1171,7 +1187,15 @@ function FigmaCard({
 
       <div className="pointer-events-none col-1 row-1" style={productImageStyle}>
         {usesManualVial ? (
-          <ManualVialPreview name={name} strength={strength ?? "20mg/25mg/mL"} size="1 (5mL) Vial" palette={vialPalette} compact />
+          <ManualVialPreview name={name} strength={strength ?? "20mg/25mg/mL"} size="1 (5mL) Vial" palette={vialPalette} baseImage={img} compact />
+        ) : img === blankNasalSprayReference ? (
+          <ManualNasalSprayPreview name={name} strength={strength ?? "100mg/mL"} palette={vialPalette} compact />
+        ) : img === blankTopicalDropperReference ? (
+          <ManualNasalSprayPreview name={name} strength={strength ?? "2%"} palette={vialPalette} baseImage={img} variant="topical" compact />
+        ) : img === blankPatchPackageReference ? (
+          <ManualPatchPreview name={name} strength={strength ?? "0.1mg/day"} compact />
+        ) : img === blankCapsuleBottleReference ? (
+          <ManualCapsulePreview name={name} strength={strength ?? "200mg/mL"} palette={vialPalette} compact />
         ) : (
           <img
             alt={name}
@@ -1272,9 +1296,25 @@ function OldCatalogCard({
       className="relative h-[374px] w-[268px] shrink-0 cursor-pointer overflow-hidden rounded-[16px] bg-gradient-to-b from-[rgba(247,239,233,0.10)] to-[rgba(236,229,182,0.10)] transition-transform duration-200 hover:-translate-y-0.5"
     >
       <div className="flex h-[276px] items-center justify-center px-7 pt-5">
-        {img === blankVialReference ? (
+        {img === blankVialReference || img === blankLyophilizedVialReference ? (
           <div className="h-[245px] w-[196px]">
-            <ManualVialPreview name={name} strength={strength ?? "20mg/25mg/mL"} size="1 (5mL) Vial" palette={vialPalette} compact />
+            <ManualVialPreview name={name} strength={strength ?? "20mg/25mg/mL"} size="1 (5mL) Vial" palette={vialPalette} baseImage={img} compact />
+          </div>
+        ) : img === blankNasalSprayReference ? (
+          <div className="h-[260px] w-[223px]">
+            <ManualNasalSprayPreview name={name} strength={strength ?? "100mg/mL"} palette={vialPalette} compact />
+          </div>
+        ) : img === blankTopicalDropperReference ? (
+          <div className="h-[245px] w-[196px]">
+            <ManualNasalSprayPreview name={name} strength={strength ?? "2%"} palette={vialPalette} baseImage={img} variant="topical" compact />
+          </div>
+        ) : img === blankPatchPackageReference ? (
+          <div className="size-[220px]">
+            <ManualPatchPreview name={name} strength={strength ?? "0.1mg/day"} compact />
+          </div>
+        ) : img === blankCapsuleBottleReference ? (
+          <div className="h-[255px] w-[205px]">
+            <ManualCapsulePreview name={name} strength={strength ?? "200mg/mL"} palette={vialPalette} compact />
           </div>
         ) : (
           <img src={img} alt={name} className="max-h-[245px] max-w-[205px] object-contain mix-blend-multiply" />
@@ -1330,9 +1370,25 @@ function PharmacyCatalogCard({
   return (
     <article onClick={onClick} className="group relative flex h-[374px] w-[268px] shrink-0 cursor-pointer flex-col overflow-hidden rounded-[16px] border border-[#e7e9e7] bg-white transition-colors hover:border-[#cbd2ce]">
       <div className="relative flex h-[230px] items-center justify-center bg-[#f7f8f7] px-7 py-5">
-        {img === blankVialReference ? (
+        {img === blankVialReference || img === blankLyophilizedVialReference ? (
           <div className="h-[195px] w-[156px] transition-transform duration-300 group-hover:scale-[1.03]">
-            <ManualVialPreview name={name} strength={strength ?? "20mg/25mg/mL"} size="1 (5mL) Vial" palette={vialPalette} compact />
+            <ManualVialPreview name={name} strength={strength ?? "20mg/25mg/mL"} size="1 (5mL) Vial" palette={vialPalette} baseImage={img} compact />
+          </div>
+        ) : img === blankNasalSprayReference ? (
+          <div className="h-[205px] w-[176px] transition-transform duration-300 group-hover:scale-[1.03]">
+            <ManualNasalSprayPreview name={name} strength={strength ?? "100mg/mL"} palette={vialPalette} compact />
+          </div>
+        ) : img === blankTopicalDropperReference ? (
+          <div className="h-[195px] w-[156px] transition-transform duration-300 group-hover:scale-[1.03]">
+            <ManualNasalSprayPreview name={name} strength={strength ?? "2%"} palette={vialPalette} baseImage={img} variant="topical" compact />
+          </div>
+        ) : img === blankPatchPackageReference ? (
+          <div className="size-[185px] transition-transform duration-300 group-hover:scale-[1.03]">
+            <ManualPatchPreview name={name} strength={strength ?? "0.1mg/day"} compact />
+          </div>
+        ) : img === blankCapsuleBottleReference ? (
+          <div className="h-[205px] w-[165px] transition-transform duration-300 group-hover:scale-[1.03]">
+            <ManualCapsulePreview name={name} strength={strength ?? "200mg/mL"} palette={vialPalette} compact />
           </div>
         ) : (
           <img src={img} alt={name} className="max-h-[195px] max-w-[175px] object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-[1.03]" />
@@ -1365,10 +1421,8 @@ function PharmacyCatalogCard({
 }
 
 type VialPalette = {
-  start: string;
-  middle: string;
-  end: string;
-  mark: string;
+  primary: string;
+  foreground: string;
 };
 
 // Product definitions matching the Figma dashboard export exactly
@@ -1400,16 +1454,62 @@ function injectionArea(name: string) {
   return "Wellness";
 }
 
+const PROVIDED_LABEL_COLOR_FAMILIES: VialPalette[][] = [
+  [
+    { primary: "#B7CFDA", foreground: "#314E68" },
+    { primary: "#8E7AD9", foreground: "#FFFFFF" },
+    { primary: "#6C5BC8", foreground: "#FFFFFF" },
+    { primary: "#DAB8F4", foreground: "#4F356D" },
+    { primary: "#2F348E", foreground: "#FFFFFF" },
+  ],
+  [
+    { primary: "#F7B0A3", foreground: "#683245" },
+    { primary: "#F39572", foreground: "#683245" },
+    { primary: "#FFAA75", foreground: "#683245" },
+    { primary: "#E88478", foreground: "#683245" },
+    { primary: "#C6535F", foreground: "#FFFFFF" },
+  ],
+  [
+    { primary: "#BFD5D2", foreground: "#4F4A57" },
+    { primary: "#ACD7D2", foreground: "#4F4A57" },
+    { primary: "#6FAEA1", foreground: "#FFFFFF" },
+    { primary: "#A9E2B0", foreground: "#35553E" },
+    { primary: "#82DDA2", foreground: "#35553E" },
+  ],
+  [
+    { primary: "#EFE8A8", foreground: "#4F1D3A" },
+    { primary: "#E8D769", foreground: "#4F1D3A" },
+    { primary: "#DDE862", foreground: "#39391D" },
+    { primary: "#DDE8AC", foreground: "#4F356D" },
+    { primary: "#D8E49A", foreground: "#35553E" },
+  ],
+];
+
+function referenceLabelPalette(catalogNumber: number, offset = 0): VialPalette {
+  const colorIndex = Math.max(0, catalogNumber - 1 + offset);
+  const familySize = PROVIDED_LABEL_COLOR_FAMILIES[0].length;
+  const family = PROVIDED_LABEL_COLOR_FAMILIES[Math.floor(colorIndex / familySize) % PROVIDED_LABEL_COLOR_FAMILIES.length];
+  return family[colorIndex % familySize];
+}
+
 function injectionPalette(catalogNumber: number): VialPalette {
-  const hue = (218 + catalogNumber * 47) % 360;
-  const middleHue = (hue + 7) % 360;
-  const endHue = (hue + 14) % 360;
-  return {
-    start: `hsl(${hue} 56% 25%)`,
-    middle: `hsl(${middleHue} 58% 45%)`,
-    end: `hsl(${endHue} 72% 68%)`,
-    mark: `hsl(${endHue} 76% 73%)`,
-  };
+  return referenceLabelPalette(catalogNumber);
+}
+
+function nasalSprayPalette(catalogNumber: number): VialPalette {
+  return referenceLabelPalette(catalogNumber);
+}
+
+function lyophilizedPalette(catalogNumber: number): VialPalette {
+  return referenceLabelPalette(catalogNumber);
+}
+
+function topicalPalette(catalogNumber: number): VialPalette {
+  return referenceLabelPalette(catalogNumber);
+}
+
+function capsulePalette(): VialPalette {
+  return { primary: "#581C3B", foreground: "#F2C15A" };
 }
 
 const INJECTION_CARDS: CardDef[] = INJECTION_PRODUCT_SEEDS.map((product, index) => ({
@@ -1433,9 +1533,113 @@ const INJECTION_CARDS: CardDef[] = INJECTION_PRODUCT_SEEDS.map((product, index) 
   vialPalette: injectionPalette(product.catalogNumber),
 }));
 
+const NASAL_SPRAY_CARDS: CardDef[] = NASAL_SPRAY_PRODUCT_SEEDS.map((product, index) => ({
+  id: 2000 + product.catalogNumber,
+  name: product.name,
+  strength: product.strength,
+  price: "$35.88",
+  pharmacies: 2 + (index % 4),
+  pharmacy: ["1st Choice Compounding Pharmacy", "Optimal Balance Pharmacy", "DCA Pharmacy", "Thesis Pharmacy"][index % 4],
+  shippingState: ["Florida", "New York", "Texas"][index % 3],
+  areaOfTreatment: injectionArea(product.name),
+  dosage: "Nasal Spray",
+  img: blankNasalSprayReference,
+  imgW: 210,
+  imgH: 255,
+  imgL: 29,
+  imgT: 1,
+  imgContain: true,
+  btnOffsetX: 168,
+  heartVariant: "black",
+  vialPalette: nasalSprayPalette(product.catalogNumber),
+}));
+
+const LYOPHILIZED_CARDS: CardDef[] = LYOPHILIZED_PRODUCT_SEEDS.map((product, index) => ({
+  id: 3000 + product.catalogNumber,
+  name: product.name,
+  strength: product.strength,
+  price: "$35.88",
+  pharmacies: 2 + (index % 4),
+  pharmacy: ["1st Choice Compounding Pharmacy", "Optimal Balance Pharmacy", "DCA Pharmacy", "Thesis Pharmacy"][index % 4],
+  shippingState: ["Florida", "New York", "Texas"][index % 3],
+  areaOfTreatment: injectionArea(product.name),
+  dosage: "Lyophilized",
+  img: blankLyophilizedVialReference,
+  imgW: 145,
+  imgH: 181,
+  imgL: 30,
+  imgT: 17,
+  imgContain: true,
+  btnOffsetX: 168,
+  heartVariant: "black",
+  vialPalette: lyophilizedPalette(product.catalogNumber),
+}));
+
+const TOPICAL_CARDS: CardDef[] = TOPICAL_PRODUCT_SEEDS.map((product, index) => ({
+  id: 4000 + product.catalogNumber,
+  name: product.name,
+  strength: product.strength,
+  price: "$35.88",
+  pharmacies: 2 + (index % 4),
+  pharmacy: ["1st Choice Compounding Pharmacy", "Optimal Balance Pharmacy", "DCA Pharmacy", "Thesis Pharmacy"][index % 4],
+  shippingState: ["Florida", "New York", "Texas"][index % 3],
+  areaOfTreatment: injectionArea(product.name),
+  dosage: "Topical",
+  img: blankTopicalDropperReference,
+  imgW: 172,
+  imgH: 215,
+  imgL: 16.5,
+  imgT: 2,
+  imgContain: true,
+  btnOffsetX: 168,
+  heartVariant: "black" as const,
+  vialPalette: topicalPalette(product.catalogNumber),
+}));
+
+const PATCH_CARDS: CardDef[] = PATCH_PRODUCT_SEEDS.map((product, index) => ({
+  id: 5000 + product.catalogNumber,
+  name: product.name,
+  strength: product.strength,
+  price: "$35.88",
+  pharmacies: 2 + (index % 4),
+  pharmacy: ["1st Choice Compounding Pharmacy", "Optimal Balance Pharmacy", "DCA Pharmacy", "Thesis Pharmacy"][index % 4],
+  shippingState: ["Florida", "New York", "Texas"][index % 3],
+  areaOfTreatment: "Women's Health",
+  dosage: "Patch",
+  img: blankPatchPackageReference,
+  imgW: 172,
+  imgH: 215,
+  imgL: 16.5,
+  imgT: 2,
+  imgContain: true,
+  btnOffsetX: 168,
+  heartVariant: "black" as const,
+}));
+
+const CAPSULE_CARDS: CardDef[] = CAPSULE_PRODUCT_SEEDS.map((product, index) => ({
+  id: 6000 + product.catalogNumber,
+  name: product.name,
+  strength: product.strength,
+  price: "$35.88",
+  pharmacies: 2 + (index % 4),
+  pharmacy: ["1st Choice Compounding Pharmacy", "Optimal Balance Pharmacy", "DCA Pharmacy", "Thesis Pharmacy"][index % 4],
+  shippingState: ["Florida", "New York", "Texas"][index % 3],
+  areaOfTreatment: injectionArea(product.name),
+  dosage: "Capsule",
+  img: blankCapsuleBottleReference,
+  imgW: 172,
+  imgH: 215,
+  imgL: 16.5,
+  imgT: 2,
+  imgContain: true,
+  btnOffsetX: 168,
+  heartVariant: "black" as const,
+  vialPalette: capsulePalette(),
+}));
+
 const POPULAR_CARDS: CardDef[] = INJECTION_CARDS.slice(0, 8);
 
-const ALL_CARDS: CardDef[] = INJECTION_CARDS;
+const ALL_CARDS: CardDef[] = [...INJECTION_CARDS, ...NASAL_SPRAY_CARDS, ...LYOPHILIZED_CARDS, ...TOPICAL_CARDS, ...PATCH_CARDS, ...CAPSULE_CARDS];
 
 const PHARMACIES_MULTI = [
   { name: "All Pharmacies", count: 200 },
@@ -1767,8 +1971,12 @@ function ProductsPage({
   const dosageCounts: Record<string, number> = {
     Bottle: 6,
     Enema: 2,
-    Capsule: 1,
+    Capsule: CAPSULE_CARDS.length,
     Injection: INJECTION_CARDS.length,
+    "Nasal Spray": NASAL_SPRAY_CARDS.length,
+    Lyophilized: LYOPHILIZED_CARDS.length,
+    Topical: TOPICAL_CARDS.length,
+    Patch: PATCH_CARDS.length,
     Gel: 6,
     Lollipop: 2,
     "Iv Bag": 1,
@@ -1776,7 +1984,7 @@ function ProductsPage({
     "Iv Bag 15": 15,
     Jan: 6,
   };
-  const dosageOptions = ["Bottle", "Enema", "Capsule", "Injection", "Gel", "Lollipop", "Iv Bag", "Jar", "Iv Bag 15", "Jan"];
+  const dosageOptions = ["Bottle", "Enema", "Capsule", "Injection", "Nasal Spray", "Lyophilized", "Topical", "Patch", "Gel", "Lollipop", "Iv Bag", "Jar", "Iv Bag 15", "Jan"];
   const areaCounts = ALL_CARDS.reduce<Record<string, number>>((counts, card) => {
     counts[card.areaOfTreatment] = (counts[card.areaOfTreatment] ?? 0) + 1;
     return counts;
@@ -2107,12 +2315,14 @@ function ManualVialPreview({
   strength,
   size,
   palette,
+  baseImage = blankVialReference,
   compact = false,
 }: {
   name: string;
   strength: string;
   size: string;
   palette?: VialPalette;
+  baseImage?: string;
   compact?: boolean;
 }) {
   const breakCandidates = Array.from(name).flatMap((character, index) =>
@@ -2168,10 +2378,8 @@ function ManualVialPreview({
       if (!sourceContext || !outputContext) return;
 
       const colors = {
-        start: palette?.start ?? "#282e84",
-        middle: palette?.middle ?? "#5d55bd",
-        end: palette?.end ?? "#9680ef",
-        mark: palette?.mark ?? "#9680ef",
+        primary: palette?.primary ?? "#8E7AD9",
+        foreground: palette?.foreground ?? "#FFFFFF",
       };
 
       const fitFont = (text: string, maxWidth: number, maximum: number, minimum: number) => {
@@ -2225,25 +2433,10 @@ function ManualVialPreview({
       const markX = bandX + mainBandWidth;
       const markWidth = bandWidth - mainBandWidth;
 
-      const bandGradient = sourceContext.createLinearGradient(bandX, 0, bandX + mainBandWidth, 0);
-      bandGradient.addColorStop(0, colors.start);
-      bandGradient.addColorStop(0.18, colors.start);
-      bandGradient.addColorStop(0.5, colors.middle);
-      bandGradient.addColorStop(0.82, colors.end);
-      bandGradient.addColorStop(1, colors.end);
-      sourceContext.fillStyle = bandGradient;
+      sourceContext.fillStyle = colors.primary;
       sourceContext.fillRect(bandX, bandY, mainBandWidth + 1, bandHeight);
 
-      const bandLight = sourceContext.createLinearGradient(bandX, 0, bandX + mainBandWidth, 0);
-      bandLight.addColorStop(0, "rgba(7, 10, 35, 0.10)");
-      bandLight.addColorStop(0.22, "rgba(255, 255, 255, 0.015)");
-      bandLight.addColorStop(0.58, "rgba(255, 255, 255, 0.07)");
-      bandLight.addColorStop(0.82, "rgba(255, 255, 255, 0.025)");
-      bandLight.addColorStop(1, "rgba(255, 255, 255, 0.09)");
-      sourceContext.fillStyle = bandLight;
-      sourceContext.fillRect(bandX, bandY, mainBandWidth + 1, bandHeight);
-
-      sourceContext.fillStyle = colors.mark;
+      sourceContext.fillStyle = colors.primary;
       const markPieces = [
         [0, 0.5, 0.24, 0.5],
         [0.24, 0, 0.15, 0.5],
@@ -2252,8 +2445,7 @@ function ManualVialPreview({
         [0.71, 0, 0.17, 0.5],
         [0.88, 0.5, 0.12, 0.5],
       ];
-      markPieces.forEach(([x, y, pieceWidth, pieceHeight], index) => {
-        sourceContext.globalAlpha = 0.9 + index * 0.018;
+      markPieces.forEach(([x, y, pieceWidth, pieceHeight]) => {
         sourceContext.fillRect(
           markX + markWidth * x,
           bandY + bandHeight * y,
@@ -2261,8 +2453,6 @@ function ManualVialPreview({
           bandHeight * pieceHeight,
         );
       });
-      sourceContext.globalAlpha = 1;
-
       const strengthText = strength.toUpperCase();
       const strengthFontSize = fitFont(
         strengthText,
@@ -2271,7 +2461,7 @@ function ManualVialPreview({
         (compact ? 47 : 43) * renderScale,
       );
       sourceContext.font = `400 ${strengthFontSize}px "Bebas Neue", Impact, sans-serif`;
-      sourceContext.fillStyle = "#fff";
+      sourceContext.fillStyle = colors.foreground;
       sourceContext.textAlign = "left";
       sourceContext.textBaseline = "middle";
       sourceContext.save();
@@ -2317,17 +2507,6 @@ function ManualVialPreview({
         );
       }
 
-      outputContext.globalCompositeOperation = "source-atop";
-      const cylinderLight = outputContext.createLinearGradient(0, 0, width, 0);
-      cylinderLight.addColorStop(0, "rgba(22, 18, 12, 0.13)");
-      cylinderLight.addColorStop(0.12, "rgba(22, 18, 12, 0.04)");
-      cylinderLight.addColorStop(0.34, "rgba(255, 255, 255, 0.035)");
-      cylinderLight.addColorStop(0.58, "rgba(255, 255, 255, 0.075)");
-      cylinderLight.addColorStop(0.8, "rgba(255, 255, 255, 0.02)");
-      cylinderLight.addColorStop(1, "rgba(22, 18, 12, 0.11)");
-      outputContext.fillStyle = cylinderLight;
-      outputContext.fillRect(0, 0, width, height);
-      outputContext.globalCompositeOperation = "source-over";
     };
 
     const scheduleDraw = () => {
@@ -2367,9 +2546,493 @@ function ManualVialPreview({
       role="img"
       aria-label={`${name}, ${strength}, ${size}`}
     >
-      <img src={blankVialReference} alt="" draggable={false} />
+      <img src={baseImage} alt="" draggable={false} />
       <div className="manual-vial-label" aria-hidden="true">
         <canvas ref={labelCanvasRef} className="manual-vial-art" />
+      </div>
+    </div>
+  );
+}
+
+function ManualNasalSprayPreview({
+  name,
+  strength,
+  palette,
+  baseImage = blankNasalSprayReference,
+  variant = "nasal",
+  compact = false,
+}: {
+  name: string;
+  strength: string;
+  palette?: VialPalette;
+  baseImage?: string;
+  variant?: "nasal" | "topical";
+  compact?: boolean;
+}) {
+  const labelCanvasRef = useRef<HTMLCanvasElement>(null);
+  const desiredLineCount = variant === "topical"
+    ? name.length > 58 ? 4 : name.length > 28 ? 3 : name.length > 16 ? 2 : 1
+    : name.toLowerCase().includes("nasal spray") || name.length > 24 ? 3 : name.length > 14 ? 2 : 1;
+  const nasalNameTokens = name.replaceAll("/", "/ ").trim().split(/\s+/).filter(Boolean);
+  const nasalNameLines = nasalNameTokens.reduce<string[]>((lines, token) => {
+    if (desiredLineCount === 1) return [name];
+    const currentLine = lines.at(-1) ?? "";
+    const targetLength = Math.ceil(name.length / desiredLineCount);
+    if (currentLine && `${currentLine} ${token}`.length > targetLength && lines.length < desiredLineCount) {
+      lines.push(token);
+    } else if (lines.length === 0) {
+      lines.push(token);
+    } else {
+      lines[lines.length - 1] = `${currentLine} ${token}`;
+    }
+    return lines;
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    let drawFrame = 0;
+    let densityQuery: MediaQueryList | null = null;
+
+    const drawLabel = () => {
+      const canvas = labelCanvasRef.current;
+      if (!canvas || cancelled) return;
+      const bounds = canvas.getBoundingClientRect();
+      if (bounds.width <= 0 || bounds.height <= 0) return;
+
+      const pixelDensity = compact
+        ? Math.max(variant === "topical" ? 4 : 3, window.devicePixelRatio || 1)
+        : Math.min(3, Math.max(2, window.devicePixelRatio || 1));
+      const width = Math.max(1, Math.round(bounds.width * pixelDensity));
+      const height = Math.max(1, Math.round(bounds.height * pixelDensity));
+      canvas.width = width;
+      canvas.height = height;
+
+      const source = document.createElement("canvas");
+      source.width = width;
+      source.height = height;
+      const sourceContext = source.getContext("2d");
+      const outputContext = canvas.getContext("2d");
+      if (!sourceContext || !outputContext) return;
+
+      const colors = {
+        primary: palette?.primary ?? "#BFD5D2",
+        foreground: palette?.foreground ?? "#683245",
+      };
+      const renderScale = width / 720;
+      const fitFont = (text: string, maxWidth: number, maximum: number, minimum: number) => {
+        sourceContext.font = `400 ${maximum}px "Bebas Neue", Impact, sans-serif`;
+        const measured = Math.max(sourceContext.measureText(text.toUpperCase()).width, 1);
+        return Math.max(minimum, Math.min(maximum, maximum * maxWidth / measured));
+      };
+
+      sourceContext.clearRect(0, 0, width, height);
+      const topicalLineCount = nasalNameLines.length;
+      const maximumNameSize = variant === "topical"
+        ? topicalLineCount === 1 ? 190 : topicalLineCount === 2 ? 150 : topicalLineCount === 3 ? 132 : 110
+        : topicalLineCount === 1 ? 210 : topicalLineCount === 2 ? 140 : topicalLineCount === 3 ? 112 : 92;
+      const minimumNameSize = variant === "topical" ? 48 : 42;
+      const widthFittedNameSize = Math.min(...nasalNameLines.map(line => fitFont(
+        line,
+        width * (variant === "topical" ? 0.88 : 0.84),
+        maximumNameSize * renderScale,
+        minimumNameSize * renderScale,
+      )));
+      const topicalBandY = height * (topicalLineCount >= 4 ? 0.67 : topicalLineCount === 3 ? 0.64 : 0.61);
+      const topicalNameAreaHeight = topicalBandY - height * 0.1;
+      const heightFittedNameSize = variant === "topical"
+        ? topicalNameAreaHeight / (topicalLineCount * 0.82 + Math.max(0, topicalLineCount - 1) * 0.22)
+        : widthFittedNameSize;
+      const nameFontSize = Math.min(widthFittedNameSize, heightFittedNameSize);
+      sourceContext.font = `400 ${nameFontSize}px "Bebas Neue", Impact, sans-serif`;
+      sourceContext.fillStyle = "#090909";
+      sourceContext.textAlign = "left";
+      sourceContext.textBaseline = "top";
+      const firstNameY = variant === "topical"
+        ? Math.max(height * 0.1, (topicalBandY - nameFontSize * (topicalLineCount * 0.82 + Math.max(0, topicalLineCount - 1) * 0.22)) * 0.5)
+        : height * (topicalLineCount === 1 ? 0.2 : topicalLineCount === 2 ? 0.115 : topicalLineCount === 3 ? 0.055 : 0.025);
+      const nameLineGap = variant === "topical"
+        ? nameFontSize * 1.04
+        : height * (topicalLineCount >= 4 ? 0.125 : topicalLineCount === 3 ? 0.15 : 0.2);
+      nasalNameLines.forEach((line, index) => {
+        sourceContext.save();
+        sourceContext.translate(width * (variant === "topical" ? 0.055 : 0.075), firstNameY + index * nameLineGap);
+        sourceContext.scale(variant === "topical" ? 0.8 : 0.98, variant === "topical" ? 1 : 1.12);
+        const labelLine = line.toUpperCase();
+        sourceContext.fillText(labelLine, 0, 0);
+        sourceContext.globalCompositeOperation = "destination-out";
+        sourceContext.lineWidth = variant === "topical"
+          ? Math.max(0.65, 1.5 * renderScale)
+          : Math.max(0.8, 3 * renderScale);
+        sourceContext.strokeStyle = "#000";
+        sourceContext.strokeText(labelLine, 0, 0);
+        sourceContext.globalCompositeOperation = "source-over";
+        sourceContext.restore();
+      });
+
+      const bandX = width * (variant === "topical" ? 0.055 : 0.035);
+      const bandY = height * (variant === "topical"
+        ? topicalLineCount >= 4 ? 0.67 : topicalLineCount === 3 ? 0.64 : 0.61
+        : topicalLineCount >= 4 ? 0.65 : 0.585);
+      const bandWidth = width * (variant === "topical" ? 0.89 : 0.91);
+      const bandHeight = height * (variant === "topical" ? 0.15 : 0.19);
+      const mainBandWidth = bandWidth * 0.84;
+      sourceContext.fillStyle = colors.primary;
+      sourceContext.fillRect(bandX, bandY, mainBandWidth + 1, bandHeight);
+
+      const markX = bandX + mainBandWidth;
+      const markWidth = bandWidth - mainBandWidth;
+      sourceContext.fillStyle = colors.primary;
+      [
+        [0, 0.5, 0.28, 0.5],
+        [0.28, 0, 0.2, 0.5],
+        [0.48, 0, 0.22, 1],
+        [0.7, 0.5, 0.18, 0.5],
+        [0.88, 0, 0.12, 0.5],
+      ].forEach(([x, y, pieceWidth, pieceHeight]) => {
+        sourceContext.fillRect(
+          markX + markWidth * x,
+          bandY + bandHeight * y,
+          markWidth * pieceWidth + 1,
+          bandHeight * pieceHeight,
+        );
+      });
+
+      const strengthText = strength.toUpperCase();
+      const strengthFontSize = fitFont(
+        strengthText,
+        mainBandWidth * (variant === "topical" ? 0.76 : 0.68),
+        (variant === "topical" ? 74 : 64) * renderScale,
+        (variant === "topical" ? 38 : 30) * renderScale,
+      );
+      sourceContext.font = `400 ${strengthFontSize}px "Bebas Neue", Impact, sans-serif`;
+      sourceContext.fillStyle = colors.foreground;
+      sourceContext.textBaseline = "middle";
+      sourceContext.fillText(strengthText, bandX + mainBandWidth * 0.06, bandY + bandHeight * 0.53);
+      sourceContext.globalCompositeOperation = "destination-out";
+      sourceContext.lineWidth = Math.max(0.6, (variant === "topical" ? 1.2 : 1.8) * renderScale);
+      sourceContext.strokeStyle = "#000";
+      sourceContext.strokeText(strengthText, bandX + mainBandWidth * 0.06, bandY + bandHeight * 0.53);
+      sourceContext.globalCompositeOperation = "source-over";
+
+      outputContext.clearRect(0, 0, width, height);
+      outputContext.imageSmoothingEnabled = true;
+      outputContext.imageSmoothingQuality = "high";
+      const thetaMax = variant === "topical" ? 0.62 : 0.48;
+      const sinMax = Math.sin(thetaMax);
+      const curveDepth = 10 * renderScale;
+      for (let sourceX = 0; sourceX < width; sourceX += 1) {
+        const nextSourceX = Math.min(sourceX + 1, width);
+        const normalizedX = (sourceX / width - 0.5) * 2;
+        const nextNormalizedX = (nextSourceX / width - 0.5) * 2;
+        const destinationX = width * 0.5 + Math.sin(normalizedX * thetaMax) / sinMax * width * 0.5;
+        const nextDestinationX = width * 0.5 + Math.sin(nextNormalizedX * thetaMax) / sinMax * width * 0.5;
+        const centerAmount = 1 - normalizedX * normalizedX;
+        outputContext.drawImage(
+          source,
+          sourceX,
+          0,
+          1,
+          height,
+          destinationX - 0.5,
+          curveDepth * (centerAmount - 0.42),
+          nextDestinationX - destinationX + 1,
+          height * (1 + centerAmount * 0.006),
+        );
+      }
+
+    };
+
+    const scheduleDraw = () => {
+      window.cancelAnimationFrame(drawFrame);
+      drawFrame = window.requestAnimationFrame(drawLabel);
+    };
+    const canvas = labelCanvasRef.current;
+    const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleDraw);
+    if (canvas) resizeObserver?.observe(canvas);
+    const handleDensityChange = () => {
+      densityQuery?.removeEventListener("change", handleDensityChange);
+      densityQuery = window.matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`);
+      densityQuery.addEventListener("change", handleDensityChange);
+      scheduleDraw();
+    };
+    handleDensityChange();
+    window.addEventListener("resize", scheduleDraw);
+    document.fonts?.load('400 150px "Bebas Neue"').then(scheduleDraw).catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(drawFrame);
+      resizeObserver?.disconnect();
+      densityQuery?.removeEventListener("change", handleDensityChange);
+      window.removeEventListener("resize", scheduleDraw);
+    };
+  }, [name, strength, palette, compact, variant]);
+
+  return (
+    <div className={`${variant === "topical" ? "manual-topical-preview" : "manual-nasal-preview"} ${compact ? variant === "topical" ? "manual-topical-preview-compact" : "manual-nasal-preview-compact" : ""}`} role="img" aria-label={`${name}, ${strength}, ${variant}`}>
+      <img src={baseImage} alt="" draggable={false} />
+      <div className={variant === "topical" ? "manual-topical-label" : "manual-nasal-label"} aria-hidden="true">
+        <canvas ref={labelCanvasRef} className="manual-nasal-art" />
+      </div>
+    </div>
+  );
+}
+
+function ManualPatchPreview({
+  name,
+  strength,
+  compact = false,
+}: {
+  name: string;
+  strength: string;
+  compact?: boolean;
+}) {
+  const labelCanvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    let drawFrame = 0;
+    let densityQuery: MediaQueryList | null = null;
+
+    const drawLabel = () => {
+      const canvas = labelCanvasRef.current;
+      if (!canvas || cancelled) return;
+      const bounds = canvas.getBoundingClientRect();
+      if (bounds.width <= 0 || bounds.height <= 0) return;
+
+      const pixelDensity = compact
+        ? Math.max(4, window.devicePixelRatio || 1)
+        : Math.min(3, Math.max(2, window.devicePixelRatio || 1));
+      canvas.width = Math.max(1, Math.round(bounds.width * pixelDensity));
+      canvas.height = Math.max(1, Math.round(bounds.height * pixelDensity));
+      const context = canvas.getContext("2d");
+      if (!context) return;
+
+      const width = canvas.width;
+      const height = canvas.height;
+      const renderScale = width / 1200;
+      const fitFont = (text: string, maxWidth: number, maximum: number, minimum: number) => {
+        context.font = `400 ${maximum}px "Bebas Neue", Impact, sans-serif`;
+        const measured = Math.max(context.measureText(text.toUpperCase()).width, 1);
+        return Math.max(minimum, Math.min(maximum, maximum * maxWidth / measured));
+      };
+
+      context.clearRect(0, 0, width, height);
+      const productName = name.toUpperCase();
+      const nameFontSize = fitFont(productName, width * 0.93, 220 * renderScale, 80 * renderScale);
+      context.font = `400 ${nameFontSize}px "Bebas Neue", Impact, sans-serif`;
+      context.fillStyle = "#090909";
+      context.textAlign = "left";
+      context.textBaseline = "top";
+      context.fillText(productName, width * 0.055, height * 0.045 + 5 * pixelDensity);
+
+      const bandX = width * 0.035;
+      const bandY = height * 0.58;
+      const bandWidth = width * 0.93;
+      const bandHeight = height * 0.22;
+      const mainBandWidth = bandWidth * 0.78;
+      context.fillStyle = "#E8CFC8";
+      context.fillRect(bandX, bandY, mainBandWidth, bandHeight);
+
+      const markX = bandX + bandWidth * 0.82;
+      const markWidth = bandWidth * 0.18;
+      [
+        [0, 0.5, 0.28, 0.5],
+        [0.28, 0, 0.2, 0.5],
+        [0.48, 0, 0.22, 1],
+        [0.7, 0.5, 0.18, 0.5],
+        [0.88, 0, 0.12, 0.5],
+      ].forEach(([x, y, pieceWidth, pieceHeight]) => {
+        context.fillRect(
+          markX + markWidth * x,
+          bandY + bandHeight * y,
+          markWidth * pieceWidth + 1,
+          bandHeight * pieceHeight,
+        );
+      });
+
+      const strengthFontSize = fitFont(strength, mainBandWidth * 0.78, 76 * renderScale, 34 * renderScale);
+      context.font = `400 ${strengthFontSize}px "Bebas Neue", Impact, sans-serif`;
+      context.fillStyle = "#6A4741";
+      context.textBaseline = "middle";
+      context.fillText(strength.toUpperCase(), bandX + mainBandWidth * 0.05, bandY + bandHeight * 0.52);
+
+    };
+
+    const scheduleDraw = () => {
+      window.cancelAnimationFrame(drawFrame);
+      drawFrame = window.requestAnimationFrame(drawLabel);
+    };
+    const canvas = labelCanvasRef.current;
+    const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleDraw);
+    if (canvas) resizeObserver?.observe(canvas);
+    const handleDensityChange = () => {
+      densityQuery?.removeEventListener("change", handleDensityChange);
+      densityQuery = window.matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`);
+      densityQuery.addEventListener("change", handleDensityChange);
+      scheduleDraw();
+    };
+    handleDensityChange();
+    window.addEventListener("resize", scheduleDraw);
+    document.fonts?.load('400 180px "Bebas Neue"').then(scheduleDraw).catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(drawFrame);
+      resizeObserver?.disconnect();
+      densityQuery?.removeEventListener("change", handleDensityChange);
+      window.removeEventListener("resize", scheduleDraw);
+    };
+  }, [name, strength, compact]);
+
+  return (
+    <div className={`manual-patch-preview ${compact ? "manual-patch-preview-compact" : ""}`} role="img" aria-label={`${name}, ${strength}, patch`}>
+      <img src={blankPatchPackageReference} alt="" draggable={false} />
+      <canvas ref={labelCanvasRef} className="manual-patch-label" aria-hidden="true" />
+    </div>
+  );
+}
+
+function ManualCapsulePreview({
+  name,
+  strength,
+  palette,
+  compact = false,
+}: {
+  name: string;
+  strength: string;
+  palette?: VialPalette;
+  compact?: boolean;
+}) {
+  const labelCanvasRef = useRef<HTMLCanvasElement>(null);
+  const desiredLineCount = name.length > 56 ? 4 : name.length > 36 ? 3 : name.length > 18 ? 2 : 1;
+  const capsuleNameTokens = name.replaceAll("/", "/ ").trim().split(/\s+/).filter(Boolean);
+  const capsuleNameLines = capsuleNameTokens.reduce<string[]>((lines, token) => {
+    if (desiredLineCount === 1) return [name];
+    const currentLine = lines.at(-1) ?? "";
+    const targetLength = Math.ceil(name.length / desiredLineCount);
+    if (currentLine && `${currentLine} ${token}`.length > targetLength && lines.length < desiredLineCount) {
+      lines.push(token);
+    } else if (lines.length === 0) {
+      lines.push(token);
+    } else {
+      lines[lines.length - 1] = `${currentLine} ${token}`;
+    }
+    return lines;
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    let drawFrame = 0;
+
+    const drawLabel = () => {
+      const canvas = labelCanvasRef.current;
+      if (!canvas || cancelled) return;
+      const bounds = canvas.getBoundingClientRect();
+      if (bounds.width <= 0 || bounds.height <= 0) return;
+      const pixelDensity = compact ? Math.max(4, window.devicePixelRatio || 1) : Math.min(3, Math.max(2, window.devicePixelRatio || 1));
+      canvas.width = Math.max(1, Math.round(bounds.width * pixelDensity));
+      canvas.height = Math.max(1, Math.round(bounds.height * pixelDensity));
+      const context = canvas.getContext("2d");
+      if (!context) return;
+      const width = canvas.width;
+      const height = canvas.height;
+      const renderScale = width / 900;
+      const source = document.createElement("canvas");
+      source.width = width;
+      source.height = height;
+      const sourceContext = source.getContext("2d");
+      if (!sourceContext) return;
+      const fitFont = (text: string, maxWidth: number, maximum: number, minimum: number) => {
+        sourceContext.font = `400 ${maximum}px "Bebas Neue", Impact, sans-serif`;
+        const measured = Math.max(sourceContext.measureText(text.toUpperCase()).width, 1);
+        return Math.max(minimum, Math.min(maximum, maximum * maxWidth / measured));
+      };
+
+      sourceContext.clearRect(0, 0, width, height);
+      const maximumNameSize = [174, 150, 118, 94][capsuleNameLines.length - 1] ?? 94;
+      const minimumNameSize = capsuleNameLines.length >= 4 ? 46 : 58;
+      const nameSize = Math.min(...capsuleNameLines.map(line => fitFont(line, width * 0.74, maximumNameSize * renderScale, minimumNameSize * renderScale)));
+      sourceContext.font = `400 ${nameSize}px "Bebas Neue", Impact, sans-serif`;
+      sourceContext.fillStyle = "#080808";
+      sourceContext.textAlign = "left";
+      sourceContext.textBaseline = "top";
+      const lineLayout = {
+        1: { top: 0.285, gap: 0 },
+        2: { top: 0.19, gap: 0.185 },
+        3: { top: 0.095, gap: 0.15 },
+        4: { top: 0.045, gap: 0.12 },
+      }[capsuleNameLines.length] ?? { top: 0.045, gap: 0.12 };
+      capsuleNameLines.forEach((line, index) => {
+        sourceContext.save();
+        sourceContext.translate(width * 0.11, height * (lineLayout.top + index * lineLayout.gap));
+        sourceContext.scale(0.96, 1.16);
+        sourceContext.fillText(line.toUpperCase(), 0, 0);
+        sourceContext.globalCompositeOperation = "destination-out";
+        sourceContext.lineWidth = Math.max(0.8, 2.4 * renderScale);
+        sourceContext.strokeStyle = "#000";
+        sourceContext.strokeText(line.toUpperCase(), 0, 0);
+        sourceContext.restore();
+      });
+
+      const bandX = width * 0.06;
+      const bandY = height * 0.675;
+      const bandWidth = width * 0.88;
+      const bandHeight = height * 0.185;
+      const mainBandWidth = bandWidth * 0.875;
+      sourceContext.fillStyle = palette?.primary ?? "#581C3B";
+      sourceContext.fillRect(bandX, bandY, mainBandWidth, bandHeight);
+      const markX = bandX + mainBandWidth;
+      const markWidth = bandWidth - mainBandWidth;
+      [[0, .5, .24, .5], [.24, 0, .15, .5], [.39, 0, .16, 1], [.55, .5, .16, .5], [.71, 0, .17, .5], [.88, .5, .12, .5]].forEach(([x, y, w, h]) => {
+        sourceContext.fillRect(markX + markWidth * x, bandY + bandHeight * y, markWidth * w + 1, bandHeight * h);
+      });
+      const strengthSize = fitFont(strength, mainBandWidth * 0.72, 68 * renderScale, 34 * renderScale);
+      sourceContext.font = `400 ${strengthSize}px "Bebas Neue", Impact, sans-serif`;
+      sourceContext.fillStyle = palette?.foreground ?? "#F1C9A8";
+      sourceContext.textBaseline = "middle";
+      sourceContext.fillText(strength.toUpperCase(), bandX + mainBandWidth * 0.075, bandY + bandHeight * 0.53);
+
+      context.clearRect(0, 0, width, height);
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+      const thetaMax = 0.5;
+      const sinMax = Math.sin(thetaMax);
+      const curveDepth = 18 * renderScale;
+      for (let sourceX = 0; sourceX < width; sourceX += 1) {
+        const nextSourceX = Math.min(sourceX + 1, width);
+        const normalizedX = (sourceX / width - 0.5) * 2;
+        const nextNormalizedX = (nextSourceX / width - 0.5) * 2;
+        const destinationX = width * 0.5 + Math.sin(normalizedX * thetaMax) / sinMax * width * 0.5;
+        const nextDestinationX = width * 0.5 + Math.sin(nextNormalizedX * thetaMax) / sinMax * width * 0.5;
+        const centerAmount = 1 - normalizedX * normalizedX;
+        context.drawImage(source, sourceX, 0, 1, height, destinationX - 0.5, curveDepth * (centerAmount - 0.42), nextDestinationX - destinationX + 1, height * (1 + centerAmount * 0.007));
+      }
+    };
+
+    const scheduleDraw = () => {
+      window.cancelAnimationFrame(drawFrame);
+      drawFrame = window.requestAnimationFrame(drawLabel);
+    };
+    const canvas = labelCanvasRef.current;
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleDraw);
+    if (canvas) observer?.observe(canvas);
+    window.addEventListener("resize", scheduleDraw);
+    document.fonts?.load('400 150px "Bebas Neue"').then(scheduleDraw).catch(() => undefined);
+    scheduleDraw();
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(drawFrame);
+      observer?.disconnect();
+      window.removeEventListener("resize", scheduleDraw);
+    };
+  }, [name, strength, palette, compact]);
+
+  return (
+    <div className={`manual-capsule-preview ${compact ? "manual-capsule-preview-compact" : ""}`} role="img" aria-label={`${name}, ${strength}, capsule`}>
+      <img src={blankCapsuleBottleReference} alt="" draggable={false} />
+      <div className="manual-capsule-label" aria-hidden="true">
+        <canvas ref={labelCanvasRef} className="manual-capsule-art" />
       </div>
     </div>
   );
@@ -2392,7 +3055,7 @@ function ProductDetailPage({
 }) {
   const isCompoundProduct = product.name.includes("/");
   const isTirzepatidePyridoxine = product.name.toLowerCase().includes("tirzepatide") && product.name.toLowerCase().includes("pyridoxine");
-  const defaultSize = product.dosage === "Gel" ? "30g Tube" : product.dosage === "Capsule" ? "30 Capsules" : isTirzepatidePyridoxine ? "1 (0.5mL) Vial" : "1 (5mL) Vial";
+  const defaultSize = product.dosage === "Gel" ? "30g Tube" : product.dosage === "Capsule" ? "30 Capsules" : product.dosage === "Nasal Spray" ? "1 (10mL) Bottle" : product.dosage === "Topical" ? "1 (30mL) Bottle" : product.dosage === "Patch" ? "30 Patches" : isTirzepatidePyridoxine ? "1 (0.5mL) Vial" : "1 (5mL) Vial";
   const defaultStrength = product.strength ?? (isTirzepatidePyridoxine ? "20mg/25mg/mL" : isCompoundProduct ? "15mg/40mg/250mg/mL" : product.price.includes("mg") ? product.price : product.dosage === "Gel" ? "0.025%" : "5mg/mL");
   const [size, setSize] = useState(defaultSize);
   const [strength, setStrength] = useState(defaultStrength);
@@ -2462,6 +3125,8 @@ function ProductDetailPage({
   ];
   const sizeCatalog = isTirzepatidePyridoxine
     ? ["1 (0.5mL) Vial", "1 (1mL) Vial", "1 (2mL) Vial", "1 (3mL) Vial", "1 (5mL) Vial", "1 (10mL) Vial", "2 (0.5mL) Vials", "2 (1mL) Vials", "2 (2mL) Vials", "2 (5mL) Vials"]
+    : product.dosage === "Nasal Spray"
+    ? ["1 (5mL) Bottle", "1 (10mL) Bottle", "1 (15mL) Bottle", "1 (20mL) Bottle", "2 (5mL) Bottles", "2 (10mL) Bottles", "3 (5mL) Bottles", "3 (10mL) Bottles"]
     : product.dosage === "Gel"
     ? ["10g Tube", "15g Tube", "20g Tube", "30g Tube", "45g Tube", "60g Tube", "75g Tube", "90g Tube", "15g Pump", "30g Pump", "45g Pump", "60g Pump", "75g Pump", "90g Pump", "120g Pump"]
     : product.dosage === "Capsule"
@@ -2629,8 +3294,16 @@ function ProductDetailPage({
       <div className={`grid max-w-[1180px] items-start gap-10 ${isReferenceStyle ? "xl:grid-cols-[minmax(0,1.1fr)_minmax(480px,0.9fr)]" : "xl:grid-cols-[minmax(0,1.244fr)_minmax(0,1fr)]"}`}>
         <div className="min-w-0">
           <div className={`flex h-[600px] items-center justify-center overflow-hidden rounded-[18px] p-16 ${isReferenceStyle ? "bg-[#fafafa]" : `border border-[#e4e4e4] ${productDetailVariant === 2 ? "bg-[#fbfdfc]" : "bg-[#f8f8f8]"}`}`}>
-            {product.img === blankVialReference ? (
-              <ManualVialPreview name={product.name} strength={strength} size={size} palette={product.vialPalette} />
+            {product.img === blankVialReference || product.img === blankLyophilizedVialReference ? (
+              <ManualVialPreview name={product.name} strength={strength} size={size} palette={product.vialPalette} baseImage={product.img} />
+            ) : product.img === blankNasalSprayReference ? (
+              <ManualNasalSprayPreview name={product.name} strength={strength} palette={product.vialPalette} />
+            ) : product.img === blankTopicalDropperReference ? (
+              <ManualNasalSprayPreview name={product.name} strength={strength} palette={product.vialPalette} baseImage={product.img} variant="topical" />
+            ) : product.img === blankPatchPackageReference ? (
+              <ManualPatchPreview name={product.name} strength={strength} />
+            ) : product.img === blankCapsuleBottleReference ? (
+              <ManualCapsulePreview name={product.name} strength={strength} palette={product.vialPalette} />
             ) : (
               <img src={product.img} alt={product.name} className="max-h-[470px] h-full w-full object-contain mix-blend-multiply" />
             )}
@@ -8390,9 +9063,13 @@ export default function App() {
   const [platformTourTooltipVisible, setPlatformTourTooltipVisible] = useState(false);
   const [chatInput, setChatInput] = useState("");
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (page !== "product-detail") return;
-    mainScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    const scroller = mainScrollRef.current;
+    if (!scroller) return;
+    scroller.scrollTop = 0;
+    scroller.scrollLeft = 0;
+    window.scrollTo(0, 0);
   }, [page, selectedProduct.id]);
   const [alexTyping, setAlexTyping] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
