@@ -4764,116 +4764,698 @@ function PharmaciesPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
 // ─── Support ──────────────────────────────────────────────────────────────────
 
-const TICKETS = [
-  { id: "#089", subject: "Order not received after 5 days", patient: "Sarah Mitchell", phone: "(646)-617-9881", address: "2823 Middletown Road, Bronx, NY 10461", status: "Open", priority: "Urgent", created: "Jul 8", assigned: "Dr. Chen" },
-  { id: "#088", subject: "Wrong product shipped - need replacement", patient: "John Reynolds", phone: "(718)-555-0143", address: "88 Park Blvd, Queens, NY 11375", status: "Open", priority: "Urgent", created: "Jul 7", assigned: "Unassigned" },
-  { id: "#087", subject: "Question about dosage instructions", patient: "Emily Krause", phone: "(718)-555-0187", address: "302 Maple Ave, Brooklyn, NY 11201", status: "Resolved", priority: "Normal", created: "Jul 6", assigned: "Nurse Kim" },
-  { id: "#086", subject: "Billing discrepancy on last invoice", patient: "David Lim", phone: "(646)-389-7766", address: "95 Windermere Drive, Westchester County, NY 10710", status: "Open", priority: "Normal", created: "Jul 5", assigned: "Admin Team" },
-  { id: "#085", subject: "Side effects consultation request", patient: "Maria Santos", phone: "(555)-789-0123", address: "852 Cedar Ln, Seattle, WA 98101", status: "Resolved", priority: "Normal", created: "Jul 4", assigned: "Dr. Chen" },
-  { id: "#084", subject: "Insurance coverage question", patient: "Chris Baker", phone: "(555)-890-1234", address: "963 Birch Blvd, Denver, CO 80201", status: "Resolved", priority: "Normal", created: "Jul 3", assigned: "Admin Team" },
+const SUPPORT_PRIMARY = "#1d5043";
+const SUPPORT_PRIMARY_HOVER = "#143b32";
+
+type SupportSender = "prescriber" | "support";
+
+interface SupportMessage {
+  id: string;
+  sender: SupportSender;
+  senderLabel: string;
+  text: string;
+  sentAt: string;
+  isRead: boolean;
+}
+
+interface SupportTicket {
+  id: string;
+  type: "ticket" | "feature_request";
+  description: string;
+  isClosed: boolean;
+  unread: number;
+  createdAt: string;
+  messages: SupportMessage[];
+}
+
+const SUPPORT_MOCK_NOW = Date.now();
+const supportMinutesAgo = (minutes: number) => new Date(SUPPORT_MOCK_NOW - minutes * 60000).toISOString();
+
+const SUPPORT_MOCK_TICKETS: SupportTicket[] = [
+  {
+    id: "3f8a2c91-4d67-4b2e-9a51-c0d8e7f61b24",
+    type: "ticket",
+    description: "Order ORD-2493 stuck in processing for 3 days",
+    isClosed: false,
+    unread: 2,
+    createdAt: supportMinutesAgo(2980),
+    messages: [
+      { id: "m1-1", sender: "prescriber", senderLabel: "You", text: "Hi, order ORD-2493 for patient Sarah Mitchell has been stuck in “Processing” since Monday. Can you check what's going on?", sentAt: supportMinutesAgo(2980), isRead: true },
+      { id: "m1-2", sender: "support", senderLabel: "Shayne", text: "Thanks for flagging this — let me check with the pharmacy and get right back to you.", sentAt: supportMinutesAgo(2955), isRead: true },
+      { id: "m1-3", sender: "support", senderLabel: "Shayne", text: "Quick update: the pharmacy was waiting on a refrigerated packaging restock. Your order is being compounded today.", sentAt: supportMinutesAgo(1500), isRead: true },
+      { id: "m1-4", sender: "support", senderLabel: "Shayne", text: "Good news — ORD-2493 just shipped. Tracking: 1Z999AA10123456784.", sentAt: supportMinutesAgo(25), isRead: true },
+      { id: "m1-5", sender: "support", senderLabel: "Shayne", text: "You should see the tracking link go live within the hour.", sentAt: supportMinutesAgo(24), isRead: true },
+    ],
+  },
+  {
+    id: "7b42e9a0-1f8c-4a3d-b6e2-58d90c4a7f13",
+    type: "ticket",
+    description: "Patient charged twice for Semaglutide order",
+    isClosed: false,
+    unread: 0,
+    createdAt: supportMinutesAgo(1620),
+    messages: [
+      { id: "m2-1", sender: "prescriber", senderLabel: "You", text: "My patient David Lim was charged twice for order ORD-2417 ($215.98 x2). Can you refund the duplicate charge?", sentAt: supportMinutesAgo(1620), isRead: true },
+      { id: "m2-2", sender: "support", senderLabel: "Zee", text: "Sorry about that! I can see the duplicate authorization on our end. The second charge will be voided within 1-2 business days.", sentAt: supportMinutesAgo(1580), isRead: true },
+      { id: "m2-3", sender: "prescriber", senderLabel: "You", text: "Thank you — please confirm here once the refund is through.", sentAt: supportMinutesAgo(180), isRead: false },
+    ],
+  },
+  {
+    id: "c91d47e6-8b05-42f9-9c31-7ea2d0b85f46",
+    type: "feature_request",
+    description: "Bulk CSV export for monthly order history",
+    isClosed: false,
+    unread: 0,
+    createdAt: supportMinutesAgo(4390),
+    messages: [
+      { id: "m3-1", sender: "prescriber", senderLabel: "You", text: "It would save us hours if we could export all orders for a month as a CSV — right now we copy them one by one for bookkeeping.", sentAt: supportMinutesAgo(4390), isRead: true },
+      { id: "m3-2", sender: "support", senderLabel: "Zee", text: "Love this idea — I've passed it along to our product team. I'll keep you posted here as soon as there's progress.", sentAt: supportMinutesAgo(4320), isRead: true },
+    ],
+  },
+  {
+    id: "e5a01b38-6c2f-47d1-8b9a-3f04c6d92e78",
+    type: "ticket",
+    description: "Unable to update patient shipping address",
+    isClosed: false,
+    unread: 0,
+    createdAt: supportMinutesAgo(5830),
+    messages: [
+      { id: "m4-1", sender: "prescriber", senderLabel: "You", text: "I'm getting a validation error when updating Maria Santos' shipping address to 852 Cedar Ln, Seattle, WA 98101.", sentAt: supportMinutesAgo(5830), isRead: true },
+      { id: "m4-2", sender: "support", senderLabel: "Shayne", text: "We found the bug — apartment-less addresses were failing validation. A fix went out this morning, mind trying again?", sentAt: supportMinutesAgo(5790), isRead: true },
+      { id: "m4-3", sender: "prescriber", senderLabel: "You", text: "Works now, thank you!", sentAt: supportMinutesAgo(5770), isRead: true },
+      { id: "m4-4", sender: "support", senderLabel: "Shayne", text: "Great — I'll keep this ticket open for a couple of days in case anything else comes up.", sentAt: supportMinutesAgo(5760), isRead: true },
+    ],
+  },
+  {
+    id: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+    type: "ticket",
+    description: "Tracking link opens the wrong carrier page",
+    isClosed: false,
+    unread: 0,
+    createdAt: supportMinutesAgo(7200),
+    messages: [],
+  },
+  {
+    id: "9d3b1e57-2a84-4f60-b1c5-86e7d40a92cf",
+    type: "ticket",
+    description: "Refund for cancelled order ORD-2311",
+    isClosed: true,
+    unread: 0,
+    createdAt: supportMinutesAgo(20300),
+    messages: [
+      { id: "m6-1", sender: "prescriber", senderLabel: "You", text: "Order ORD-2311 was cancelled before it shipped but the card was still charged $55.88.", sentAt: supportMinutesAgo(20300), isRead: true },
+      { id: "m6-2", sender: "support", senderLabel: "Shayne", text: "Refund processed! You should see it back on the card within 3-5 business days.", sentAt: supportMinutesAgo(20200), isRead: true },
+      { id: "m6-3", sender: "prescriber", senderLabel: "You", text: "Received, thanks for the quick turnaround.", sentAt: supportMinutesAgo(20160), isRead: true },
+    ],
+  },
+  {
+    id: "5a8c4f2d-9e71-4b06-a3d8-1c5f27e94b60",
+    type: "feature_request",
+    description: "Dark mode for the dashboard",
+    isClosed: true,
+    unread: 0,
+    createdAt: supportMinutesAgo(24540),
+    messages: [
+      { id: "m7-1", sender: "prescriber", senderLabel: "You", text: "Any chance of a dark mode? Late-night charting with a bright white screen is rough.", sentAt: supportMinutesAgo(24540), isRead: true },
+      { id: "m7-2", sender: "support", senderLabel: "Zee", text: "Shipped in last night's release — check Settings → Appearance. Marking this one as resolved!", sentAt: supportMinutesAgo(24480), isRead: true },
+    ],
+  },
+  {
+    id: "1c6f9a84-3d50-4e27-b8f1-a92c07d54e36",
+    type: "ticket",
+    description: "Wrong quantity shipped for B-12 injection order",
+    isClosed: true,
+    unread: 0,
+    createdAt: supportMinutesAgo(30360),
+    messages: [
+      { id: "m8-1", sender: "prescriber", senderLabel: "You", text: "We ordered 3 vials of B-12 on ORD-2205 but only 2 arrived.", sentAt: supportMinutesAgo(30360), isRead: true },
+      { id: "m8-2", sender: "support", senderLabel: "Shayne", text: "The missing vial shipped separately at no charge — apologies for the mix-up. Closing this out now that it's delivered.", sentAt: supportMinutesAgo(30240), isRead: true },
+    ],
+  },
 ];
 
-function SupportPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
-  const [tab, setTab] = useState("All");
-  const [query, setQuery] = useState("");
-  const tabs = ["All", "Open", "Resolved", "Urgent"];
+function supportLastActivity(ticket: SupportTicket): string {
+  return ticket.messages.length > 0 ? ticket.messages[ticket.messages.length - 1].sentAt : ticket.createdAt;
+}
 
-  const filtered = TICKETS.filter((t) => {
-    const matchesTab = tab === "All" ? true : tab === "Urgent" ? t.priority === "Urgent" : t.status === tab;
-    const search = query.trim().toLowerCase();
-    const matchesSearch = !search || [t.id, t.subject, t.patient, t.phone, t.address, t.assigned].some(value => value.toLowerCase().includes(search));
-    return matchesTab && matchesSearch;
-  });
+function supportRelativeDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const now = new Date();
+  const diffMin = Math.floor((now.getTime() - d.getTime()) / 60000);
+  if (diffMin < 1) return "now";
+  if (diffMin < 60) return `${diffMin}m`;
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return `${diffH}h`;
+  const sameDay = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  if (sameDay(d, yesterday)) return "Yesterday";
+  return d.toLocaleDateString([], { month: "short", day: "numeric" });
+}
 
-  const tabCount = (name: string) => name === "All"
-    ? TICKETS.length
-    : name === "Urgent"
-      ? TICKETS.filter(ticket => ticket.priority === "Urgent").length
-      : TICKETS.filter(ticket => ticket.status === name).length;
+function supportMessageTime(iso: string): string {
+  const d = new Date(iso);
+  const diffMin = Math.floor((Date.now() - d.getTime()) / 60000);
+  if (diffMin < 1) return "Just now";
+  if (diffMin < 60) return `${diffMin} min ago`;
+  const time = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  if (new Date().toDateString() === d.toDateString()) return time;
+  return `${time} · ${d.toLocaleDateString([], { month: "short", day: "numeric" })}`;
+}
+
+function supportDateSeparator(iso: string): string {
+  const date = new Date(iso);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diffDays = Math.floor((today.getTime() - messageDate.getTime()) / 86400000);
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  return date.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
+}
+
+interface SupportSenderGroup {
+  sender: SupportSender;
+  senderLabel: string;
+  messages: SupportMessage[];
+}
+
+function groupSupportMessages(messages: SupportMessage[]): { date: string; senderGroups: SupportSenderGroup[] }[] {
+  const dateGroups: { date: string; senderGroups: SupportSenderGroup[] }[] = [];
+  let currentDateKey = "";
+  for (const msg of messages) {
+    const msgDateKey = new Date(msg.sentAt).toDateString();
+    if (msgDateKey !== currentDateKey) {
+      currentDateKey = msgDateKey;
+      dateGroups.push({ date: msg.sentAt, senderGroups: [{ sender: msg.sender, senderLabel: msg.senderLabel, messages: [msg] }] });
+      continue;
+    }
+    const lastDateGroup = dateGroups[dateGroups.length - 1];
+    const lastSenderGroup = lastDateGroup.senderGroups[lastDateGroup.senderGroups.length - 1];
+    if (lastSenderGroup.sender === msg.sender && lastSenderGroup.senderLabel === msg.senderLabel) {
+      lastSenderGroup.messages.push(msg);
+    } else {
+      lastDateGroup.senderGroups.push({ sender: msg.sender, senderLabel: msg.senderLabel, messages: [msg] });
+    }
+  }
+  return dateGroups;
+}
+
+function SupportChatBubbleIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true">
+      <path d="M12.5 3L2.5 3.00002C1.67157 3.00002 1 3.6716 1 4.50002V9.50003C1 10.3285 1.67157 11 2.5 11H7.50003C7.63264 11 7.75982 11.0527 7.85358 11.1465L10 13.2929V11.5C10 11.2239 10.2239 11 10.5 11H12.5C13.3284 11 14 10.3285 14 9.50003V4.5C14 3.67157 13.3284 3 12.5 3ZM2.49999 2.00002L12.5 2C13.8807 2 15 3.11929 15 4.5V9.50003C15 10.8807 13.8807 12 12.5 12H11V14.5C11 14.7022 10.8782 14.8845 10.6913 14.9619C10.5045 15.0393 10.2894 14.9965 10.1464 14.8536L7.29292 12H2.5C1.11929 12 0 10.8807 0 9.50003V4.50002C0 3.11931 1.11928 2.00003 2.49999 2.00002Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd" />
+    </svg>
+  );
+}
+
+function SupportSearchInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
+  return (
+    <div className="relative w-fit content-center">
+      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.5 17.5L13.1694 13.1694M13.1694 13.1694C14.3004 12.0384 15 10.4759 15 8.75C15 5.29822 12.2018 2.5 8.75 2.5C5.29822 2.5 2.5 5.29822 2.5 8.75C2.5 12.2018 5.29822 15 8.75 15C10.4759 15 12.0384 14.3004 13.1694 13.1694Z" stroke="#98A39B" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+      <input
+        type="text"
+        value={value}
+        onChange={event => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="h-10 w-full max-w-[230px] rounded-lg border border-[#dbdbdb] bg-white pl-10 pr-[30px] text-[#121212] shadow-[0px_3px_6px_-3px_#0000000d,0px_2px_4px_-2px_#0000000d,0px_1px_2px_-1px_#0000000d,0px_1px_0px_-1px_#0000000d] transition-all duration-200 focus:border-[1.5px] focus:border-[#132F19] focus:shadow-[0_0_0_2px_rgba(0,174,48,0.1)] focus:outline-none"
+      />
+      {value && (
+        <button type="button" onClick={() => onChange("")} aria-label="Clear search" className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center justify-center p-1 text-[#888888] transition-colors hover:text-[#132F19]">
+          ×
+        </button>
+      )}
+    </div>
+  );
+}
+
+function SupportTicketListItem({ ticket, isActive, onClick }: { ticket: SupportTicket; isActive: boolean; onClick: () => void }) {
+  const typeLabel = ticket.type === "feature_request" ? "Feature Request" : "Ticket";
+  const typeColor = ticket.type === "feature_request" ? "#02BCB9" : "#E07C0B";
+  const hasUnread = ticket.unread > 0 && !ticket.isClosed;
+  const lastMessage = ticket.messages.length > 0 ? ticket.messages[ticket.messages.length - 1] : null;
+  const previewLabel = lastMessage ? (lastMessage.sender === "prescriber" ? "You" : lastMessage.senderLabel || "Support") : null;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={isActive}
+      className={`flex flex-col gap-1.5 rounded-[10px] border px-3 py-2.5 text-left transition-colors ${
+        isActive
+          ? "border-[#1d5043] bg-[#eef5f1] shadow-[inset_0_0_0_1px_#1d5043]"
+          : "border-[#eef0ee] bg-white hover:border-[#e0e3e0] hover:bg-[#f6f8f7]"
+      } ${ticket.isClosed ? "opacity-[0.78]" : ""}`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="rounded-md bg-[#f3f4f6] px-1.5 py-0.5 font-mono text-[11px] font-bold text-[#374151]">#{ticket.id.slice(0, 8)}</span>
+        <div className="inline-flex shrink-0 items-center gap-1.5">
+          {hasUnread && (
+            <span className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#e5532a] px-1.5 text-[10px] font-bold leading-none text-white" aria-label={`${ticket.unread} unread`}>
+              {ticket.unread > 99 ? "99+" : ticket.unread}
+            </span>
+          )}
+          <span className={`shrink-0 text-[11px] ${hasUnread ? "font-bold text-[#1d5043]" : "text-[#6b7280]"}`}>{supportRelativeDate(supportLastActivity(ticket))}</span>
+        </div>
+      </div>
+      <div className={`line-clamp-1 break-words text-[12px] leading-[1.4] ${hasUnread ? "font-medium text-[#1f2937]" : "text-[#6b7280]"}`}>
+        {lastMessage ? (
+          <>
+            <span className={`font-semibold ${hasUnread ? "text-[#1f2937]" : "text-[#4b5563]"}`}>{previewLabel}:</span>{" "}
+            <span>{lastMessage.text}</span>
+          </>
+        ) : (
+          <span className="italic text-[#9ca3af]">No messages yet</span>
+        )}
+      </div>
+      <div className="flex items-center justify-between gap-2">
+        <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border bg-transparent px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.04em]" style={{ color: typeColor, borderColor: typeColor }}>
+          {typeLabel}
+        </span>
+      </div>
+    </button>
+  );
+}
+
+function SupportTicketChat({ ticket, onClose, onSend }: { ticket: SupportTicket; onClose: () => void; onSend: (text: string) => void }) {
+  const [messageText, setMessageText] = useState("");
+  const [muted, setMuted] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isResolved = ticket.isClosed;
+  const canSend = messageText.trim().length > 0 && !isResolved;
+  const dateGroups = groupSupportMessages(ticket.messages);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+  }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [ticket.messages.length]);
+
+  function handleSend() {
+    const trimmed = messageText.trim();
+    if (!trimmed || isResolved) return;
+    onSend(trimmed);
+    setMessageText("");
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
+  }
+
+  return (
+    <div className="flex h-full w-full flex-col overflow-hidden bg-white">
+      {/* Header */}
+      <div className="flex shrink-0 items-center gap-3 border-b border-[#e6e7e4] bg-white px-4 py-3.5">
+        <button type="button" onClick={onClose} aria-label="Close chat" className="inline-flex size-[34px] shrink-0 items-center justify-center rounded-full text-[#6b7280] transition-colors hover:bg-[#f3f4f6] hover:text-[#0d0e0d]">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <div className="flex min-w-0 flex-col gap-1">
+          <h2 className="line-clamp-2 break-words text-[15px] font-bold leading-[1.3] text-[#0d0e0d]">{ticket.description || `Ticket #${ticket.id.slice(0, 8)}`}</h2>
+          <p className="inline-flex flex-wrap items-center gap-2 text-[12px] leading-[1.3] text-[#6b7280]">
+            <span className={`inline-flex items-center gap-1 rounded-xl px-2.5 py-0.5 text-[11px] font-semibold capitalize ${isResolved ? "bg-[#f3f4f6] text-[#6b7280]" : "bg-[#f0fdf4] text-[#16a34a]"}`}>
+              {isResolved ? "resolved" : "open"}
+            </span>
+          </p>
+        </div>
+        <div className="flex-1" />
+        <button
+          type="button"
+          onClick={() => setMuted(m => !m)}
+          title={muted ? "Notification sound muted — click to enable" : "Mute notification sound"}
+          aria-label={muted ? "Unmute notifications" : "Mute notifications"}
+          aria-pressed={muted}
+          className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full transition-colors ${muted ? "text-[#c1281f] hover:bg-[#fdecea]" : "text-[#6b7280] hover:bg-[#f3f4f6] hover:text-[#0d0e0d]"}`}
+        >
+          {muted ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M3 3l18 18M9 5l3-3v6m6.6 8.6A8 8 0 0019 13c0-1.5-.4-2.9-1.2-4M5.6 7.6A8 8 0 005 13c0 4.4 3.6 8 8 8 1.7 0 3.3-.5 4.6-1.4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M13.7 21a2 2 0 01-3.4 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      {/* Messages */}
+      <div className="relative flex min-h-0 flex-1 flex-col">
+        <div className="flex flex-1 flex-col gap-3.5 overflow-y-auto p-5" role="log" aria-live="polite" aria-label="Conversation">
+          {ticket.messages.length === 0 ? (
+            <div className="flex h-full flex-col items-center justify-center p-10 text-center">
+              <SupportChatBubbleIcon className="mb-4 size-16 text-[#d1d5db]" />
+              <p className="text-[18px] font-semibold text-[#374151]">Start a conversation</p>
+              <p className="mt-2 max-w-[280px] text-[14px] text-[#6b7280]">Send a message to our support team and we&apos;ll get back to you as soon as possible</p>
+            </div>
+          ) : (
+            <>
+              {dateGroups.map((dateGroup, gi) => {
+                const label = supportDateSeparator(dateGroup.date);
+                const showSeparator = gi > 0 || label !== "Today";
+                return (
+                  <Fragment key={`${dateGroup.date}-${gi}`}>
+                    {showSeparator && (
+                      <div className="my-2 flex items-center justify-center">
+                        <div className="h-px flex-1 bg-[#e6e7e4]" />
+                        <span className="whitespace-nowrap px-4 text-[12px] font-medium text-[#6b7280]">{label}</span>
+                        <div className="h-px flex-1 bg-[#e6e7e4]" />
+                      </div>
+                    )}
+                    {dateGroup.senderGroups.map((senderGroup, sgi) => (
+                      <div key={`${dateGroup.date}-${sgi}-${senderGroup.sender}`} className="mb-3.5 flex flex-col gap-[3px] last:mb-1">
+                        {senderGroup.messages.map((msg, mi) => {
+                          const isUser = msg.sender === "prescriber";
+                          const first = mi === 0;
+                          const showTimestamp = mi === senderGroup.messages.length - 1;
+                          return (
+                            <div key={msg.id} className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
+                              <div
+                                className={`max-w-[78%] break-words px-3.5 py-2.5 text-[14px] leading-[1.5] ${isUser ? "bg-[#1d5043] text-white" : "bg-[#f6f8f7] text-[#0d0e0d]"}`}
+                                style={{ borderRadius: isUser ? `18px ${first ? 18 : 6}px 6px 18px` : `${first ? 18 : 6}px 18px 18px 6px` }}
+                              >
+                                <div className="whitespace-pre-wrap break-words">{msg.text}</div>
+                              </div>
+                              {showTimestamp && (
+                                <div className="mt-1 flex items-center gap-1 px-1">
+                                  <time className="text-[11px] text-[#6b7280]" dateTime={msg.sentAt} title={new Date(msg.sentAt).toLocaleString()}>
+                                    {supportMessageTime(msg.sentAt)}
+                                  </time>
+                                  {isUser && <span className={`text-[11px] ${msg.isRead ? "text-[#1d5043]" : "text-[#6b7280]"}`}>{msg.isRead ? "✓✓" : "✓"}</span>}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </Fragment>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Input */}
+      <div className="shrink-0 border-t border-[#e6e7e4] bg-white px-4 pb-4 pt-3">
+        {isResolved && (
+          <div className="mb-2 rounded-lg border border-[#e5e7eb] bg-[#f3f4f6] px-2.5 py-2 text-center text-[12px] text-[#6b7280]">
+            This ticket is resolved. Contact support to reopen it.
+          </div>
+        )}
+        <div className="flex items-end gap-2 rounded-[14px] border border-[#e0e3e0] bg-white py-1.5 pl-2.5 pr-2 transition-[border-color,box-shadow] focus-within:border-[#1d5043] focus-within:shadow-[0_0_0_3px_rgba(29,80,67,0.12)]">
+          <button
+            type="button"
+            aria-label="Attach files"
+            title="Attach files"
+            disabled={isResolved}
+            className="flex size-9 shrink-0 items-center justify-center rounded-full text-[#6b7280] transition-colors hover:bg-[#f1f5f3] hover:text-[#1d5043] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+          <textarea
+            ref={textareaRef}
+            rows={1}
+            value={messageText}
+            disabled={isResolved}
+            placeholder={isResolved ? "This ticket is resolved" : "Type your message..."}
+            aria-label="Type your message"
+            onChange={event => {
+              setMessageText(event.target.value);
+              event.target.style.height = "auto";
+              event.target.style.height = `${Math.min(event.target.scrollHeight, 120)}px`;
+            }}
+            onKeyDown={event => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                handleSend();
+              }
+            }}
+            className="max-h-[140px] min-h-[38px] flex-1 resize-none bg-transparent px-1 py-2 text-[14.5px] leading-[1.5] text-[#0d0e0d] outline-none placeholder:text-[#9ca3af] disabled:cursor-not-allowed disabled:opacity-70"
+          />
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={!canSend}
+            aria-label="Send message"
+            className={`flex size-9 shrink-0 items-center justify-center rounded-full transition-all disabled:cursor-not-allowed ${canSend ? "bg-[#1d5043] text-white hover:opacity-90" : "bg-[#e5e7eb] text-[#9ca3af] disabled:opacity-50"}`}
+          >
+            <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SupportCreateTicketModal({ open, onClose, onCreate }: { open: boolean; onClose: () => void; onCreate: (type: "ticket" | "feature_request", description: string) => void }) {
+  const { showToast } = useAppLoading();
+  const [ticketType, setTicketType] = useState<"ticket" | "feature_request">("ticket");
+  const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    if (open) {
+      setTicketType("ticket");
+      setDescription("");
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    if (!description.trim()) {
+      showToast("Please enter a description", "error");
+      return;
+    }
+    onCreate(ticketType, description.trim());
+  }
+
+  return (
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50" onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
+      <div className="max-h-[90vh] w-full max-w-[500px] overflow-y-auto rounded-2xl bg-white p-8 shadow-[0_4px_6px_rgba(0,0,0,0.1)]">
+        <div className="mb-2.5 flex items-center justify-between">
+          <h2 className="text-[20px] font-bold" style={{ color: SUPPORT_PRIMARY }}>Create Ticket</h2>
+          <button type="button" onClick={onClose} className="text-2xl leading-none text-[#9ca3af]" aria-label="Close">×</button>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-8">
+            <div className="mb-5">
+              <label className="mb-2 block text-[14px] font-semibold leading-5 text-[#121212]">Type</label>
+              <div className="mt-2 flex gap-6">
+                {([["ticket", "Ticket"], ["feature_request", "Feature Request"]] as const).map(([value, label]) => (
+                  <label key={value} className="flex cursor-pointer items-center gap-2">
+                    <input type="radio" name="ticket_type" value={value} checked={ticketType === value} onChange={() => setTicketType(value)} className="sr-only" />
+                    <span className={`relative flex size-5 items-center justify-center rounded-full border-2 bg-white transition-all ${ticketType === value ? "border-[#1d5043]" : "border-[#e4e4e4] hover:border-[#1d5043]"}`}>
+                      {ticketType === value && <span className="size-2.5 rounded-full bg-[#1d5043]" />}
+                    </span>
+                    <span className="text-[14px] font-medium text-[#121212]">{label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label htmlFor="support-ticket-description" className="mb-2 block text-[14px] font-semibold leading-5 text-[#121212]">
+                Description <span className="text-[#b44b42]">*</span>
+              </label>
+              <textarea
+                id="support-ticket-description"
+                rows={3}
+                value={description}
+                onChange={event => setDescription(event.target.value)}
+                placeholder="Write..."
+                className="w-full resize-y rounded-lg border border-[#e4e4e4] p-3 text-[14px] text-[#121212] outline-none transition-colors placeholder:text-[#b8b8b5] focus:border-[#1d5043]"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <button type="submit" className="flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-[14px] font-medium text-white transition-colors" style={{ background: SUPPORT_PRIMARY }} onMouseEnter={event => (event.currentTarget.style.background = SUPPORT_PRIMARY_HOVER)} onMouseLeave={event => (event.currentTarget.style.background = SUPPORT_PRIMARY)}>
+              Create Ticket
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function SupportPage({ onNavigate: _onNavigate }: { onNavigate: (p: Page) => void }) {
+  const { showToast } = useAppLoading();
+  const [tickets, setTickets] = useState<SupportTicket[]>(SUPPORT_MOCK_TICKETS);
+  const [activeTab, setActiveTab] = useState<"OPEN" | "CLOSED">("OPEN");
+  const [searchValue, setSearchValue] = useState("");
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [mobileShowDetail, setMobileShowDetail] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const openTickets = tickets.filter(t => !t.isClosed);
+  const closedTickets = tickets.filter(t => t.isClosed);
+  const tabCounts = { OPEN: openTickets.length, CLOSED: closedTickets.length };
+
+  const filteredTickets = useMemo(() => {
+    const pool = activeTab === "CLOSED" ? closedTickets : openTickets;
+    const sorted = [...pool].sort((a, b) => new Date(supportLastActivity(b)).getTime() - new Date(supportLastActivity(a)).getTime());
+    if (!searchValue.trim()) return sorted;
+    const query = searchValue.toLowerCase();
+    return sorted.filter(ticket =>
+      ticket.description.toLowerCase().includes(query) ||
+      ticket.id.toLowerCase().includes(query) ||
+      ticket.messages.some(message => message.text.toLowerCase().includes(query)),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tickets, activeTab, searchValue]);
+
+  // If the selected ticket leaves the visible list (filter or tab change),
+  // collapse the right panel back to the empty state.
+  useEffect(() => {
+    if (!selectedTicketId) return;
+    if (!filteredTickets.some(t => t.id === selectedTicketId)) setSelectedTicketId(null);
+  }, [filteredTickets, selectedTicketId]);
+
+  const selectedTicket = tickets.find(t => t.id === selectedTicketId) ?? null;
+
+  function handleSelectTicket(id: string) {
+    setSelectedTicketId(id);
+    setMobileShowDetail(true);
+    setTickets(current => current.map(t => (t.id === id && t.unread > 0 ? { ...t, unread: 0 } : t)));
+  }
+
+  function handleSendMessage(ticketId: string, text: string) {
+    setTickets(current => current.map(t =>
+      t.id === ticketId
+        ? { ...t, messages: [...t.messages, { id: `msg-${Date.now()}`, sender: "prescriber" as const, senderLabel: "You", text, sentAt: new Date().toISOString(), isRead: false }] }
+        : t,
+    ));
+  }
+
+  function handleCreateTicket(type: "ticket" | "feature_request", description: string) {
+    const newTicket: SupportTicket = {
+      id: `${crypto.randomUUID?.() ?? `new-${Date.now()}`}`,
+      type,
+      description,
+      isClosed: false,
+      unread: 0,
+      createdAt: new Date().toISOString(),
+      messages: [{ id: `msg-${Date.now()}`, sender: "prescriber", senderLabel: "You", text: description, sentAt: new Date().toISOString(), isRead: false }],
+    };
+    setTickets(current => [newTicket, ...current]);
+    setActiveTab("OPEN");
+    setSelectedTicketId(newTicket.id);
+    setMobileShowDetail(true);
+    setIsCreateModalOpen(false);
+    showToast("Ticket created");
+  }
 
   return (
     <>
-      <Header title="Support tickets" onNavigate={onNavigate} />
-
-      <section className="mb-6 grid grid-cols-4 gap-3 max-lg:grid-cols-2 max-sm:grid-cols-1">
-        {[
-          { label: "Open tickets", value: "17", note: "2 need attention", icon: MessageSquare, bg: "bg-[#f5f8f6]", color: "text-[#31584A]" },
-          { label: "Urgent", value: "3", note: "Review today", icon: AlertCircle, bg: "bg-[#fff7f2]", color: "text-[#8A4338]" },
-          { label: "Average response", value: "4.2h", note: "Within target", icon: Clock, bg: "bg-[#fafafa]", color: "text-[#6E642A]" },
-          { label: "Resolved today", value: "8", note: "6 more this week", icon: CheckCircle2, bg: "bg-[#f2fbf5]", color: "text-[#31583F]" },
-        ].map(({ label, value, note, icon: Icon, bg, color }) => (
-          <div key={label} className="flex min-h-[108px] items-center gap-4 rounded-[14px] border border-[#efefec] bg-white p-4">
-            <div className={`flex size-11 shrink-0 items-center justify-center rounded-[12px] ${bg} ${color}`}>
-              <Icon size={18} strokeWidth={1.7} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-medium text-[#858b88]">{label}</p>
-              <p className="mt-0.5 text-[22px] font-semibold tracking-[-0.02em] text-[#1a1a1a]">{value}</p>
-              <p className="mt-0.5 truncate text-[10px] text-[#9b9e9c]">{note}</p>
-            </div>
-          </div>
-        ))}
-      </section>
-
-      <section className="overflow-hidden rounded-[14px] bg-[#FBFBFB] p-2">
-        <div className="flex flex-wrap items-end justify-between gap-4 px-3 pb-3 pt-2">
-          <div>
-            <h2 className="text-[15px] font-semibold text-[#1a1a1a]">Ticket inbox</h2>
-            <p className="mt-1 text-[11px] text-[#8c8c8c]">Track questions, order issues, and patient requests.</p>
-          </div>
-          <div className="flex items-center gap-2 max-sm:w-full">
-            <label className="group flex h-9 w-[245px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:w-[310px] focus-within:border-2 focus-within:border-black max-sm:flex-1">
-              <Search size={14} className="text-[#858b88] transition-transform duration-300 group-focus-within:scale-110" />
-              <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search tickets" className="min-w-0 flex-1 bg-transparent text-[11px] outline-none placeholder:text-[#aaa]" />
-            </label>
-            <button className="flex h-9 items-center gap-1.5 rounded-full bg-black px-4 text-[12px] font-medium text-white transition-colors hover:bg-[#252525]">
-              <Plus size={14} /> New ticket
+      {/* Top bar */}
+      <div className="sticky top-0 z-40 -mx-7 -mt-7 rounded-t-[10px] border-b border-[#e5e7eb] bg-white px-6 py-4">
+        <div className="flex items-center justify-between">
+          <h1 className="shrink-0 text-[24px] font-bold leading-[29px] text-[#111827]">
+            Support Tickets<span className="ml-2 font-medium text-[#6b7280]">({tabCounts.OPEN + tabCounts.CLOSED})</span>
+          </h1>
+          <div className="flex flex-1 justify-end">
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(true)}
+              aria-label="Create Ticket"
+              className="flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-[14px] font-medium text-white transition-colors"
+              style={{ background: SUPPORT_PRIMARY }}
+              onMouseEnter={event => (event.currentTarget.style.background = SUPPORT_PRIMARY_HOVER)}
+              onMouseLeave={event => (event.currentTarget.style.background = SUPPORT_PRIMARY)}
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 5V15M5 10H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              <span><span className="max-md:hidden">Create </span>Ticket</span>
             </button>
           </div>
+          <button type="button" className="ml-4 flex size-10 items-center justify-center rounded-[10px] bg-[#f0fdf4] transition-colors hover:bg-[#dcfce7]" aria-label="Announcements">
+            <span className="relative flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: SUPPORT_PRIMARY }}>
+                <path d="M8.60124 1.25086C8.60124 1.75459 8.26278 2.17927 7.80087 2.30989C10.1459 2.4647 12 4.41582 12 6.79999V10.25C12 11.0563 12.0329 11.7074 12.7236 12.0528C12.931 12.1565 13.0399 12.3892 12.9866 12.6149C12.9333 12.8406 12.7319 13 12.5 13H8.16144C8.36904 13.1832 8.49997 13.4513 8.49997 13.75C8.49997 14.3023 8.05226 14.75 7.49997 14.75C6.94769 14.75 6.49997 14.3023 6.49997 13.75C6.49997 13.4513 6.63091 13.1832 6.83851 13H2.49999C2.2681 13 2.06664 12.8406 2.01336 12.6149C1.96009 12.3892 2.06897 12.1565 2.27638 12.0528C2.96708 11.7074 2.99999 11.0563 2.99999 10.25V6.79999C2.99999 4.41537 4.85481 2.46396 7.20042 2.3098C6.73867 2.17908 6.40036 1.75448 6.40036 1.25086C6.40036 0.643104 6.89304 0.150421 7.5008 0.150421C8.10855 0.150421 8.60124 0.643104 8.60124 1.25086ZM7.49999 3.29999C5.56699 3.29999 3.99999 4.86699 3.99999 6.79999V10.25L4.00002 10.3009C4.0005 10.7463 4.00121 11.4084 3.69929 12H11.3007C10.9988 11.4084 10.9995 10.7463 11 10.3009L11 10.25V6.79999C11 4.86699 9.43299 3.29999 7.49999 3.29999Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd" />
+              </svg>
+              <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ background: SUPPORT_PRIMARY }}>2</span>
+            </span>
+          </button>
         </div>
+      </div>
 
-        <div className="flex gap-5 border-b border-[#eeeae6] px-3">
-          {tabs.map((name) => (
-            <button key={name} onClick={() => setTab(name)} className={`relative flex h-10 items-center gap-1.5 text-[11px] font-semibold transition-colors ${tab === name ? "text-[#183229]" : "text-[#929794] hover:text-[#1a1a1a]"}`}>
-              {name}
-              <span className={`flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[9px] ${tab === name ? "bg-[#183229] text-white" : "bg-[#eeefed] text-[#747976]"}`}>{tabCount(name)}</span>
-              {tab === name && <span className="absolute inset-x-0 bottom-0 h-[2px] rounded-full bg-[#183229]" />}
-            </button>
-          ))}
-        </div>
+      <div className="mt-4 flex h-[calc(100dvh-146px)] min-h-[420px] w-full overflow-hidden rounded-xl border border-[#e6e7e4] bg-white">
+        {/* Left: ticket list */}
+        <aside className={`flex min-h-0 w-[360px] shrink-0 flex-col border-r border-[#e6e7e4] bg-[#fafbfa] max-md:w-full max-md:border-r-0 ${mobileShowDetail ? "max-md:hidden" : ""}`}>
+          <div className="shrink-0 border-b border-[#eef0ee] bg-white px-3.5 py-3">
+            <SupportSearchInput value={searchValue} onChange={setSearchValue} placeholder="Search tickets" />
+          </div>
 
-        <div className="space-y-2 p-2">
-          {filtered.map((ticket) => {
-            return (
-              <article key={ticket.id} className="group grid grid-cols-[minmax(260px,1.7fr)_minmax(160px,.85fr)_105px_105px_95px_36px] items-center gap-4 rounded-[11px] bg-white px-4 py-3.5 transition-colors hover:bg-[#fffcfa] max-xl:grid-cols-[minmax(250px,1.7fr)_minmax(150px,.9fr)_100px_95px_36px] max-xl:[&_.created-column]:hidden max-md:grid-cols-[1fr_auto]">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-semibold text-[#8A4A24]">{ticket.id}</span>
-                    {ticket.priority === "Urgent" && <span className="rounded-full bg-[#fff4eb] px-2 py-1 text-[9px] font-semibold text-[#8A4338]">Urgent</span>}
-                  </div>
-                  <p className="mt-1.5 truncate text-[12px] font-semibold text-[#1a1a1a]">{ticket.subject}</p>
-                  <p className="mt-1 text-[10px] text-[#989b99]">Created {ticket.created}</p>
-                </div>
-                <div className="flex min-w-0 items-center gap-2.5 max-md:hidden">
-                  <div className="min-w-0">
-                    <p className="truncate text-[11px] font-semibold text-[#292929]">{ticket.patient}</p>
-                    <p className="mt-0.5 truncate text-[10px] text-[#6f7782]">{ticket.phone}</p>
-                    <p className="mt-0.5 truncate text-[9px] text-[#999]">{ticket.address}</p>
-                  </div>
-                </div>
-                <div className="max-md:hidden">
-                  <p className="text-[9px] uppercase tracking-[0.08em] text-[#a0a3a1]">Assigned</p>
-                  <p className="mt-1 truncate text-[11px] font-medium text-[#4e514f]">{ticket.assigned}</p>
-                </div>
-                <span className={`w-fit rounded-full px-2.5 py-1.5 text-[10px] font-semibold ${ticket.status === "Open" ? "bg-[#edf6f2] text-[#31584A]" : "bg-[#ecf8ef] text-[#31583F]"}`}>{ticket.status}</span>
-                <p className="created-column text-[10px] text-[#989b99]">{ticket.created}</p>
-                <button className="flex size-8 items-center justify-center rounded-[8px] text-[#8c8f8d] transition-colors hover:bg-[#f1efec] hover:text-[#1a1a1a]" aria-label={`Open ticket ${ticket.id}`}><ChevronRight size={15} /></button>
-              </article>
-            );
-          })}
-          {filtered.length === 0 && <div className="flex min-h-[180px] flex-col items-center justify-center rounded-[11px] bg-white text-center"><Search size={22} className="text-[#b3b5b3]" /><p className="mt-3 text-[12px] font-semibold text-[#333]">No tickets found</p><p className="mt-1 text-[10px] text-[#999]">Try a different search or filter.</p></div>}
-        </div>
-      </section>
+          <div className="flex shrink-0 gap-1 border-b border-[#eef0ee] bg-white px-2.5 py-2" role="tablist" aria-label="Filter tickets by status">
+            {([["OPEN", "Open"], ["CLOSED", "Closed"]] as const).map(([id, label]) => {
+              const isActive = activeTab === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setActiveTab(id)}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-semibold transition-colors ${
+                    isActive ? "border-[#1d5043] bg-[#1d5043] text-white hover:bg-[#143b32]" : "border-transparent bg-transparent text-[#6b7280] hover:bg-[#f3f4f6] hover:text-[#374151]"
+                  }`}
+                >
+                  {label}
+                  <span className={`inline-flex h-4 min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10px] font-bold ${isActive ? "bg-white/20" : "bg-[#e5e7eb] text-[#4b5563]"}`}>
+                    {tabCounts[id]}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto px-2 pb-3 pt-2">
+            {filteredTickets.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-1.5 px-4 py-8 text-center">
+                <p className="text-[14px] font-semibold text-[#374151]">
+                  {searchValue ? "No tickets match your search" : activeTab === "CLOSED" ? "No closed tickets" : "No open tickets"}
+                </p>
+                <p className="max-w-[240px] text-[12px] leading-[1.4] text-[#6b7280]">Click &ldquo;Create Ticket&rdquo; above to start a conversation.</p>
+              </div>
+            ) : (
+              filteredTickets.map(ticket => (
+                <SupportTicketListItem key={ticket.id} ticket={ticket} isActive={selectedTicketId === ticket.id} onClick={() => handleSelectTicket(ticket.id)} />
+              ))
+            )}
+          </div>
+        </aside>
+
+        {/* Right: chat detail */}
+        <section className={`flex min-h-0 min-w-0 flex-1 flex-col bg-white max-md:hidden ${mobileShowDetail ? "max-md:flex" : ""}`}>
+          {selectedTicket ? (
+            <SupportTicketChat key={selectedTicket.id} ticket={selectedTicket} onClose={() => setMobileShowDetail(false)} onSend={text => handleSendMessage(selectedTicket.id, text)} />
+          ) : (
+            <div className="flex flex-1 flex-col items-center justify-center gap-2.5 p-10 text-center">
+              <SupportChatBubbleIcon className="size-14 text-[#d1d5db]" />
+              <p className="text-[18px] font-semibold text-[#374151]">Select a conversation</p>
+              <p className="max-w-[320px] text-[14px] text-[#6b7280]">Choose a ticket from the list to view messages and reply to support.</p>
+            </div>
+          )}
+        </section>
+      </div>
+
+      <SupportCreateTicketModal open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onCreate={handleCreateTicket} />
     </>
   );
 }
