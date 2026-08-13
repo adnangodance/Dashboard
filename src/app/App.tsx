@@ -5076,6 +5076,725 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   );
 }
 
+// ─── Pending Approvals ────────────────────────────────────────────────────────
+
+interface PendingApprovalRx {
+  name: string;
+  size: string;
+  strength: string;
+  sig: string;
+  reason: string;
+  note?: string;
+  daysSupply: number;
+  refills: number;
+  qty: number;
+  price: number;
+  image: string;
+  isControlled?: boolean;
+  supplies?: { name: string; size: string }[];
+}
+
+interface PendingApprovalPharmacy {
+  name: string;
+  shippingMethod: string;
+  refrigerated?: boolean;
+  signatureRequired?: boolean;
+  prescriptions: PendingApprovalRx[];
+}
+
+interface PendingApproval {
+  id: string;
+  createdAt: string;
+  patient: { firstName: string; lastName: string; gender: string; address1: string; address2?: string; city: string; state: string; zip: string; phone: string; dob: string };
+  submittedBy: string;
+  paymentMethod: "patient" | "clinic" | "clinic_ach";
+  shipTo: "patient" | "clinic";
+  pharmacies: PendingApprovalPharmacy[];
+}
+
+const PENDING_APPROVALS_CLINIC = {
+  name: "ScriptLinkRX Medical Group",
+  address: "2823 Middletown Road, Suite 4B, Bronx, NY 10461",
+  phone: "(646) 617-9881",
+};
+
+const PENDING_APPROVER = {
+  firstName: "Sarah",
+  lastName: "Chen",
+  npi: "1780012345",
+  dea: "FC1234563",
+  license: "NY-556677",
+};
+
+const pendingApprovalDaysAgo = (days: number, hour: number, minute: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  d.setHours(hour, minute, 0, 0);
+  return d.toISOString();
+};
+
+const PENDING_APPROVALS_MOCK: PendingApproval[] = [
+  {
+    id: "b7e2f4a1c8d3465f9a0b1c2d3e4f5a6b8c1d24af",
+    createdAt: pendingApprovalDaysAgo(0, 9, 5),
+    patient: { firstName: "Sarah", lastName: "Mitchell", gender: "F", address1: "2823 Middletown Road", address2: "Apt 3C", city: "Bronx", state: "NY", zip: "10461", phone: "(646) 617-9881", dob: "04/14/1991" },
+    submittedBy: "Chirag Patel",
+    paymentMethod: "patient",
+    shipTo: "patient",
+    pharmacies: [
+      {
+        name: "Precision Compounding",
+        shippingMethod: "UPS Overnight Refrigerated",
+        refrigerated: true,
+        prescriptions: [
+          { name: "Semaglutide", size: "2 Vials", strength: "5mg/mL", sig: "Inject 0.25mg subcutaneously once weekly for 4 weeks, then increase as directed.", reason: "Patient requires a customized compounded formulation.", daysSupply: 60, refills: 5, qty: 2, price: 180.0, image: img434, supplies: [{ name: "Injection Supplies (Syringes & Alcohol Pads)", size: "1 month supply" }] },
+          { name: "NAD+ Injection", size: "1 (0.5mL) Vial", strength: "20mg/25mg/mL", sig: "Inject 0.5mL intramuscularly twice weekly.", reason: "Wellness and energy support protocol.", note: "Patient prefers morning administration.", daysSupply: 30, refills: 2, qty: 1, price: 84.5, image: imgNadInjection },
+        ],
+      },
+    ],
+  },
+  {
+    id: "3a9c1e5f7b2d48609c4e8f1a2b3c4d5e0f8a36cd",
+    createdAt: pendingApprovalDaysAgo(1, 16, 38),
+    patient: { firstName: "David", lastName: "Lim", gender: "M", address1: "95 Windermere Drive", city: "Westchester County", state: "NY", zip: "10710", phone: "(646) 389-7766", dob: "08/03/1975" },
+    submittedBy: "Nora Vasquez",
+    paymentMethod: "clinic",
+    shipTo: "clinic",
+    pharmacies: [
+      {
+        name: "Rush Pharmacy FL",
+        shippingMethod: "UPS 2nd Day Air",
+        signatureRequired: true,
+        prescriptions: [
+          { name: "Testosterone Cypionate", size: "1 Vial", strength: "200mg/mL", sig: "Inject 1mL intramuscularly once weekly.", reason: "Hormone replacement therapy per treatment plan.", daysSupply: 28, refills: 11, qty: 1, price: 135.99, image: img452dash, isControlled: true },
+        ],
+      },
+    ],
+  },
+  {
+    id: "f0d8b6a4e2c1479385a7c9e1b3d5f7a94b2e68f1",
+    createdAt: pendingApprovalDaysAgo(2, 11, 21),
+    patient: { firstName: "Maria", lastName: "Santos", gender: "F", address1: "852 Cedar Ln", city: "Seattle", state: "WA", zip: "98101", phone: "(555) 789-0123", dob: "07/19/1990" },
+    submittedBy: "Chirag Patel",
+    paymentMethod: "clinic_ach",
+    shipTo: "patient",
+    pharmacies: [
+      {
+        name: "Optimal Balance Pharmacy",
+        shippingMethod: "UPS Ground",
+        prescriptions: [
+          { name: "Aminoblend", size: "1 (30mL) Vial", strength: "100mg/50mg/50mg/50mg/100mg/mL", sig: "Inject 1mL intramuscularly up to three times weekly.", reason: "Amino acid supplementation for recovery.", daysSupply: 30, refills: 2, qty: 1, price: 35.99, image: img432 },
+        ],
+      },
+    ],
+  },
+  {
+    id: "c4b2d0f8a6e3471592c7a5e9f1b3d80613f5a7c9",
+    createdAt: pendingApprovalDaysAgo(3, 14, 2),
+    patient: { firstName: "Emily", lastName: "Krause", gender: "F", address1: "302 Maple Ave", city: "Brooklyn", state: "NY", zip: "11201", phone: "(718) 555-0187", dob: "03/22/1988" },
+    submittedBy: "Marcus Webb",
+    paymentMethod: "patient",
+    shipTo: "patient",
+    pharmacies: [
+      {
+        name: "Precision Compounding",
+        shippingMethod: "UPS Overnight Refrigerated",
+        refrigerated: true,
+        prescriptions: [
+          { name: "Bremelanotide (PT-141)", size: "1 (10mL) Bottle", strength: "10mg/mL", sig: "Use as directed by prescriber.", reason: "Patient requires a customized compounded formulation.", daysSupply: 30, refills: 1, qty: 1, price: 118.8, image: imgProduct452 },
+        ],
+      },
+    ],
+  },
+  {
+    id: "58e6c4a2f0d9473186b5d3f7a9c1e02479b1d3f5",
+    createdAt: pendingApprovalDaysAgo(4, 10, 47),
+    patient: { firstName: "John", lastName: "Reynolds", gender: "M", address1: "88 Park Blvd", city: "Queens", state: "NY", zip: "11375", phone: "(718) 555-0143", dob: "01/17/1993" },
+    submittedBy: "Nora Vasquez",
+    paymentMethod: "clinic",
+    shipTo: "clinic",
+    pharmacies: [
+      {
+        name: "Optimal Balance Pharmacy",
+        shippingMethod: "UPS Ground",
+        prescriptions: [
+          { name: "Glutathione", size: "1 (30mL) Vial", strength: "200mg/mL", sig: "Inject 1mL intramuscularly twice weekly.", reason: "Antioxidant support protocol.", daysSupply: 30, refills: 3, qty: 1, price: 96.0, image: landingGlutathione },
+          { name: "B-Complex", size: "1 (30mL) Vial", strength: "100mg/mL", sig: "Inject 1mL intramuscularly once weekly.", reason: "Vitamin supplementation for fatigue.", daysSupply: 30, refills: 3, qty: 1, price: 45.99, image: img431 },
+        ],
+      },
+    ],
+  },
+  {
+    id: "916f3d5b7a8c42e0f4a6c8e0b2d4f6a8d0f2b4a8",
+    createdAt: pendingApprovalDaysAgo(5, 15, 29),
+    patient: { firstName: "Tom", lastName: "Taylor", gender: "M", address1: "902 Cedar Ln", city: "Houston", state: "TX", zip: "77001", phone: "(646) 617-1880", dob: "09/05/1982" },
+    submittedBy: "Marcus Webb",
+    paymentMethod: "patient",
+    shipTo: "patient",
+    pharmacies: [
+      {
+        name: "Northeast Compounding",
+        shippingMethod: "UPS 2nd Day Air",
+        refrigerated: true,
+        prescriptions: [
+          { name: "Tesamorelin/Ipamorelin", size: "1 (5mL) Vial", strength: "2.4mg/1.2mg/mL", sig: "Inject 0.5mL subcutaneously nightly before bed.", reason: "Peptide therapy per treatment plan.", daysSupply: 30, refills: 1, qty: 1, price: 135.36, image: imgPT141 },
+        ],
+      },
+    ],
+  },
+];
+
+const pendingApprovalTotal = (approval: PendingApproval) =>
+  approval.pharmacies.reduce((sum, ph) => sum + ph.prescriptions.reduce((s, rx) => s + rx.price, 0), 0);
+
+const pendingApprovalRxCount = (approval: PendingApproval) =>
+  approval.pharmacies.reduce((sum, ph) => sum + ph.prescriptions.length, 0);
+
+function PendingShipToChip({ shipTo }: { shipTo: "patient" | "clinic" }) {
+  const isPatient = shipTo === "patient";
+  return (
+    <span
+      className="inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[11px] font-semibold text-[#132f19]"
+      style={{ backgroundColor: isPatient ? "#ADEBBE" : "#0FECEF" }}
+    >
+      {isPatient ? "Ship to Patient" : "Ship to Clinic"}
+      <span className="flex size-3.5 items-center justify-center">
+        {isPatient ? (
+          <svg width="14" height="14" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.99077 9.3624C8.30605 8.45873 7.2212 7.875 6 7.875C4.7788 7.875 3.69395 8.45873 3.00923 9.3624M8.99077 9.3624C9.91675 8.53817 10.5 7.3372 10.5 6C10.5 3.51472 8.48528 1.5 6 1.5C3.51472 1.5 1.5 3.51472 1.5 6C1.5 7.3372 2.08325 8.53817 3.00923 9.3624M8.99077 9.3624C8.19575 10.0701 7.14808 10.5 6 10.5C4.85192 10.5 3.80425 10.0701 3.00923 9.3624M7.5 4.875C7.5 5.70343 6.82843 6.375 6 6.375C5.17157 6.375 4.5 5.70343 4.5 4.875C4.5 4.04657 5.17157 3.375 6 3.375C6.82843 3.375 7.5 4.04657 7.5 4.875Z" stroke="#020202" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.125 10.5H10.875M1.875 1.5V10.5M7.125 1.5V10.5M10.125 3.75V10.5M3.375 3.375H3.75M3.375 4.875H3.75M3.375 6.375H3.75M5.25 3.375H5.625M5.25 4.875H5.625M5.25 6.375H5.625M3.375 10.5V8.8125C3.375 8.50184 3.62684 8.25 3.9375 8.25H5.0625C5.37316 8.25 5.625 8.50184 5.625 8.8125V10.5M1.5 1.5H7.5M7.125 3.75H10.5M8.625 5.625H8.62875V5.62875H8.625V5.625ZM8.625 7.125H8.62875V7.12875H8.625V7.125ZM8.625 8.625H8.62875V8.62875H8.625V8.625Z" stroke="#020202" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        )}
+      </span>
+    </span>
+  );
+}
+
+function PendingApprovalModal({ isOpen, onClose, onApprove, isLoading }: { isOpen: boolean; onClose: () => void; onApprove: () => void; isLoading: boolean }) {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50" onClick={onClose}>
+      <div className="max-h-[90vh] w-full max-w-[480px] overflow-y-auto rounded-2xl bg-white shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]" onClick={event => event.stopPropagation()}>
+        <div className="flex items-center justify-between border-b border-[#e5e7eb] px-6 py-5">
+          <h2 className="text-[18px] font-semibold text-[#111827]">Approve Order</h2>
+          <button className="text-2xl leading-none text-[#6b7280] hover:text-[#374151]" onClick={onClose}>×</button>
+        </div>
+        <div className="p-6">
+          <p className="mb-5 text-[14px] leading-[1.6] text-[#374151]">
+            By approving this order, your prescriber credentials will be attached and payment will be processed.
+          </p>
+          <div className="mb-5">
+            <h3 className="mb-3 text-[14px] font-semibold uppercase tracking-[0.05em] text-[#111827]">Your Credentials</h3>
+            <div className="rounded-lg bg-[#f9fafb] px-4 py-3">
+              {[
+                ["Name", `${PENDING_APPROVER.firstName} ${PENDING_APPROVER.lastName}`],
+                ["NPI", PENDING_APPROVER.npi],
+                ["DEA", PENDING_APPROVER.dea],
+                ["License", PENDING_APPROVER.license],
+              ].map(([label, value]) => (
+                <div key={label} className="flex justify-between border-b border-[#e5e7eb] py-2 last:border-b-0">
+                  <span className="text-[13px] text-[#6b7280]">{label}</span>
+                  <span className="text-[13px] font-medium text-[#111827]">{value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="mb-5">
+            <h3 className="mb-3 text-[14px] font-semibold uppercase tracking-[0.05em] text-[#111827]">Your Signature</h3>
+            <div className="flex min-h-[100px] items-center justify-center rounded-lg bg-[#f9fafb] p-4">
+              <span className="text-[28px] italic text-[#1a2e35]" style={{ fontFamily: '"Snell Roundhand", "Savoye LET", "Segoe Script", cursive' }}>
+                Sarah Chen
+              </span>
+            </div>
+          </div>
+          <div className="rounded-lg bg-[#fef3c7] px-4 py-3">
+            <p className="text-[13px] leading-[1.5] text-[#92400e]">
+              This action cannot be undone. The patient will be charged and the order will be submitted for processing.
+            </p>
+          </div>
+        </div>
+        <div className="flex justify-end gap-3 border-t border-[#e5e7eb] px-6 py-4">
+          <button onClick={onClose} className="flex items-center justify-center gap-2 rounded-lg border-2 bg-white px-3.5 py-1.5 text-[14px] font-medium transition-colors hover:bg-[#f0f9f1]" style={{ borderColor: SUPPORT_PRIMARY, color: SUPPORT_PRIMARY }}>
+            Cancel
+          </button>
+          <button onClick={onApprove} disabled={isLoading} className="flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-[14px] font-medium text-white transition-colors disabled:opacity-50" style={{ background: SUPPORT_PRIMARY }}>
+            {isLoading && <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />}
+            Approve Order
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PendingRejectModal({ isOpen, onClose, onReject, isLoading }: { isOpen: boolean; onClose: () => void; onReject: (reason?: string) => void; isLoading: boolean }) {
+  const [reason, setReason] = useState("");
+  if (!isOpen) return null;
+
+  const handleClose = () => {
+    setReason("");
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50" onClick={handleClose}>
+      <div className="max-h-[90vh] w-full max-w-[440px] overflow-y-auto rounded-2xl bg-white shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]" onClick={event => event.stopPropagation()}>
+        <div className="flex items-center justify-between border-b border-[#e5e7eb] px-6 py-5">
+          <h2 className="text-[18px] font-semibold text-[#111827]">Reject Order</h2>
+          <button className="text-2xl leading-none text-[#6b7280] hover:text-[#374151]" onClick={handleClose}>×</button>
+        </div>
+        <div className="p-6">
+          <div className="mb-5 rounded-lg bg-[#fee2e2] px-4 py-3">
+            <p className="text-[13px] leading-[1.5] text-[#991b1b]">
+              This action cannot be undone. The order will be permanently cancelled and the user will need to submit a new order.
+            </p>
+          </div>
+          <div className="mt-4">
+            <label className="mb-1 block text-[14px] font-medium leading-none text-[#121212]">Rejection Reason (Optional)</label>
+            <textarea
+              rows={4}
+              value={reason}
+              onChange={event => setReason(event.target.value)}
+              placeholder="Enter a reason for rejecting this order..."
+              className="min-h-[100px] w-full resize-y rounded-lg border border-[#dbdbdb] bg-white px-4 py-3 text-[16px] leading-5 text-[#121212] shadow-[0px_3px_6px_-3px_#0000000d,0px_2px_4px_-2px_#0000000d,0px_1px_2px_-1px_#0000000d,0px_1px_0px_-1px_#0000000d] outline-none transition-all placeholder:font-medium placeholder:text-[#999999] focus:border-[#132F19] focus:shadow-[0_0_0_1px_#132F19,0_0_0_3px_rgba(0,174,48,0.1)]"
+            />
+          </div>
+        </div>
+        <div className="flex justify-end gap-3 border-t border-[#e5e7eb] px-6 py-4">
+          <button onClick={handleClose} className="flex items-center justify-center gap-2 rounded-lg border-2 bg-white px-3.5 py-1.5 text-[14px] font-medium transition-colors hover:bg-[#f0f9f1]" style={{ borderColor: SUPPORT_PRIMARY, color: SUPPORT_PRIMARY }}>
+            Cancel
+          </button>
+          <button onClick={() => onReject(reason || undefined)} disabled={isLoading} className="flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-[14px] font-medium text-white transition-colors disabled:opacity-50" style={{ background: SUPPORT_PRIMARY }}>
+            {isLoading && <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />}
+            Reject Order
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: PendingApproval; onBack: () => void; onResolve: () => void }) {
+  const { showToast } = useAppLoading();
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
+
+  const created = new Date(approval.createdAt);
+  const timestamp = `${String(created.getMonth() + 1).padStart(2, "0")}/${String(created.getDate()).padStart(2, "0")}/${created.getFullYear()} - ${created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+  const payToClinic = approval.paymentMethod === "clinic" || approval.paymentMethod === "clinic_ach";
+  const { patient } = approval;
+  const patientStripName = `${patient.firstName} ${patient.lastName} (${patient.gender})`;
+  const patientStripAddress = [patient.address1, patient.city, patient.state, patient.zip].filter(Boolean).join(", ");
+  const finalTotal = pendingApprovalTotal(approval);
+
+  function handleApprove() {
+    setIsApproving(true);
+    window.setTimeout(() => {
+      setIsApproving(false);
+      setIsApprovalModalOpen(false);
+      showToast("Order approved successfully");
+      onResolve();
+    }, 900);
+  }
+
+  function handleReject() {
+    setIsRejecting(true);
+    window.setTimeout(() => {
+      setIsRejecting(false);
+      setIsRejectModalOpen(false);
+      showToast("Order rejected");
+      onResolve();
+    }, 900);
+  }
+
+  const metaLabel = "text-[9px] font-semibold uppercase tracking-[0.1em] text-[#8c95a1]";
+
+  return (
+    <div className="max-w-[1040px]">
+      {/* Top bar */}
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <button type="button" aria-label="Back to pending approvals" onClick={onBack} className="flex size-10 items-center justify-center rounded-r-[12px] bg-[#f0f1f2] text-[#111] transition-colors hover:bg-[#e6e8e9]">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+          </button>
+          <h1 className="text-[22px] font-semibold text-[#1a1a1a]">Pending Approvals</h1>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => setIsRejectModalOpen(true)} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[#ffe7d6] px-4 text-[11px] font-semibold text-[#7b003b] transition-colors hover:bg-[#ffdcc4]">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></svg>
+            Reject
+          </button>
+          <button onClick={() => setIsApprovalModalOpen(true)} className="inline-flex h-9 items-center gap-1.5 rounded-lg px-4 text-[11px] font-semibold text-white" style={{ background: SUPPORT_PRIMARY }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
+            Approve Order
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        {/* Order summary card */}
+        <section className="overflow-hidden rounded-[14px] border border-[#e6e7e5] bg-white">
+          <div className="grid gap-x-5 gap-y-4 border-b border-[#eceeeb] bg-[#fbfbfb] px-5 py-4 sm:grid-cols-3 lg:grid-cols-[1.15fr_.8fr_1fr_1.05fr_1.35fr_.85fr]">
+            <div>
+              <p className={metaLabel}>Order Timestamp</p>
+              <p className="mt-1 text-[12px] font-semibold text-[#161a18]">{timestamp}</p>
+            </div>
+            <div>
+              <p className={metaLabel}>Order ID</p>
+              <p className="mt-1 text-[12px] font-semibold text-[#161a18]">#{approval.id.slice(-6).toUpperCase()}</p>
+            </div>
+            <div>
+              <p className={metaLabel}>Status</p>
+              <div className="mt-1 flex">
+                <span className="inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-full bg-[#6D7280] px-3 text-[10px] font-bold uppercase text-white">Pending Approval</span>
+              </div>
+            </div>
+            <div>
+              <p className={metaLabel}>Ship To</p>
+              <div className="mt-1 flex">
+                <span className={`inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[10px] font-bold ${approval.shipTo === "clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
+                  {approval.shipTo === "clinic" ? "Ship to clinic" : "Ship to patient"}
+                  {approval.shipTo === "clinic" ? <Building2 size={12} /> : <User size={12} />}
+                </span>
+              </div>
+            </div>
+            <div>
+              <p className={metaLabel}>Payment Method</p>
+              <div className="mt-1 flex">
+                <span className={`inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[10px] font-bold ${payToClinic ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
+                  {payToClinic ? "Pay by clinic" : "Pay by patient"}
+                  {payToClinic ? <Building2 size={12} /> : <User size={12} />}
+                  {approval.paymentMethod === "clinic_ach" ? (
+                    <span className="inline-flex h-4 items-center justify-center rounded-full bg-[#f97316] px-1.5 text-[8px] font-bold leading-none text-white">ACH</span>
+                  ) : (
+                    <span className="inline-flex h-4 min-w-[42px] items-center justify-center rounded-full bg-[#ff4a87] px-2 text-[8px] font-bold uppercase leading-none text-white">Unpaid</span>
+                  )}
+                </span>
+              </div>
+            </div>
+            <div>
+              <p className={metaLabel}>Final Total</p>
+              <p className="mt-1 text-[12px] font-bold text-[#161a18]">${finalTotal.toFixed(2)}</p>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-[1.15fr_.85fr]">
+            <div className="min-w-0 px-5 py-4">
+              <div className="mb-2 flex items-center gap-2"><p className={metaLabel}>Patient</p></div>
+              <div className="flex flex-col gap-3">
+                <div className="text-[11px] leading-[1.45] text-[#5f6863]">
+                  <div className="flex items-center gap-1.5">
+                    <p className="font-semibold text-[#161a18]">
+                      {patient.firstName} {patient.lastName} <span className="font-medium text-[#777777]">({patient.gender})</span>
+                    </p>
+                  </div>
+                  <p className="mt-0.5">
+                    {patient.address1}
+                    {patient.address2 && `, ${patient.address2}`}
+                    {`, ${patient.city}, ${patient.state} ${patient.zip}`}
+                  </p>
+                  <div className="mt-0.5 flex items-center gap-1.5"><span>{patient.phone}</span></div>
+                  <div className="mt-0.5 flex items-center gap-1.5"><span>DOB: {patient.dob}</span></div>
+                </div>
+              </div>
+            </div>
+            <div className="min-w-0 border-t border-[#eceeeb] px-5 py-4 lg:border-l lg:border-t-0">
+              <div className="mb-2 flex items-center gap-2"><p className={metaLabel}>Submitted By</p></div>
+              <div className="flex flex-col gap-3">
+                <div className="text-[11px] leading-[1.45] text-[#5f6863]">
+                  <p className="font-semibold text-[#161a18]">{approval.submittedBy}</p>
+                  <p className="mt-0.5">Awaiting approval</p>
+                </div>
+                <div className="text-[11px] leading-[1.45] text-[#5f6863]">
+                  <div className="mb-2 flex items-center gap-2"><p className={metaLabel}>Clinic</p></div>
+                  <p className="font-semibold text-[#161a18]">{PENDING_APPROVALS_CLINIC.name}</p>
+                  <p className="mt-0.5">{PENDING_APPROVALS_CLINIC.address}</p>
+                  <div className="mt-0.5 flex items-center gap-1.5"><span>{PENDING_APPROVALS_CLINIC.phone}</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Pharmacy fulfillment cards */}
+        {approval.pharmacies.map((pharmacyOrder, pharmacyIndex) => {
+          const hasControlledSubstance = pharmacyOrder.prescriptions.some(rx => rx.isControlled);
+          const pharmacyTotal = pharmacyOrder.prescriptions.reduce((s, rx) => s + rx.price, 0);
+          return (
+            <section key={pharmacyIndex} className="overflow-hidden rounded-[14px] border border-[#e6e7e5] bg-white">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#eceeeb] bg-[#fbfbfb] px-5 py-4">
+                <div className="flex items-center gap-3">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-[9px] bg-white text-[#667085]"><Building2 size={17} /></span>
+                  <div>
+                    <p className="text-[14px] font-semibold text-[#161a18]">{pharmacyOrder.name}</p>
+                    <p className="mt-0.5 text-[11px] text-[#667085]">Licensed compounding pharmacy</p>
+                  </div>
+                </div>
+                <p className="text-[16px] font-bold text-[#161a18]">${pharmacyTotal.toFixed(2)}</p>
+              </div>
+
+              {hasControlledSubstance && (
+                <div className="ml-11 mt-1 flex max-w-max items-center gap-1 rounded-md bg-[#f9ecec] px-2 py-0.5 text-[12px] font-medium text-[#e14343]">
+                  <svg className="mt-0.5 shrink-0 text-[#dc2626]" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                    <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                  Please make sure to also forward an e-prescription via your clinical software to the above pharmacy!
+                </div>
+              )}
+
+              <div className="grid gap-3 border-b border-[#eceeeb] px-5 py-3 sm:grid-cols-4">
+                <div>
+                  <p className={metaLabel}>Shipping Method</p>
+                  <p className="mt-1 text-[11px] font-semibold text-[#161a18]">{pharmacyOrder.shippingMethod}</p>
+                </div>
+                <div>
+                  <p className={metaLabel}>Est. Delivery</p>
+                  <p className="mt-1 text-[11px] font-semibold text-[#161a18]">Pending</p>
+                </div>
+                <div>
+                  <p className={metaLabel}>Tracking</p>
+                  <p className="mt-1 text-[11px] text-[#8c95a1]">Tracking Not Ready</p>
+                </div>
+                {(pharmacyOrder.refrigerated || pharmacyOrder.signatureRequired) && (
+                  <div>
+                    <p className={metaLabel}>Handling</p>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {pharmacyOrder.refrigerated && <span className="inline-flex rounded-full bg-[#edf8fb] px-2 py-0.5 text-[9px] font-semibold text-[#21707d]">Refrigerated</span>}
+                      {pharmacyOrder.signatureRequired && <span className="inline-flex rounded-full bg-[#edf8fb] px-2 py-0.5 text-[9px] font-semibold text-[#21707d]">Signature Required</span>}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-white">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2 bg-[#fbfbfb] px-5 py-2 text-[10px] text-[#667085]">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#05AF3B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                    <span className="font-semibold text-[#161a18]">{patientStripName}</span>
+                    <span>|</span>
+                    <span>{patient.phone}</span>
+                    <span>|</span>
+                    <span>{patientStripAddress}</span>
+                  </div>
+                  {pharmacyOrder.prescriptions.map((rx, rxIndex) => (
+                    <Fragment key={rxIndex}>
+                      <div className={`grid gap-4 px-5 py-4 md:grid-cols-[minmax(0,1fr)_70px_70px_70px_90px] ${rxIndex > 0 ? "border-t border-[#eceeeb]" : ""}`}>
+                        <div className="flex gap-3">
+                          <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-[7px] border border-[#eeeeec] bg-white">
+                            <img src={rx.image} alt="" className="size-11 object-contain mix-blend-multiply" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="text-[12px] font-semibold text-[#161a18]">{rx.name}</p>
+                            </div>
+                            <p className="mt-1 text-[11px] text-[#667085]">{rx.size} | {rx.strength}</p>
+                            <p className="mt-2 text-[10px] text-[#161a18]"><strong>Sig:</strong> {rx.sig}</p>
+                            <p className="mt-1 text-[10px] text-[#161a18]"><strong>Reason:</strong> {rx.reason}</p>
+                            {rx.note && <p className="mt-1 text-[10px] text-[#161a18]"><strong>Note:</strong> {rx.note}</p>}
+                          </div>
+                        </div>
+                        <div className="max-md:hidden">
+                          <p className={metaLabel}>Days Supply</p>
+                          <p className="mt-2 text-[11px] font-semibold text-[#161a18]">{rx.daysSupply}</p>
+                        </div>
+                        <div className="max-md:hidden">
+                          <p className={metaLabel}>Refills</p>
+                          <p className="mt-2 text-[11px] font-semibold text-[#161a18]">{rx.refills}</p>
+                        </div>
+                        <div className="max-md:hidden">
+                          <p className={metaLabel}>Qty</p>
+                          <p className="mt-2 text-[11px] font-semibold text-[#161a18]">{rx.qty}</p>
+                        </div>
+                        <p className="text-right text-[12px] font-bold text-[#161a18]">${rx.price.toFixed(2)}</p>
+                      </div>
+                      {rx.supplies?.map((supply, supplyIndex) => (
+                        <div key={supplyIndex} className="grid gap-4 border-t border-[#eceeeb] px-5 py-4 md:grid-cols-[minmax(0,1fr)_70px_70px_70px_90px]">
+                          <div className="flex gap-3">
+                            <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-[7px] border border-[#eeeeec] bg-white text-[#8c95a1]">
+                              <Syringe size={22} strokeWidth={1.5} />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="text-[12px] font-semibold text-[#161a18]">{supply.name}</p>
+                              </div>
+                              <p className="mt-1 text-[11px] text-[#667085]">{supply.size}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </Fragment>
+                  ))}
+                </div>
+              </div>
+            </section>
+          );
+        })}
+      </div>
+
+      <PendingApprovalModal isOpen={isApprovalModalOpen} onClose={() => setIsApprovalModalOpen(false)} onApprove={handleApprove} isLoading={isApproving} />
+      <PendingRejectModal isOpen={isRejectModalOpen} onClose={() => setIsRejectModalOpen(false)} onReject={handleReject} isLoading={isRejecting} />
+    </div>
+  );
+}
+
+function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Page) => void }) {
+  const [approvals, setApprovals] = useState<PendingApproval[]>(PENDING_APPROVALS_MOCK);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  // ⌘F / Ctrl+F focuses the search box instead of the browser find bar
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const selectedApproval = approvals.find(a => a.id === selectedId) ?? null;
+
+  if (selectedApproval) {
+    return (
+      <PendingApprovalDetail
+        approval={selectedApproval}
+        onBack={() => setSelectedId(null)}
+        onResolve={() => {
+          setApprovals(current => current.filter(a => a.id !== selectedApproval.id));
+          setSelectedId(null);
+        }}
+      />
+    );
+  }
+
+  const filteredApprovals = approvals.filter(approval => {
+    if (!searchQuery) return true;
+    const searchLower = searchQuery.toLowerCase();
+    const patientName = `${approval.patient.firstName} ${approval.patient.lastName}`.toLowerCase();
+    return (
+      approval.id.toLowerCase().includes(searchLower) ||
+      approval.id.slice(-6).toUpperCase().includes(searchQuery.toUpperCase()) ||
+      patientName.includes(searchLower) ||
+      approval.submittedBy.toLowerCase().includes(searchLower)
+    );
+  });
+
+  const tdClass = "max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]";
+
+  return (
+    <div className="max-w-[1300px]">
+      <h1 className="mb-6 text-[28px] font-semibold leading-[1.25] text-[#1a1a1a]">Pending Approvals</h1>
+      <div className="mb-5 flex flex-col gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-[13px] text-[#6f7782]">Review, approve, or reject orders submitted by your team.</p>
+          <label className="group flex h-[38px] w-[220px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:w-[310px] focus-within:border-2 focus-within:border-black">
+            <span className="flex shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+            </span>
+            <input
+              ref={searchInputRef}
+              value={searchQuery}
+              onChange={event => setSearchQuery(event.target.value)}
+              placeholder="Search by order, patient, or user"
+              aria-label="Search pending approvals"
+              className="min-w-0 flex-1 bg-transparent text-[11px] font-medium text-[#1a1a1a] outline-none placeholder:font-medium placeholder:text-[#686868]"
+            />
+            <span className="shrink-0 text-[10px] text-[#686868]">⌘ F</span>
+          </label>
+        </div>
+
+        <div className="flex items-end gap-4 overflow-x-auto border-b border-[#e3e3e3] px-1">
+          <button type="button" className="relative inline-flex h-[46px] shrink-0 items-center whitespace-nowrap px-0.5 text-[12px] font-medium text-[#171717]">
+            <span>Overall</span>
+            <span className="ml-1.5 inline-flex size-[18px] items-center justify-center rounded-full bg-[#183229] text-[9px] font-semibold text-white">{approvals.length}</span>
+            <span className="absolute inset-x-0 bottom-0 h-[2px] bg-[#183229]" />
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-col gap-6">
+        {filteredApprovals.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-[10px] bg-[#f8f8f8] px-5 py-[60px] text-center">
+            <div className="mb-2.5">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14.6667 28.9739C15.0721 29.2079 15.5319 29.3311 16 29.3311C16.4681 29.3311 16.9279 29.2079 17.3333 28.9739L26.6667 23.6405C27.0717 23.4067 27.408 23.0705 27.6421 22.6656C27.8761 22.2608 27.9995 21.8015 28 21.3339V10.6672C27.9995 10.1996 27.8761 9.74027 27.6421 9.3354C27.408 8.93054 27.0717 8.59434 26.6667 8.36052L17.3333 3.02719C16.9279 2.79314 16.4681 2.66992 16 2.66992C15.5319 2.66992 15.0721 2.79314 14.6667 3.02719L5.33333 8.36052C4.92835 8.59434 4.59197 8.93054 4.35795 9.3354C4.12392 9.74027 4.00048 10.1996 4 10.6672V21.3339C4.00048 21.8015 4.12392 22.2608 4.35795 22.6656C4.59197 23.0705 4.92835 23.4067 5.33333 23.6405L14.6667 28.9739Z" stroke="#999999" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M16 29.3333V16" stroke="#999999" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M4.38672 9.33398L16.0001 16.0007L27.6134 9.33398" stroke="#999999" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M10 5.69336L22 12.56" stroke="#999999" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <h3 className="text-[14px] font-bold text-[#121212]">No pending approvals</h3>
+            <p className="mb-4 mt-1.5 text-[12px] text-[#999999]">
+              {searchQuery ? "No orders found matching your search." : "There are no orders waiting for your approval."}
+            </p>
+          </div>
+        ) : (
+          <div className="w-max max-w-full overflow-x-auto rounded-lg border border-[#e5e7eb] bg-white">
+            <table className="w-full min-w-max border-collapse text-left text-sm">
+              <thead>
+                <tr>
+                  {["ORDER ID", "PATIENT", "CREATED BY", "CREATED AT", "PAY BY", "SHIP TO", "ITEMS", "STATUS", "TOTAL", ""].map((header, index) => (
+                    <th key={index} className="whitespace-nowrap border-b border-[#e5e7eb] bg-[#fbfbfb] px-4 py-2 text-[12px] font-bold uppercase leading-5 text-[#999999]">
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredApprovals.map(approval => {
+                  const created = new Date(approval.createdAt);
+                  return (
+                    <tr
+                      key={approval.id}
+                      onClick={() => setSelectedId(approval.id)}
+                      className="cursor-pointer transition-colors even:bg-[#fbfbfb] hover:bg-[#E0FAE7] even:hover:bg-[#E0FAE7]"
+                    >
+                      <td className={tdClass}>#{approval.id.slice(-8)}</td>
+                      <td className={tdClass}>
+                        <span className="text-[14px] font-semibold text-[#121212]">{approval.patient.firstName} {approval.patient.lastName}</span>
+                      </td>
+                      <td className={tdClass}>{approval.submittedBy}</td>
+                      <td className={tdClass}>
+                        <div className="flex flex-col items-start">
+                          <span>{created.getMonth() + 1}/{created.getDate()}/{created.getFullYear()}</span>
+                          <span className="text-[10px] font-bold leading-3 text-[#999999]">{created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
+                        </div>
+                      </td>
+                      <td className={tdClass}><OrderHistoryPayByChip payBy={approval.paymentMethod} showStatus /></td>
+                      <td className={tdClass}><PendingShipToChip shipTo={approval.shipTo} /></td>
+                      <td className={tdClass}>{pendingApprovalRxCount(approval)}</td>
+                      <td className={tdClass}>
+                        <span className="inline-flex h-7 items-center justify-center whitespace-nowrap rounded-full bg-[#6B7280] px-3 text-[11px] font-semibold text-white">PENDING APPROVAL</span>
+                      </td>
+                      <td className={tdClass}>${pendingApprovalTotal(approval).toFixed(2)}</td>
+                      <td className={tdClass}>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={event => { event.stopPropagation(); setSelectedId(approval.id); }}
+                            className="cursor-pointer rounded px-2 py-1 transition-all hover:bg-[#f0faf3]"
+                            aria-label="See order"
+                          >
+                            <svg width="18" height="19" viewBox="0 0 18 19" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.75 5L11.25 9.5L6.75 14" stroke="#A5A5A5" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Pharmacies ───────────────────────────────────────────────────────────────
 
 const PHARMACIES = [
