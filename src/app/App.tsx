@@ -7279,7 +7279,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           <button type="button" className="absolute inset-0 cursor-default" onClick={() => setInviteUserOpen(false)} aria-label="Close invite user" />
           <form
             onSubmit={event => { event.preventDefault(); setInviteUserOpen(false); setInviteEmail(""); }}
-            className="relative z-10 w-full max-w-[500px] overflow-hidden rounded-[18px] border border-white/70 bg-white shadow-[0_24px_70px_rgba(20,28,24,0.2)]"
+            className="relative z-10 w-full max-w-[500px] overflow-hidden rounded-[10px] border border-white/70 bg-white shadow-[0_24px_70px_rgba(20,28,24,0.2)]"
             role="dialog"
             aria-modal="true"
             aria-labelledby="invite-user-title"
@@ -7320,7 +7320,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           <button type="button" className="absolute inset-0 cursor-default" onClick={() => setInvitePrescriberOpen(false)} aria-label="Close invite prescriber" />
           <form
             onSubmit={event => { event.preventDefault(); setInvitePrescriberOpen(false); setInvitePrescriberEmail(""); }}
-            className="relative z-10 w-full max-w-[500px] overflow-hidden rounded-[18px] border border-white/70 bg-white shadow-[0_24px_70px_rgba(20,28,24,0.2)]"
+            className="relative z-10 w-full max-w-[500px] overflow-hidden rounded-[10px] border border-white/70 bg-white shadow-[0_24px_70px_rgba(20,28,24,0.2)]"
             role="dialog"
             aria-modal="true"
             aria-labelledby="invite-prescriber-title"
@@ -7351,7 +7351,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       {addPrescriberOpen && (
         <div className="fixed inset-0 z-[95] flex items-stretch justify-end bg-black/35 backdrop-blur-[2px]">
           <button className="absolute inset-0 cursor-default" onClick={() => setAddPrescriberOpen(false)} aria-label="Close add prescriber" />
-          <form onSubmit={event => { event.preventDefault(); setAddPrescriberOpen(false); }} className="relative z-10 flex h-full w-full max-w-[620px] flex-col overflow-hidden border-l border-[#e3e3e3] bg-white shadow-[-20px_0_60px_rgba(0,0,0,0.16)]">
+          <form onSubmit={event => { event.preventDefault(); setAddPrescriberOpen(false); }} className="relative z-10 flex h-full w-full max-w-[620px] flex-col overflow-hidden rounded-[10px] border-l border-[#e3e3e3] bg-white shadow-[-20px_0_60px_rgba(0,0,0,0.16)]">
             <div className="flex shrink-0 items-start justify-between border-b border-[#ececec] px-6 py-5">
               <div><h2 className="text-[21px] font-semibold text-[#171717]">Add prescriber</h2><p className="mt-1 text-[11px] text-[#777]">Add identity, licensing, and contact information.</p></div>
               <button type="button" onClick={() => setAddPrescriberOpen(false)} className="flex size-9 items-center justify-center text-[#777] transition-colors hover:text-black" aria-label="Close"><X size={19} /></button>
@@ -7394,7 +7394,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           <button className="absolute inset-0 cursor-default" onClick={() => setAddUserOpen(false)} aria-label="Close add user" />
           <form
             onSubmit={event => { event.preventDefault(); setAddUserOpen(false); }}
-            className="relative z-10 flex h-full w-full max-w-[760px] flex-col overflow-hidden border-l border-[#e3e3e3] bg-white shadow-[-20px_0_60px_rgba(0,0,0,0.16)]"
+            className="relative z-10 flex h-full w-full max-w-[760px] flex-col overflow-hidden rounded-[10px] border-l border-[#e3e3e3] bg-white shadow-[-20px_0_60px_rgba(0,0,0,0.16)]"
           >
             <div className="flex shrink-0 items-start justify-between border-b border-[#ececec] px-6 py-5">
               <div><h2 className="text-[21px] font-semibold text-[#171717]">Add user</h2><p className="mt-1 text-[11px] text-[#777]">Create an account and choose its access level.</p></div>
