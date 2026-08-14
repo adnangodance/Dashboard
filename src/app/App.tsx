@@ -88,6 +88,7 @@ import supportShayne from "@/assets/support-shayne.png";
 import supportZee from "@/assets/support-zee.png";
 import userVerifiedIcon from "@/assets/user-verified.svg";
 import blankVialReference from "@/assets/blank-vial-reference.png";
+import chaseLogo from "@/assets/chase-logo.png";
 import blankNasalSprayReference from "@/assets/blank-nasal-spray-reference.png";
 import blankLyophilizedVialReference from "@/assets/blank-lyophilized-vial-reference.png";
 import blankTopicalDropperReference from "@/assets/blank-topical-dropper-reference.png";
@@ -6823,7 +6824,8 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const shouldOpenPaymentSetup = () => window.sessionStorage.getItem("open-payment-setup") === "true";
   const shouldOpenPaymentOverview = () => window.sessionStorage.getItem("open-payment-overview") === "true";
   const [activeTab, setActiveTab] = useState(() => shouldOpenPaymentSetup() || shouldOpenPaymentOverview() ? "Pay by Clinic" : "Business Account");
-  const [paymentTab, setPaymentTab] = useState<"Credit Card" | "Payouts ACH">("Credit Card");
+  const [paymentTab, setPaymentTab] = useState<"Credit Card" | "Bank Account (ACH)">("Credit Card");
+  const [primaryClinicPayment, setPrimaryClinicPayment] = useState<"credit" | "ach">("credit");
   const [creditCardOpen, setCreditCardOpen] = useState(() => shouldOpenPaymentSetup());
   const [cardType, setCardType] = useState("Visa");
   const [cardAuthorized, setCardAuthorized] = useState(true);
@@ -7001,6 +7003,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             { icon: Users, label: "Users" },
             { icon: User, label: "Prescribers" },
             { icon: CreditCard, label: "Pay by Clinic" },
+            { icon: CreditCard, label: "Payouts ACH" },
           ].map(({ icon: Icon, label }) => (
             <button
               key={label}
@@ -7073,7 +7076,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           {activeTab === "Pay by Clinic" && (
             <div data-payment-methods>
               <div className="mb-4 flex items-end gap-5 border-b border-[#e3e3e3] px-1" role="tablist" aria-label="Payment methods">
-                {(["Credit Card", "Payouts ACH"] as const).map(tab => (
+                {(["Credit Card", "Bank Account (ACH)"] as const).map(tab => (
                   <button
                     key={tab}
                     type="button"
@@ -7082,7 +7085,12 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                     onClick={() => setPaymentTab(tab)}
                     className={`relative h-[46px] whitespace-nowrap px-0.5 text-[12px] font-medium transition-colors after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:transition-colors ${paymentTab === tab ? "text-[#171717] after:bg-[#183229]" : "text-[#7b827e] after:bg-transparent hover:text-[#171717]"}`}
                   >
-                    {tab}
+                    <span className="inline-flex items-center gap-2">
+                      {tab}
+                      {((tab === "Credit Card" && primaryClinicPayment === "credit") || (tab === "Bank Account (ACH)" && primaryClinicPayment === "ach")) && (
+                        <span className="rounded-full bg-[#E8F0FF] px-2 py-1 text-[9px] font-semibold text-[#2563EB]">Primary</span>
+                      )}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -7094,9 +7102,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                   <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Credit Card</h3>
                   <p className="mt-1 text-[11px] text-[#7b827e]">Manage the credit card used for clinic purchases.</p>
                 </div>
-                {!savedClinicCard && (
-                  <button onClick={() => setCreditCardOpen(true)} className="flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Credit Card</button>
-                )}
+                <button onClick={() => setCreditCardOpen(true)} className="flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Credit Card</button>
               </div>
               <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
                 {savedClinicCard ? (
@@ -7106,10 +7112,13 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                         <span className="flex h-9 w-12 items-center justify-center rounded-[5px] border border-[#dedede] bg-white text-[12px] font-black italic text-[#1434CB]">VISA</span>
                         <div><p className="text-[13px] font-semibold text-[#1a1a1a]">Visa ending in 1234</p><p className="mt-1 text-[10px] text-[#888]">Expires 12/29</p></div>
                       </div>
-                      <span className="rounded-full bg-black px-2.5 py-1 text-[9px] font-semibold text-white">Primary</span>
+                      <span className="rounded-full bg-black px-2.5 py-1 text-[9px] font-semibold text-white">Active</span>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 py-4 text-[11px]"><div><p className="text-[#888]">Cardholder</p><p className="mt-1 font-semibold text-[#222]">ScriptLinkRx Clinic</p></div><div><p className="text-[#888]">Status</p><p className="mt-1 font-semibold text-[#31583F]">Active</p></div></div>
-                    <button type="button" onClick={() => setCreditCardOpen(true)} className="h-8 rounded-[7px] bg-black px-3 text-[11px] font-medium text-white transition-colors hover:bg-[#252525]">Update card</button>
+                    <div className="py-4 text-[11px]"><p className="text-[#888]">Cardholder</p><p className="mt-1 font-semibold text-[#222]">ScriptLinkRx Clinic</p></div>
+                    <div className="flex items-center gap-2">
+                      {primaryClinicPayment !== "credit" && <button type="button" onClick={() => setPrimaryClinicPayment("credit")} className="h-8 rounded-full border border-[#d8d8d2] bg-white px-3 text-[11px] font-medium text-black transition-colors hover:border-black hover:bg-[#f1f1f1]">Set as primary</button>}
+                      <button type="button" onClick={() => setCreditCardOpen(true)} className="h-8 rounded-[7px] bg-black px-3 text-[11px] font-medium text-white transition-colors hover:bg-[#252525]">Update card</button>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex min-h-[190px] flex-col items-center justify-center rounded-[10px] border border-[#eaeaea] bg-white p-6 text-center">
@@ -7122,38 +7131,87 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             </div>
               )}
 
-              {paymentTab === "Payouts ACH" && (
+              {paymentTab === "Bank Account (ACH)" && (
                 <div className="rounded-[14px] bg-[#FBFBFB] p-6">
                   <div className="mb-5 flex items-center justify-between gap-3 border-b border-[#e8e9e8] pb-4">
                     <div>
-                      <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Payouts ACH</h3>
-                      <p className="mt-1 text-[11px] text-[#7b827e]">Manage the bank account used for clinic ACH payments.</p>
+                      <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Bank Account (ACH)</h3>
+                      <p className="mt-1 text-[11px] text-[#7b827e]">Use a clinic bank account to pay for patient prescriptions directly from the account.</p>
                     </div>
-                    <button className="flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Bank Account</button>
+                    <div className="flex items-center gap-2">
+                      {primaryClinicPayment !== "ach" && (
+                        <button type="button" onClick={() => setPrimaryClinicPayment("ach")} className="rounded-full border border-[#d8d8d2] bg-white px-3 py-2 text-[11px] font-medium text-black transition-colors hover:border-black hover:bg-[#f1f1f1]">Set as primary</button>
+                      )}
+                      <button className="flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Bank Account</button>
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
                     <div className="overflow-hidden rounded-[10px] border border-[#eaeaea] bg-white">
-                      <div className="grid grid-cols-[40px_minmax(0,1fr)_100px_82px] border-b border-[#eee8e3] bg-[#fbfaf8] px-4 py-3">{["#", "Bank Accounts", "Status", ""].map(h => <span key={h} className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8c8c8c]">{h}</span>)}</div>
-                      <div className="grid grid-cols-[40px_minmax(0,1fr)_100px_82px] items-center px-4 py-4 text-[12px] text-[#1a1a1a]"><span>1</span><div className="min-w-0"><p className="truncate text-[13px] font-semibold">Chase Bank</p><p className="mt-1 text-[11px] text-[#8c8c8c]">**** **** **** 2826</p><p className="mt-1 text-[11px] text-[#667085]">Checking</p></div><span className="w-fit rounded-full bg-black px-2.5 py-1 text-[9px] font-medium text-white">Primary</span><button className="rounded-[7px] border border-[#D9DEDB] px-2.5 py-2 text-[11px] font-medium hover:bg-[#F7F8F7]">Update</button></div>
+                      <div className="grid grid-cols-[56px_minmax(0,1fr)_100px_82px] border-b border-[#eee8e3] bg-[#fbfaf8] px-4 py-3">{["", "Bank Accounts", "Status", ""].map((h, index) => <span key={`${h}-${index}`} className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8c8c8c]">{h}</span>)}</div>
+                      <div className="grid grid-cols-[56px_minmax(0,1fr)_100px_82px] items-center px-4 py-4 text-[12px] text-[#1a1a1a]"><span className="flex h-9 w-12 items-center justify-center rounded-[5px] border border-[#dedede] bg-white px-1.5"><img src={chaseLogo} alt="Chase" className="h-auto w-full object-contain" /></span><div className="min-w-0"><p className="truncate text-[13px] font-semibold">Chase Bank</p><p className="mt-1 text-[11px] text-[#8c8c8c]">**** **** **** 2826</p><p className="mt-1 text-[11px] text-[#667085]">Checking</p></div><span className="w-fit rounded-full bg-black px-2.5 py-1 text-[9px] font-medium text-white">Active</span><button className="rounded-[7px] border border-[#D9DEDB] px-2.5 py-2 text-[11px] font-medium hover:bg-[#F7F8F7]">Update</button></div>
                     </div>
-                    <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-5"><AlertCircle size={17} className="mb-3 text-[#667085]" /><p className="text-[12px] leading-relaxed text-[#667085]">Use this bank account for Pay by Clinic ACH payments.</p></div>
+                    <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-5"><AlertCircle size={17} className="mb-3 text-[#667085]" /><p className="text-[12px] leading-relaxed text-[#667085]">When this is your primary method, eligible Pay by Clinic orders will be charged to this bank account.</p></div>
                   </div>
 
                   <section className="mt-6 border-t border-[#e8e9e8] pt-5">
-                    <h4 className="mb-4 text-[13px] font-semibold text-[#1a1a1a]">ACH Agreement</h4>
+                    <h4 className="mb-1 text-[13px] font-semibold text-[#1a1a1a]">Bank debit authorization</h4>
+                    <p className="mb-4 text-[11px] leading-5 text-[#667085]">Required once so ScriptLinkRx has permission to debit this account when the clinic places an order.</p>
                     <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
                       <div className="rounded-[10px] border border-[#eaeaea] bg-white p-6">
                         <div className="mb-5 flex items-center gap-4">
                           <div className="flex size-12 items-center justify-center rounded-[10px] bg-[#F1F2F2] text-[#4e5652]"><Upload size={22} strokeWidth={1.8} /></div>
-                          <div><p className="text-[16px] font-semibold text-[#1a1a1a]">ACH Debit Authorization Agreement</p><p className="mt-1 text-[12px] text-[#667085]">Signed on: December 13, 2025</p></div>
+                          <div><p className="text-[16px] font-semibold text-[#1a1a1a]">Authorization signed</p><p className="mt-1 text-[12px] text-[#667085]">Signed December 13, 2025 · Bank payments enabled</p></div>
                         </div>
-                        <button className="rounded-[8px] bg-black px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">View Agreement</button>
+                        <button className="rounded-[8px] bg-black px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">View authorization</button>
                       </div>
-                      <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-6"><AlertCircle size={17} className="mb-4 text-[#667085]" /><p className="max-w-[430px] text-[13px] leading-relaxed text-[#667085]">The ACH Debit Authorization Agreement authorizes ScriptLinkRx to initiate ACH debit entries to your designated bank account for payment of fees and other amounts owed.</p></div>
+                      <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-6"><AlertCircle size={17} className="mb-4 text-[#667085]" /><p className="max-w-[430px] text-[13px] leading-relaxed text-[#667085]">This authorization only allows charges for clinic orders and related fees. You can review the signed authorization at any time.</p></div>
                     </div>
                   </section>
                 </div>
               )}
+            </div>
+          )}
+
+          {activeTab === "Payouts ACH" && (
+            <div className="space-y-4" data-payment-methods>
+              <div className="rounded-[12px] bg-[#FAFAFA] px-4 py-3">
+                <h3 className="text-[13px] font-semibold text-[#1a1a1a]">Receive clinic payouts</h3>
+                <p className="mt-1 text-[11px] leading-5 text-[#667085]">This is separate from Pay by Clinic. Add the bank account where ScriptLinkRx should deposit money owed to your clinic.</p>
+              </div>
+
+              <div className="rounded-[14px] bg-[#FBFBFB] p-6">
+                <div className="mb-5 flex items-center justify-between gap-3 border-b border-[#e8e9e8] pb-4">
+                  <div>
+                    <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Payout bank account</h3>
+                    <p className="mt-1 text-[11px] text-[#7b827e]">Clinic earnings and reimbursements are deposited into this account.</p>
+                  </div>
+                  <button className="flex items-center gap-1.5 rounded-full bg-black px-3 py-2 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add payout account</button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
+                  <div className="rounded-[10px] border border-[#eaeaea] bg-white p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-[13px] font-semibold text-[#1a1a1a]">Chase Bank</p>
+                        <p className="mt-1 text-[11px] text-[#8c8c8c]">Checking ···· 2826</p>
+                      </div>
+                      <span className="rounded-full bg-[#E8F0FF] px-2.5 py-1 text-[9px] font-semibold text-[#2563EB]">Verified</span>
+                    </div>
+                    <div className="mt-5 flex items-center gap-2 border-t border-[#eeeeee] pt-4">
+                      <button className="rounded-full border border-[#d8d8d2] bg-white px-3 py-2 text-[11px] font-medium text-black transition-colors hover:border-black hover:bg-[#f1f1f1]">Update account</button>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-5">
+                    <p className="text-[12px] font-semibold text-[#1a1a1a]">How payouts work</p>
+                    <p className="mt-2 text-[12px] leading-5 text-[#667085]">Available clinic funds are sent to this verified account. This account is only for receiving deposits—not for paying patient orders.</p>
+                    <div className="mt-4 flex items-center justify-between rounded-[9px] bg-white px-3 py-2.5 text-[11px]">
+                      <span className="text-[#667085]">Payout schedule</span>
+                      <span className="font-semibold text-[#1a1a1a]">Weekly</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
