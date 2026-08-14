@@ -4802,12 +4802,12 @@ function OrderHistoryStatusChip({ status }: { status: OrderHistoryEntry["order_s
   );
 }
 
-function OrderHistoryPayByChip({ payBy, showStatus = false }: { payBy: OrderHistoryEntry["payment_method"]; showStatus?: boolean }) {
+function OrderHistoryPayByChip({ payBy, showStatus = false, neutral = false }: { payBy: OrderHistoryEntry["payment_method"]; showStatus?: boolean; neutral?: boolean }) {
   const isPatient = payBy === "patient";
   return (
     <span
       className="inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full pl-3 pr-2 text-[11px] font-semibold text-[#282828]"
-      style={{ backgroundColor: isPatient ? "#ADEBBE" : "#0FECEF" }}
+      style={{ backgroundColor: neutral ? "#f1f1f1" : isPatient ? "#ADEBBE" : "#0FECEF" }}
     >
       {isPatient ? "Pay by Patient" : "Pay by Clinic"}
       <span className="flex size-3.5 items-center justify-center">
@@ -5014,7 +5014,7 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           </div>
         ) : (
           <div className="rounded-xl bg-white">
-            <div className="w-max max-w-full overflow-x-auto rounded-lg border border-[#e5e7eb] bg-white">
+            <div className="w-max max-w-full overflow-x-auto bg-white">
               <table className="w-full min-w-max border-collapse text-left text-sm">
                 <thead>
                   <tr>
@@ -5261,8 +5261,7 @@ function PendingShipToChip({ shipTo }: { shipTo: "patient" | "clinic" }) {
   const isPatient = shipTo === "patient";
   return (
     <span
-      className="inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[11px] font-semibold text-[#132f19]"
-      style={{ backgroundColor: isPatient ? "#ADEBBE" : "#0FECEF" }}
+      className="inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-[#f1f1f1] px-3 text-[11px] font-semibold text-[#171717]"
     >
       {isPatient ? "Ship to Patient" : "Ship to Clinic"}
       <span className="flex size-3.5 items-center justify-center">
@@ -5695,10 +5694,9 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
 
   return (
     <div className="max-w-[1300px]">
-      <h1 className="mb-6 text-[28px] font-semibold leading-[1.25] text-[#1a1a1a]">Pending Approvals</h1>
       <div className="mb-5 flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-[13px] text-[#6f7782]">Review, approve, or reject orders submitted by your team.</p>
+          <h1 className="text-[28px] font-semibold leading-tight text-[#1a1a1a]">Pending Approvals</h1>
           <label className="group flex h-[38px] w-[220px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:w-[310px] focus-within:border-2 focus-within:border-black">
             <span className="flex shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
@@ -5718,8 +5716,8 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
         <div className="flex items-end gap-4 overflow-x-auto border-b border-[#e3e3e3] px-1">
           <button type="button" className="relative inline-flex h-[46px] shrink-0 items-center whitespace-nowrap px-0.5 text-[12px] font-medium text-[#171717]">
             <span>Overall</span>
-            <span className="ml-1.5 inline-flex size-[18px] items-center justify-center rounded-full bg-[#183229] text-[9px] font-semibold text-white">{approvals.length}</span>
-            <span className="absolute inset-x-0 bottom-0 h-[2px] bg-[#183229]" />
+            <span className="ml-1.5 inline-flex size-[18px] items-center justify-center rounded-full bg-[#101010] text-[9px] font-semibold text-white">{approvals.length}</span>
+            <span className="absolute inset-x-0 bottom-0 h-[2px] bg-[#101010]" />
           </button>
         </div>
       </div>
@@ -5741,7 +5739,7 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
             </p>
           </div>
         ) : (
-          <div className="w-max max-w-full overflow-x-auto rounded-lg border border-[#e5e7eb] bg-white">
+          <div className="w-max max-w-full overflow-x-auto bg-white">
             <table className="w-full min-w-max border-collapse text-left text-sm">
               <thead>
                 <tr>
@@ -5759,7 +5757,7 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
                     <tr
                       key={approval.id}
                       onClick={() => setSelectedId(approval.id)}
-                      className="cursor-pointer transition-colors even:bg-[#fbfbfb] hover:bg-[#E0FAE7] even:hover:bg-[#E0FAE7]"
+                      className="cursor-pointer transition-colors even:bg-[#fbfbfb] hover:bg-[#f1f1f1] even:hover:bg-[#f1f1f1]"
                     >
                       <td className={tdClass}>#{approval.id.slice(-8)}</td>
                       <td className={tdClass}>
@@ -5772,18 +5770,18 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
                           <span className="text-[10px] font-bold leading-3 text-[#999999]">{created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
                         </div>
                       </td>
-                      <td className={tdClass}><OrderHistoryPayByChip payBy={approval.paymentMethod} showStatus /></td>
+                      <td className={tdClass}><OrderHistoryPayByChip payBy={approval.paymentMethod} showStatus neutral /></td>
                       <td className={tdClass}><PendingShipToChip shipTo={approval.shipTo} /></td>
                       <td className={tdClass}>{pendingApprovalRxCount(approval)}</td>
                       <td className={tdClass}>
-                        <span className="inline-flex h-7 items-center justify-center whitespace-nowrap rounded-full bg-[#6B7280] px-3 text-[11px] font-semibold text-white">PENDING APPROVAL</span>
+                        <span className="inline-flex h-7 items-center justify-center whitespace-nowrap rounded-full bg-[#101010] px-3 text-[11px] font-semibold text-white">PENDING APPROVAL</span>
                       </td>
                       <td className={tdClass}>${pendingApprovalTotal(approval).toFixed(2)}</td>
                       <td className={tdClass}>
                         <div className="flex items-center gap-1.5">
                           <button
                             onClick={event => { event.stopPropagation(); setSelectedId(approval.id); }}
-                            className="cursor-pointer rounded px-2 py-1 transition-all hover:bg-[#f0faf3]"
+                            className="cursor-pointer rounded-full px-2 py-1 transition-all hover:bg-[#e7e7e7]"
                             aria-label="See order"
                           >
                             <svg width="18" height="19" viewBox="0 0 18 19" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.75 5L11.25 9.5L6.75 14" stroke="#A5A5A5" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -6371,11 +6369,11 @@ function SupportCreateTicketModal({ open, onClose, onCreate }: { open: boolean; 
   }
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-[#15231d]/40 p-4 backdrop-blur-[2px]" onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
-      <div className="max-h-[90vh] w-full max-w-[500px] overflow-y-auto rounded-[18px] border border-white/70 bg-[#fbfcfb] p-7 shadow-[0_24px_70px_rgba(20,40,31,0.2)]">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/35 p-4 backdrop-blur-[2px]" onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
+      <div className="max-h-[90vh] w-full max-w-[500px] overflow-y-auto rounded-[14px] border border-[#e5e5e5] bg-white p-7 shadow-[0_24px_70px_rgba(0,0,0,0.18)]">
         <div className="mb-6 flex items-start justify-between">
-          <div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8a968f]">Support</p><h2 className="mt-1 text-[22px] font-semibold text-[#171a18]">Create ticket</h2><p className="mt-1 text-[12px] text-[#6c756f]">Tell us what you need help with.</p></div>
-          <button type="button" onClick={onClose} className="flex size-9 items-center justify-center rounded-full border border-[#e1e6e2] bg-white text-xl leading-none text-[#778079] transition-colors hover:bg-[#f1f4f2] hover:text-[#26352d]" aria-label="Close">×</button>
+          <div><h2 className="text-[22px] font-semibold text-[#1a1a1a]">Create Ticket</h2><p className="mt-1 text-[12px] text-[#6f7782]">Tell us what you need help with.</p></div>
+          <button type="button" onClick={onClose} className="flex size-9 items-center justify-center rounded-full border border-[#dedede] bg-white text-xl leading-none text-[#777] transition-colors hover:bg-[#f1f1f1] hover:text-black" aria-label="Close">×</button>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-8">
@@ -6383,10 +6381,10 @@ function SupportCreateTicketModal({ open, onClose, onCreate }: { open: boolean; 
               <label className="mb-2 block text-[14px] font-semibold leading-5 text-[#121212]">Type</label>
               <div className="mt-2 grid grid-cols-2 gap-2">
                 {([["ticket", "Ticket"], ["feature_request", "Feature Request"]] as const).map(([value, label]) => (
-                  <label key={value} className={`flex cursor-pointer items-center gap-2.5 rounded-[10px] border px-3 py-3 transition-colors ${ticketType === value ? "border-[#31583f] bg-[#edf4ef]" : "border-[#e1e6e2] bg-white hover:border-[#cbd5ce]"}`}>
+                  <label key={value} className={`flex cursor-pointer items-center gap-2.5 rounded-[10px] border px-3 py-3 transition-colors ${ticketType === value ? "border-black bg-[#f1f1f1]" : "border-[#dedede] bg-white hover:border-[#aaa]"}`}>
                     <input type="radio" name="ticket_type" value={value} checked={ticketType === value} onChange={() => setTicketType(value)} className="sr-only" />
-                    <span className={`relative flex size-5 items-center justify-center rounded-full border-2 bg-white transition-all ${ticketType === value ? "border-[#1d5043]" : "border-[#e4e4e4] hover:border-[#1d5043]"}`}>
-                      {ticketType === value && <span className="size-2.5 rounded-full bg-[#1d5043]" />}
+                    <span className={`relative flex size-5 items-center justify-center rounded-full border-2 bg-white transition-all ${ticketType === value ? "border-black" : "border-[#d8d8d8] hover:border-black"}`}>
+                      {ticketType === value && <span className="size-2.5 rounded-full bg-black" />}
                     </span>
                     <span className="text-[14px] font-medium text-[#121212]">{label}</span>
                   </label>
@@ -6403,13 +6401,13 @@ function SupportCreateTicketModal({ open, onClose, onCreate }: { open: boolean; 
                 value={description}
                 onChange={event => setDescription(event.target.value)}
                 placeholder="Describe the issue and include any relevant order or patient details..."
-                className="min-h-[120px] w-full resize-y rounded-[12px] border border-[#dce2de] bg-white p-3.5 text-[13px] leading-5 text-[#121512] outline-none transition-all placeholder:text-[#a2aaa5] focus:border-[#31583f] focus:shadow-[0_0_0_3px_rgba(49,88,63,0.1)]"
+                className="min-h-[120px] w-full resize-y rounded-[10px] border border-[#d8d8d8] bg-white p-3.5 text-[13px] leading-5 text-[#121512] outline-none transition-all placeholder:text-[#a2aaa5] focus:border-black focus:shadow-[0_0_0_2px_rgba(0,0,0,0.06)]"
               />
             </div>
           </div>
           <div className="flex justify-end gap-2 border-t border-[#e5e9e6] pt-5">
-            <button type="button" onClick={onClose} className="h-10 rounded-full border border-[#d8dedb] bg-white px-5 text-[12px] font-semibold text-[#4f5e56] transition-colors hover:bg-[#f4f6f4]">Cancel</button>
-            <button type="submit" className="flex h-10 items-center justify-center gap-2 rounded-full bg-[#272727] px-5 text-[12px] font-semibold text-white transition-colors hover:bg-[#111]">
+            <button type="button" onClick={onClose} className="rounded-full border border-[#dedede] bg-white px-4 py-2 text-[12px] font-medium text-black transition-colors hover:bg-[#f1f1f1]">Cancel</button>
+            <button type="submit" className="flex items-center justify-center gap-2 rounded-full bg-[#111] px-4 py-2 text-[12px] font-medium text-white transition-colors hover:bg-black">
               Create Ticket
             </button>
           </div>
@@ -6499,9 +6497,9 @@ function SupportPage({ onNavigate: _onNavigate }: { onNavigate: (p: Page) => voi
               type="button"
               onClick={() => setIsCreateModalOpen(true)}
               aria-label="Create Ticket"
-              className="flex items-center gap-1.5 rounded-full bg-[#111] px-4 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-black"
+              className="flex items-center gap-1.5 rounded-full bg-[#111] px-4 py-2 text-[12px] font-medium text-white transition-colors hover:bg-black"
             >
-              <Plus size={12} />
+              <Plus size={15} />
               Create Ticket
             </button>
         </div>
@@ -6732,17 +6730,17 @@ function UsersPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       <div className="max-w-[1300px]">
         {/* Page header row */}
         <div className="flex items-center justify-between mb-5">
-          <h1 className="text-[22px] font-semibold text-[#1a1a1a] leading-tight">
+          <h1 className="text-[28px] font-semibold text-[#1a1a1a] leading-tight">
             Patients{" "}
             <span className="text-[16px] font-normal text-[#9d9d9d]">({patients.length})</span>
           </h1>
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1.5 rounded-full border border-[#d8dedb] bg-white px-4 py-2 text-[11px] font-semibold text-black transition-colors hover:bg-[#f7f8f7]">
-              <Upload size={12} />
+            <button className="flex items-center gap-1.5 rounded-full border border-[#d8dedb] bg-white px-4 py-2 text-[12px] font-medium text-black transition-colors hover:bg-[#f7f8f7]">
+              <Upload size={15} />
               Upload Patients
             </button>
-            <button onClick={() => setCreatePatientOpen(true)} className="flex items-center gap-1.5 rounded-full bg-[#111] px-4 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-black">
-              <Plus size={12} />
+            <button onClick={() => setCreatePatientOpen(true)} className="flex items-center gap-1.5 rounded-full bg-[#111] px-4 py-2 text-[12px] font-medium text-white transition-colors hover:bg-black">
+              <Plus size={15} />
               Create Patient
             </button>
           </div>
