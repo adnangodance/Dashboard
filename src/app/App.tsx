@@ -3435,9 +3435,9 @@ function ProductDetailPage({
           </div>
 
           {!discountApplied && (
-            <div className={`${isReferenceStyle ? "mt-6" : "mt-4"} w-[226px] max-w-full rounded-[14px] border border-white/80 bg-[linear-gradient(135deg,#f3fbf7_0%,#e5f1eb_62%,#fbf8ea_100%)] p-3 shadow-[0_10px_28px_rgba(24,50,41,0.08)]`}>
+            <div className={`${isReferenceStyle ? "mt-6" : "mt-4"} w-[226px] max-w-full rounded-[14px] border border-white/80 bg-[radial-gradient(circle_at_90%_0%,rgba(219,232,255,0.98),transparent_52%),linear-gradient(145deg,#f8fbff_0%,#edf4ff_100%)] p-3 shadow-[0_10px_28px_rgba(37,99,235,0.08)]`}>
               <div className="flex items-start gap-2.5">
-                <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-white/55 text-[#315a47]">
+                <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-white/55 text-[#2563EB]">
                   <Tag size={14} strokeWidth={1.9} />
                 </span>
                 <div className="min-w-0">
@@ -3458,7 +3458,7 @@ function ProductDetailPage({
                 }}
                 className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-full bg-white text-[11px] font-semibold text-[#171717] shadow-[0_1px_0_rgba(24,50,41,0.04)] transition-colors hover:bg-[#fbfbfb] disabled:cursor-wait disabled:text-[#68736d]"
               >
-                {discountApplying && <Loader2 size={13} className="animate-spin text-[#315a47]" />}
+                {discountApplying && <Loader2 size={13} className="animate-spin text-[#2563EB]" />}
                 {discountApplying ? "Applying" : "Apply discount"}
               </button>
             </div>
@@ -6843,6 +6843,8 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const [addUserOpen, setAddUserOpen] = useState(false);
   const [inviteUserOpen, setInviteUserOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [invitePrescriberOpen, setInvitePrescriberOpen] = useState(false);
+  const [invitePrescriberEmail, setInvitePrescriberEmail] = useState("");
   const [openUserMenu, setOpenUserMenu] = useState<string | null>(null);
   const [openPrescriberMenu, setOpenPrescriberMenu] = useState<string | null>(null);
   const [showUserPassword, setShowUserPassword] = useState(false);
@@ -6853,7 +6855,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const [addPrescriberOpen, setAddPrescriberOpen] = useState(false);
   const [showPrescriberPassword, setShowPrescriberPassword] = useState(false);
   const [newPrescriberActive, setNewPrescriberActive] = useState(true);
-  const [newPrescriber, setNewPrescriber] = useState({ email: "", title: "", firstName: "", lastName: "", dob: "", npi: "", dea: "", license: "", phone: "", fax: "", cell: "", address1: "", address2: "", city: "", state: "", zip: "" });
+  const [newPrescriber, setNewPrescriber] = useState({ email: "", password: "", title: "", firstName: "", lastName: "", dob: "", npi: "", dea: "", license: "", phone: "", fax: "", cell: "", address1: "", address2: "", city: "", state: "", zip: "" });
   const generatedPrescriberPassword = "Rx!4p7vN2";
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const signatureDrawingRef = useRef(false);
@@ -7119,7 +7121,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Prescribers</h3>
               <div className="flex gap-2">
-                <button className="h-10 rounded-full border border-[#EAE8E1] bg-white px-4 text-[12px] font-medium text-[#1a1a1a] transition-colors hover:bg-[#FBFBFB]">Invite</button>
+                <button onClick={() => setInvitePrescriberOpen(true)} className="h-10 rounded-full border border-[#EAE8E1] bg-white px-4 text-[12px] font-medium text-[#1a1a1a] transition-colors hover:bg-[#FBFBFB]">Invite</button>
                 <button onClick={() => setAddPrescriberOpen(true)} className="flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
                   <Plus size={15} /> Add Prescriber
                 </button>
@@ -7287,12 +7289,12 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 <h2 id="invite-user-title" className="text-[20px] font-semibold text-[#171717]">Invite user</h2>
                 <p className="mt-1 text-[11px] text-[#777]">Send a secure invitation to join your account.</p>
               </div>
-              <button type="button" onClick={() => setInviteUserOpen(false)} className="flex size-9 items-center justify-center rounded-full border border-[#e4e4e4] bg-white text-[#777] transition-colors hover:bg-[#f5f5f5] hover:text-black" aria-label="Close">
-                <X size={17} />
+              <button type="button" onClick={() => setInviteUserOpen(false)} className="flex size-9 items-center justify-center text-[#777] transition-colors hover:text-black" aria-label="Close">
+                <X size={19} />
               </button>
             </div>
             <div className="p-6">
-              <div className="rounded-[16px] border border-white/70 bg-[radial-gradient(circle_at_95%_0%,rgba(223,244,238,0.9),transparent_52%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)] p-5 shadow-[0_10px_28px_rgba(38,54,45,0.07)]">
+              <div className="rounded-[16px] bg-[#fafafa] p-5">
                 <label className="block">
                   <span className="mb-2 block text-[11px] font-medium text-[#292929]">Email address <span className="text-[#b4473d]">*</span></span>
                   <input
@@ -7307,9 +7309,41 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 </label>
               </div>
             </div>
-            <div className="flex gap-2 border-t border-[#ececec] bg-white px-6 py-4">
-              <button type="button" onClick={() => setInviteUserOpen(false)} className="h-11 flex-1 rounded-full border border-[#d8d8d8] bg-white text-[12px] font-medium text-black transition-colors hover:bg-[#f4f4f4]">Cancel</button>
-              <button type="submit" className="h-11 flex-[1.4] rounded-full bg-black text-[12px] font-semibold text-white transition-colors hover:bg-[#222]">Send invite</button>
+            <div className="border-t border-[#ececec] bg-white px-6 py-4">
+              <button type="submit" className="h-11 w-full rounded-full bg-black text-[12px] font-semibold text-white transition-colors hover:bg-[#222]">Send invite</button>
+            </div>
+          </form>
+        </div>
+      )}
+      {invitePrescriberOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/35 p-5 backdrop-blur-[3px]">
+          <button type="button" className="absolute inset-0 cursor-default" onClick={() => setInvitePrescriberOpen(false)} aria-label="Close invite prescriber" />
+          <form
+            onSubmit={event => { event.preventDefault(); setInvitePrescriberOpen(false); setInvitePrescriberEmail(""); }}
+            className="relative z-10 w-full max-w-[500px] overflow-hidden rounded-[18px] border border-white/70 bg-white shadow-[0_24px_70px_rgba(20,28,24,0.2)]"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="invite-prescriber-title"
+          >
+            <div className="flex items-start justify-between border-b border-[#ececec] px-6 py-5">
+              <div>
+                <h2 id="invite-prescriber-title" className="text-[20px] font-semibold text-[#171717]">Invite prescriber</h2>
+                <p className="mt-1 text-[11px] text-[#777]">Send a secure invitation to join your account.</p>
+              </div>
+              <button type="button" onClick={() => setInvitePrescriberOpen(false)} className="flex size-9 items-center justify-center text-[#777] transition-colors hover:text-black" aria-label="Close">
+                <X size={19} />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="rounded-[16px] bg-[#fafafa] p-5">
+                <label className="block">
+                  <span className="mb-2 block text-[11px] font-medium text-[#292929]">Email address <span className="text-[#b4473d]">*</span></span>
+                  <input autoFocus required type="email" value={invitePrescriberEmail} onChange={event => setInvitePrescriberEmail(event.target.value)} placeholder="prescriber@example.com" className="h-11 w-full rounded-[10px] border border-white/90 bg-white px-3.5 text-[12px] text-[#222] outline-none placeholder:text-[#aaa] focus:border-black" />
+                </label>
+              </div>
+            </div>
+            <div className="border-t border-[#ececec] bg-white px-6 py-4">
+              <button type="submit" className="h-11 w-full rounded-full bg-black text-[12px] font-semibold text-white transition-colors hover:bg-[#222]">Send invite</button>
             </div>
           </form>
         </div>
@@ -7317,7 +7351,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       {addPrescriberOpen && (
         <div className="fixed inset-0 z-[95] flex items-stretch justify-end bg-black/35 backdrop-blur-[2px]">
           <button className="absolute inset-0 cursor-default" onClick={() => setAddPrescriberOpen(false)} aria-label="Close add prescriber" />
-          <form onSubmit={event => { event.preventDefault(); setAddPrescriberOpen(false); }} className="relative z-10 flex h-full w-full max-w-[820px] flex-col overflow-hidden border-l border-[#e3e3e3] bg-white shadow-[-20px_0_60px_rgba(0,0,0,0.16)]">
+          <form onSubmit={event => { event.preventDefault(); setAddPrescriberOpen(false); }} className="relative z-10 flex h-full w-full max-w-[620px] flex-col overflow-hidden border-l border-[#e3e3e3] bg-white shadow-[-20px_0_60px_rgba(0,0,0,0.16)]">
             <div className="flex shrink-0 items-start justify-between border-b border-[#ececec] px-6 py-5">
               <div><h2 className="text-[21px] font-semibold text-[#171717]">Add prescriber</h2><p className="mt-1 text-[11px] text-[#777]">Add identity, licensing, and contact information.</p></div>
               <button type="button" onClick={() => setAddPrescriberOpen(false)} className="flex size-9 items-center justify-center text-[#777] transition-colors hover:text-black" aria-label="Close"><X size={19} /></button>
@@ -7325,8 +7359,9 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
             <div className="min-h-0 flex-1 overflow-y-auto p-6">
               <div className="flex flex-col gap-6">
-              <div className="order-2 grid gap-4 sm:grid-cols-6">
-                <label className="block sm:col-span-6"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Email <span className="text-[#b4473d]">*</span></span><input required type="email" value={newPrescriber.email} onChange={event => setNewPrescriber(current => ({ ...current, email: event.target.value }))} placeholder="name@company.com" className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black" /></label>
+              <div className="order-1 grid gap-4 sm:grid-cols-6">
+                <label className="block sm:col-span-3"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Email <span className="text-[#b4473d]">*</span></span><input required type="email" value={newPrescriber.email} onChange={event => setNewPrescriber(current => ({ ...current, email: event.target.value }))} placeholder="name@company.com" className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black" /></label>
+                <label className="block sm:col-span-3"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Password <span className="text-[#b4473d]">*</span></span><input required type="password" value={newPrescriber.password} onChange={event => setNewPrescriber(current => ({ ...current, password: event.target.value }))} placeholder="Create a secure password" className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black" /></label>
                 <label className="block sm:col-span-2"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Title <span className="text-[#b4473d]">*</span></span><select required value={newPrescriber.title} onChange={event => setNewPrescriber(current => ({ ...current, title: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] bg-white px-3 text-[12px] outline-none focus:border-black"><option value="" disabled>Select</option><option>MD</option><option>DO</option><option>NP</option><option>PA</option></select></label>
                 {([['First name','firstName'],['Last name','lastName']] as const).map(([label,key]) => <label key={key} className="block sm:col-span-2"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">{label} <span className="text-[#b4473d]">*</span></span><input required value={newPrescriber[key]} onChange={event => setNewPrescriber(current => ({ ...current, [key]: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none focus:border-black" /></label>)}
                 <label className="block sm:col-span-3"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Date of birth</span><input type="date" value={newPrescriber.dob} onChange={event => setNewPrescriber(current => ({ ...current, dob: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none focus:border-black" /></label>
@@ -7334,19 +7369,19 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 <label className="block sm:col-span-3"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">DEA number</span><input value={newPrescriber.dea} onChange={event => setNewPrescriber(current => ({ ...current, dea: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none focus:border-black" /></label>
                 <label className="block sm:col-span-3"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">License number <span className="text-[#b4473d]">*</span></span><input required value={newPrescriber.license} onChange={event => setNewPrescriber(current => ({ ...current, license: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none focus:border-black" /></label>
                 {([['Phone number','phone',true],['Fax number','fax',false],['Cellphone','cell',false]] as const).map(([label,key,required]) => <label key={key} className="block sm:col-span-2"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">{label} {required && <span className="text-[#b4473d]">*</span>}</span><input required={required} type="tel" value={newPrescriber[key]} onChange={event => setNewPrescriber(current => ({ ...current, [key]: event.target.value }))} placeholder="(000) 000-0000" className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black" /></label>)}
-                <label className="block sm:col-span-6"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Address line 1 <span className="text-[#b4473d]">*</span></span><input required value={newPrescriber.address1} onChange={event => setNewPrescriber(current => ({ ...current, address1: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none focus:border-black" /></label>
-                {([['Address line 2','address2',false],['City','city',true],['State','state',true],['Zip code','zip',true]] as const).map(([label,key,required]) => <label key={key} className="block sm:col-span-3"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">{label} {required && <span className="text-[#b4473d]">*</span>}</span><input required={required} value={newPrescriber[key]} onChange={event => setNewPrescriber(current => ({ ...current, [key]: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none focus:border-black" /></label>)}
+                {([['Address line 1','address1',true],['Address line 2','address2',false]] as const).map(([label,key,required]) => <label key={key} className="block sm:col-span-3"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">{label} {required && <span className="text-[#b4473d]">*</span>}</span><input required={required} value={newPrescriber[key]} onChange={event => setNewPrescriber(current => ({ ...current, [key]: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none focus:border-black" /></label>)}
+                {([['City','city'],['State','state'],['Zip code','zip']] as const).map(([label,key]) => <label key={key} className="block sm:col-span-2"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">{label} <span className="text-[#b4473d]">*</span></span><input required value={newPrescriber[key]} onChange={event => setNewPrescriber(current => ({ ...current, [key]: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none focus:border-black" /></label>)}
                 <label className="flex cursor-pointer items-center justify-between rounded-[10px] border border-[#e3e3e3] bg-[#fafafa] px-3.5 py-3 sm:col-span-6"><span><span className="block text-[12px] font-medium text-[#202020]">Active prescriber</span><span className="mt-0.5 block text-[10px] text-[#7c7c7c]">Can sign in and prescribe immediately</span></span><input type="checkbox" checked={newPrescriberActive} onChange={event => setNewPrescriberActive(event.target.checked)} className="peer sr-only" /><span className="relative h-6 w-11 rounded-full bg-[#dedede] transition-colors peer-checked:bg-black after:absolute after:left-1 after:top-1 after:size-4 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-5" /></label>
               </div>
 
-              <aside className="order-1 rounded-[18px] border border-white/70 bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)] p-5 shadow-[0_10px_28px_rgba(38,54,45,0.08)]">
+              <aside className="order-2 rounded-[18px] border border-white/70 bg-[radial-gradient(circle_at_90%_0%,rgba(219,232,255,0.98),transparent_52%),linear-gradient(145deg,#f8fbff_0%,#edf4ff_100%)] p-5 shadow-[0_10px_28px_rgba(38,54,45,0.08)]">
                 <h3 className="text-[16px] font-semibold text-[#1b1b1b]">Login credentials</h3>
                 <div className="mt-4 grid gap-3 text-[11px] sm:grid-cols-3">
                   <div><p className="mb-1.5 text-[#888]">Login URL</p><div className="rounded-[12px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.78),rgba(255,255,255,0.4))] px-4 py-4 font-semibold text-[#222] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl">scriptlinkrx.com/login</div></div>
                   <div><p className="mb-1.5 text-[#888]">Email</p><div className="rounded-[12px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.78),rgba(255,255,255,0.4))] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className={`truncate font-semibold ${newPrescriber.email ? "text-[#222]" : "text-[#aaa]"}`}>{newPrescriber.email || "zee@scriptlinkrx.com"}</p></div></div>
-                  <div><p className="mb-1.5 text-[#888]">Temporary password</p><div className="flex items-center justify-between rounded-[12px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.78),rgba(255,255,255,0.4))] px-4 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className="font-mono text-[12px] font-semibold tracking-[0.08em]">{showPrescriberPassword ? generatedPrescriberPassword : "•••••••••"}</p><button type="button" onClick={() => setShowPrescriberPassword(current => !current)} className="flex size-7 items-center justify-center text-[#777] hover:text-black">{showPrescriberPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button></div></div>
+                  <div><p className="mb-1.5 text-[#888]">Password</p><div className="flex items-center justify-between rounded-[12px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.78),rgba(255,255,255,0.4))] px-4 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className="font-mono text-[12px] font-semibold tracking-[0.08em]">{showPrescriberPassword ? (newPrescriber.password || generatedPrescriberPassword) : "•••••••••"}</p><button type="button" onClick={() => setShowPrescriberPassword(current => !current)} className="flex size-7 items-center justify-center text-[#777] hover:text-black">{showPrescriberPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button></div></div>
                 </div>
-                <button type="button" onClick={() => navigator.clipboard?.writeText(`Login: https://scriptlinkrx.com/login\nEmail: ${newPrescriber.email}\nPassword: ${generatedPrescriberPassword}`)} className="mt-6 flex h-10 w-full items-center justify-center gap-2 rounded-full border border-white/80 bg-white text-[11px] font-semibold shadow-[0_3px_12px_rgba(34,46,39,0.06)] transition-transform hover:-translate-y-0.5"><Copy size={14} /> Copy credentials</button>
+                <button type="button" onClick={() => navigator.clipboard?.writeText(`Login: https://scriptlinkrx.com/login\nEmail: ${newPrescriber.email}\nPassword: ${newPrescriber.password || generatedPrescriberPassword}`)} className="mt-6 flex h-10 w-full items-center justify-center gap-2 rounded-full border border-white/80 bg-white text-[11px] font-semibold shadow-[0_3px_12px_rgba(34,46,39,0.06)] transition-transform hover:-translate-y-0.5"><Copy size={14} /> Copy credentials</button>
               </aside>
               </div>
             </div>
@@ -7368,7 +7403,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
             <div className="min-h-0 flex-1 overflow-y-auto p-6">
               <div className="flex flex-col gap-6">
-              <div className="order-2 grid h-fit content-start gap-x-4 gap-y-3 sm:grid-cols-2">
+              <div className="order-1 grid h-fit content-start gap-x-4 gap-y-3 sm:grid-cols-2">
                 {([
                   ["First name", "firstName", "e.g. John"],
                   ["Last name", "lastName", "e.g. Doe"],
@@ -7403,7 +7438,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 </div>
               </div>
 
-              <aside className="order-1 rounded-[18px] border border-white/70 bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)] p-5 shadow-[0_10px_28px_rgba(38,54,45,0.08)]">
+              <aside className="order-2 rounded-[18px] border border-white/70 bg-[radial-gradient(circle_at_90%_0%,rgba(219,232,255,0.98),transparent_52%),linear-gradient(145deg,#f8fbff_0%,#edf4ff_100%)] p-5 shadow-[0_10px_28px_rgba(38,54,45,0.08)]">
                 <h3 className="text-[16px] font-semibold text-[#1b1b1b]">Login credentials</h3>
                 <div className="mt-4 grid gap-3 text-[11px] sm:grid-cols-3">
                   <div><p className="mb-1.5 text-[#888]">Login URL</p><div className="rounded-[12px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.78),rgba(255,255,255,0.4))] px-4 py-4 font-semibold text-[#222] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl">scriptlinkrx.com/login</div></div>
