@@ -4806,8 +4806,8 @@ function OrderHistoryPayByChip({ payBy, showStatus = false, neutral = false }: {
   const isPatient = payBy === "patient";
   return (
     <span
-      className="inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full pl-3 pr-2 text-[11px] font-semibold text-[#282828]"
-      style={{ backgroundColor: neutral ? "#f1f1f1" : isPatient ? "#ADEBBE" : "#0FECEF" }}
+      className={`inline-flex h-7 items-center justify-center gap-1 whitespace-nowrap rounded-full py-1 pl-3 pr-1 text-[11px] text-[#282828] ${neutral ? "font-medium" : "font-semibold"}`}
+      style={{ backgroundColor: neutral ? (isPatient ? "#ADEBBE" : "#6DE9ED") : isPatient ? "#ADEBBE" : "#0FECEF" }}
     >
       {isPatient ? "Pay by Patient" : "Pay by Clinic"}
       <span className="flex size-3.5 items-center justify-center">
@@ -4817,8 +4817,8 @@ function OrderHistoryPayByChip({ payBy, showStatus = false, neutral = false }: {
           <svg width="14" height="14" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.125 10.5H10.875M1.875 1.5V10.5M7.125 1.5V10.5M10.125 3.75V10.5M3.375 3.375H3.75M3.375 4.875H3.75M3.375 6.375H3.75M5.25 3.375H5.625M5.25 4.875H5.625M5.25 6.375H5.625M3.375 10.5V8.8125C3.375 8.50184 3.62684 8.25 3.9375 8.25H5.0625C5.37316 8.25 5.625 8.50184 5.625 8.8125V10.5M1.5 1.5H7.5M7.125 3.75H10.5M8.625 5.625H8.62875V5.62875H8.625V5.625ZM8.625 7.125H8.62875V7.12875H8.625V7.125ZM8.625 8.625H8.62875V8.62875H8.625V8.625Z" stroke="#020202" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
         )}
       </span>
-      {payBy === "clinic_ach" && <span className="rounded-3xl bg-[#f97316] px-1.5 py-px text-[8px] font-bold text-white">ACH</span>}
-      {showStatus && payBy !== "clinic_ach" && <span className="rounded-3xl bg-[#fb3e75] px-2 py-0.5 text-[9px] font-bold text-[#fcfcfc]">UNPAID</span>}
+      {showStatus && payBy === "clinic_ach" && <span className="inline-flex h-5 items-center rounded-full bg-white px-2 text-[8px] font-bold text-[#101010]">PAID</span>}
+      {showStatus && payBy !== "clinic_ach" && <span className="inline-flex h-5 items-center rounded-full bg-[#fb3e75] px-2 text-[8px] font-bold text-white">UNPAID</span>}
     </span>
   );
 }
@@ -5261,7 +5261,7 @@ function PendingShipToChip({ shipTo }: { shipTo: "patient" | "clinic" }) {
   const isPatient = shipTo === "patient";
   return (
     <span
-      className="inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-[#f1f1f1] px-3 text-[11px] font-semibold text-[#171717]"
+      className={`inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[11px] font-medium text-[#171717] ${isPatient ? "bg-[#ADEBBE]" : "bg-[#6DE9ED]"}`}
     >
       {isPatient ? "Ship to Patient" : "Ship to Clinic"}
       <span className="flex size-3.5 items-center justify-center">
@@ -5690,13 +5690,15 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
     );
   });
 
-  const tdClass = "max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]";
+  const tdClass = "max-w-[500px] px-4 py-1 text-[12px] font-normal leading-5 text-[#121212]";
 
   return (
     <div className="max-w-[1300px]">
       <div className="mb-5 flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-[28px] font-semibold leading-tight text-[#1a1a1a]">Pending Approvals</h1>
+          <h1 className="text-[28px] font-medium leading-tight text-[#1a1a1a]">
+            Pending Approvals <span className="text-[18px] font-normal text-[#7b7f86]">({approvals.length})</span>
+          </h1>
           <label className="group flex h-[38px] w-[220px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:w-[310px] focus-within:border-2 focus-within:border-black">
             <span className="flex shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
@@ -5711,14 +5713,6 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
             />
             <span className="shrink-0 text-[10px] text-[#686868]">⌘ F</span>
           </label>
-        </div>
-
-        <div className="flex items-end gap-4 overflow-x-auto border-b border-[#e3e3e3] px-1">
-          <button type="button" className="relative inline-flex h-[46px] shrink-0 items-center whitespace-nowrap px-0.5 text-[12px] font-medium text-[#171717]">
-            <span>Overall</span>
-            <span className="ml-1.5 inline-flex size-[18px] items-center justify-center rounded-full bg-[#101010] text-[9px] font-semibold text-white">{approvals.length}</span>
-            <span className="absolute inset-x-0 bottom-0 h-[2px] bg-[#101010]" />
-          </button>
         </div>
       </div>
 
@@ -5744,7 +5738,7 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
               <thead>
                 <tr>
                   {["ORDER ID", "PATIENT", "CREATED BY", "CREATED AT", "PAY BY", "SHIP TO", "ITEMS", "STATUS", "TOTAL", ""].map((header, index) => (
-                    <th key={index} className="whitespace-nowrap border-b border-[#e5e7eb] bg-[#fbfbfb] px-4 py-2 text-[12px] font-bold uppercase leading-5 text-[#999999]">
+                    <th key={index} className="whitespace-nowrap border-b border-[#e5e7eb] bg-[#fbfbfb] px-4 py-2 text-[12px] font-medium uppercase leading-5 text-[#999999]">
                       {header}
                     </th>
                   ))}
@@ -5761,20 +5755,20 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
                     >
                       <td className={tdClass}>#{approval.id.slice(-8)}</td>
                       <td className={tdClass}>
-                        <span className="text-[14px] font-semibold text-[#121212]">{approval.patient.firstName} {approval.patient.lastName}</span>
+                        <span className="text-[14px] font-medium text-[#121212]">{approval.patient.firstName} {approval.patient.lastName}</span>
                       </td>
                       <td className={tdClass}>{approval.submittedBy}</td>
                       <td className={tdClass}>
-                        <div className="flex flex-col items-start">
+                        <div className="inline-flex h-7 items-center gap-2 whitespace-nowrap rounded-full bg-[#f1f1f1] py-1 pl-3 pr-1 text-[11px] font-medium text-[#282828]">
                           <span>{created.getMonth() + 1}/{created.getDate()}/{created.getFullYear()}</span>
-                          <span className="text-[10px] font-bold leading-3 text-[#999999]">{created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
+                          <span className="inline-flex h-5 items-center rounded-full bg-white px-2 text-[9px] font-medium text-[#686868]">{created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
                         </div>
                       </td>
                       <td className={tdClass}><OrderHistoryPayByChip payBy={approval.paymentMethod} showStatus neutral /></td>
                       <td className={tdClass}><PendingShipToChip shipTo={approval.shipTo} /></td>
                       <td className={tdClass}>{pendingApprovalRxCount(approval)}</td>
                       <td className={tdClass}>
-                        <span className="inline-flex h-7 items-center justify-center whitespace-nowrap rounded-full bg-[#101010] px-3 text-[11px] font-semibold text-white">PENDING APPROVAL</span>
+                        <span className="inline-flex h-7 items-center justify-center whitespace-nowrap rounded-full bg-[#FFF0D2] px-3.5 text-[11px] font-semibold text-[#56203B]">Pending Approval</span>
                       </td>
                       <td className={tdClass}>${pendingApprovalTotal(approval).toFixed(2)}</td>
                       <td className={tdClass}>
