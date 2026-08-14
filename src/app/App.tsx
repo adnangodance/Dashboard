@@ -6841,6 +6841,8 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const [cardSaving, setCardSaving] = useState(false);
   const [savedClinicCard, setSavedClinicCard] = useState(() => window.sessionStorage.getItem("clinic-card-saved") === "true");
   const [addUserOpen, setAddUserOpen] = useState(false);
+  const [inviteUserOpen, setInviteUserOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
   const [openUserMenu, setOpenUserMenu] = useState<string | null>(null);
   const [openPrescriberMenu, setOpenPrescriberMenu] = useState<string | null>(null);
   const [showUserPassword, setShowUserPassword] = useState(false);
@@ -7102,7 +7104,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Users</h3>
               <div className="flex gap-2">
-                <button className="h-10 rounded-full border border-[#EAE8E1] bg-white px-4 text-[12px] font-medium text-[#1a1a1a] transition-colors hover:bg-[#FBFBFB]">Invite</button>
+                <button onClick={() => setInviteUserOpen(true)} className="h-10 rounded-full border border-[#EAE8E1] bg-white px-4 text-[12px] font-medium text-[#1a1a1a] transition-colors hover:bg-[#FBFBFB]">Invite</button>
                 <button onClick={() => setAddUserOpen(true)} className="flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
                   <Plus size={15} /> Add User
                 </button>
@@ -7171,7 +7173,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                     <div className="py-4 text-[11px]"><p className="text-[#888]">Cardholder</p><p className="mt-1 font-semibold text-[#222]">ScriptLinkRx Clinic</p></div>
                     <div className="flex items-center gap-2">
                       {primaryClinicPayment !== "credit" && <button type="button" onClick={() => setPrimaryClinicPayment("credit")} className="h-8 rounded-full border border-[#d8d8d2] bg-white px-3 text-[11px] font-medium text-black transition-colors hover:border-black hover:bg-[#f1f1f1]">Set as primary</button>}
-                      <button type="button" onClick={() => setCreditCardOpen(true)} className="h-8 rounded-[7px] bg-black px-3 text-[11px] font-medium text-white transition-colors hover:bg-[#252525]">Update card</button>
+                      <button type="button" onClick={() => setCreditCardOpen(true)} className="h-9 rounded-full border border-[#d8d8d8] bg-white px-5 text-[11px] font-medium text-[#1f1f1f] transition-colors hover:border-[#b8b8b8] hover:bg-[#f7f7f7]">Update card</button>
                     </div>
                   </div>
                 ) : (
@@ -7270,6 +7272,48 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           )}
         </div>
       </div>
+      {inviteUserOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/35 p-5 backdrop-blur-[3px]">
+          <button type="button" className="absolute inset-0 cursor-default" onClick={() => setInviteUserOpen(false)} aria-label="Close invite user" />
+          <form
+            onSubmit={event => { event.preventDefault(); setInviteUserOpen(false); setInviteEmail(""); }}
+            className="relative z-10 w-full max-w-[500px] overflow-hidden rounded-[18px] border border-white/70 bg-white shadow-[0_24px_70px_rgba(20,28,24,0.2)]"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="invite-user-title"
+          >
+            <div className="flex items-start justify-between border-b border-[#ececec] px-6 py-5">
+              <div>
+                <h2 id="invite-user-title" className="text-[20px] font-semibold text-[#171717]">Invite user</h2>
+                <p className="mt-1 text-[11px] text-[#777]">Send a secure invitation to join your account.</p>
+              </div>
+              <button type="button" onClick={() => setInviteUserOpen(false)} className="flex size-9 items-center justify-center rounded-full border border-[#e4e4e4] bg-white text-[#777] transition-colors hover:bg-[#f5f5f5] hover:text-black" aria-label="Close">
+                <X size={17} />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="rounded-[16px] border border-white/70 bg-[radial-gradient(circle_at_95%_0%,rgba(223,244,238,0.9),transparent_52%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)] p-5 shadow-[0_10px_28px_rgba(38,54,45,0.07)]">
+                <label className="block">
+                  <span className="mb-2 block text-[11px] font-medium text-[#292929]">Email address <span className="text-[#b4473d]">*</span></span>
+                  <input
+                    autoFocus
+                    required
+                    type="email"
+                    value={inviteEmail}
+                    onChange={event => setInviteEmail(event.target.value)}
+                    placeholder="user@example.com"
+                    className="h-11 w-full rounded-[10px] border border-white/90 bg-white/80 px-3.5 text-[12px] text-[#222] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_5px_16px_rgba(34,46,39,0.05)] outline-none backdrop-blur-xl placeholder:text-[#aaa] focus:border-black"
+                  />
+                </label>
+              </div>
+            </div>
+            <div className="flex gap-2 border-t border-[#ececec] bg-white px-6 py-4">
+              <button type="button" onClick={() => setInviteUserOpen(false)} className="h-11 flex-1 rounded-full border border-[#d8d8d8] bg-white text-[12px] font-medium text-black transition-colors hover:bg-[#f4f4f4]">Cancel</button>
+              <button type="submit" className="h-11 flex-[1.4] rounded-full bg-black text-[12px] font-semibold text-white transition-colors hover:bg-[#222]">Send invite</button>
+            </div>
+          </form>
+        </div>
+      )}
       {addPrescriberOpen && (
         <div className="fixed inset-0 z-[95] flex items-stretch justify-end bg-black/35 backdrop-blur-[2px]">
           <button className="absolute inset-0 cursor-default" onClick={() => setAddPrescriberOpen(false)} aria-label="Close add prescriber" />
