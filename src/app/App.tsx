@@ -4578,7 +4578,7 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
         <div className="ml-auto flex flex-wrap justify-end gap-2">
           <button className="inline-flex h-10 items-center gap-1.5 rounded-full border border-[#d8dedb] bg-white px-4 text-[11px] font-semibold text-black transition-colors hover:bg-[#f1f1f1]"><Download size={13} /> Download receipt</button>
           <button onClick={() => onNavigate("support")} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#272727] px-4 text-[11px] font-semibold text-white transition-colors hover:bg-[#111]"><Plus size={13} /> Create Ticket</button>
-          <button className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#FFE7D6] px-4 text-[11px] font-semibold text-[#7B003B] transition-colors hover:bg-[#ffdcc4]"><XCircle size={13} /> Request cancellation</button>
+          <button className="inline-flex h-10 items-center rounded-full bg-[#FFE7D6] px-4 text-[11px] font-semibold text-[#7B003B] transition-colors hover:bg-[#ffdcc4]">Request cancellation</button>
         </div>
       </div>
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -4678,13 +4678,13 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
               <div className="mt-6">{statusSteps.map((step,index) => (
                 <div key={step} className="flex gap-4">
                   <div className="flex flex-col items-center">
-                    <span className={`flex size-9 items-center justify-center rounded-full ${index <= activeStep ? "bg-[#56203B] text-white" : "bg-[#edf0f2] text-[#9aa1a8]"}`}>{index === 0 ? <Package size={15}/> : <CheckCircle2 size={15}/>}</span>
+                    <span className={`flex size-9 items-center justify-center rounded-full ${index <= activeStep ? order.payStatus === "UNPAID" ? "bg-[linear-gradient(135deg,#4C1D95_0%,#8B5CF6_52%,#EDE9FE_100%)] text-white" : order.status === "Processing" || order.status === "Shipped" ? "bg-[linear-gradient(135deg,#1746D1_0%,#3B82F6_48%,#A7C8FF_100%)] text-white" : "bg-[#56203B] text-white" : "bg-[#edf0f2] text-[#9aa1a8]"}`}>{index === 0 ? <Package size={15}/> : <CheckCircle2 size={15}/>}</span>
                     {index < statusSteps.length - 1 && <span className="h-10 w-px bg-[#dfe5e2]" />}
                   </div>
-                  <div className="pt-1"><p className="text-[13px] font-semibold text-[#161a18]">{step}</p>{index === 0 && <><p className="mt-1 text-[11px] text-[#667085]">{order.timestamp}</p><p className="mt-1 text-[11px] font-semibold text-[#d92d20]">Payment {order.payStatus.toLowerCase()}</p></>}</div>
+                  <div className="pt-1"><p className="text-[13px] font-semibold text-[#161a18]">{step}</p>{index === 0 && <><p className="mt-1 text-[11px] text-[#667085]">{order.timestamp}</p><p className={`mt-1 text-[11px] font-semibold ${order.payStatus === "PAID" ? "text-[#2563EB]" : "text-[#d92d20]"}`}>Payment {order.payStatus.toLowerCase()}</p></>}</div>
                 </div>
               ))}</div>
-              <div className="mt-6 flex items-center gap-3 rounded-[12px] bg-gradient-to-r from-[#CADDD9] to-[#E8E5B0] px-4 py-3">
+              <div className="mt-6 flex items-center gap-3 rounded-[12px] bg-[radial-gradient(circle_at_90%_0%,rgba(219,232,255,0.98),transparent_52%),linear-gradient(145deg,#f8fbff_0%,#edf4ff_100%)] px-4 py-3">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-[#667085]"><Bell size={15} /></span>
                 <div><p className="text-[12px] font-semibold text-[#161a18]">Live updates.</p><p className="mt-0.5 text-[11px] leading-4 text-[#667085]">Always in the know.</p></div>
               </div>
