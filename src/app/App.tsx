@@ -6828,8 +6828,8 @@ function UsersPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const shouldOpenPaymentSetup = () => window.sessionStorage.getItem("open-payment-setup") === "true";
   const shouldOpenPaymentOverview = () => window.sessionStorage.getItem("open-payment-overview") === "true";
-  const [activeTab, setActiveTab] = useState(() => shouldOpenPaymentSetup() || shouldOpenPaymentOverview() ? "Payment Methods" : "Business Account");
-  const [paymentTab, setPaymentTab] = useState<"Pay by Clinic Card" | "Payouts ACH">("Pay by Clinic Card");
+  const [activeTab, setActiveTab] = useState(() => shouldOpenPaymentSetup() || shouldOpenPaymentOverview() ? "Pay by Clinic" : "Business Account");
+  const [paymentTab, setPaymentTab] = useState<"Credit Card" | "Payouts ACH">("Credit Card");
   const [creditCardOpen, setCreditCardOpen] = useState(() => shouldOpenPaymentSetup());
   const [cardType, setCardType] = useState("Visa");
   const [cardAuthorized, setCardAuthorized] = useState(true);
@@ -6842,15 +6842,15 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
     window.sessionStorage.removeItem("open-payment-setup");
     window.sessionStorage.removeItem("open-payment-overview");
     const openPaymentSetup = () => {
-      setActiveTab("Payment Methods");
-      setPaymentTab("Pay by Clinic Card");
+      setActiveTab("Pay by Clinic");
+      setPaymentTab("Credit Card");
       setCreditCardOpen(true);
       window.sessionStorage.removeItem("open-payment-setup");
     };
     window.addEventListener("open-payment-setup", openPaymentSetup);
     const openPaymentOverview = () => {
-      setActiveTab("Payment Methods");
-      setPaymentTab("Pay by Clinic Card");
+      setActiveTab("Pay by Clinic");
+      setPaymentTab("Credit Card");
       setCreditCardOpen(false);
       window.sessionStorage.removeItem("open-payment-overview");
     };
@@ -7006,7 +7006,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             { icon: Building2, label: "Business Account" },
             { icon: Users, label: "Users" },
             { icon: User, label: "Prescribers" },
-            { icon: CreditCard, label: "Payment Methods" },
+            { icon: CreditCard, label: "Pay by Clinic" },
           ].map(({ icon: Icon, label }) => (
             <button
               key={label}
@@ -7076,10 +7076,10 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           </div>
           )}
 
-          {activeTab === "Payment Methods" && (
+          {activeTab === "Pay by Clinic" && (
             <div data-payment-methods>
               <div className="mb-4 flex items-end gap-5 border-b border-[#e3e3e3] px-1" role="tablist" aria-label="Payment methods">
-                {(["Pay by Clinic Card", "Payouts ACH"] as const).map(tab => (
+                {(["Credit Card", "Payouts ACH"] as const).map(tab => (
                   <button
                     key={tab}
                     type="button"
@@ -7093,11 +7093,11 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 ))}
               </div>
 
-              {paymentTab === "Pay by Clinic Card" && (
+              {paymentTab === "Credit Card" && (
             <div className="rounded-[14px] bg-[#FBFBFB] p-6">
               <div className="mb-5 flex items-center justify-between gap-3 border-b border-[#e8e9e8] pb-4">
                 <div>
-                  <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Pay by Clinic Card</h3>
+                  <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Credit Card</h3>
                   <p className="mt-1 text-[11px] text-[#7b827e]">Manage the credit card used for clinic purchases.</p>
                 </div>
                 {!savedClinicCard && (
