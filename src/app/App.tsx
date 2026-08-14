@@ -4795,9 +4795,9 @@ function resolveOrderHistoryRange(preset: string, customStart: string, customEnd
 
 const ORDER_HISTORY_STATUS_CONFIG = {
   processing: { label: "Processing", bgColor: "#FFC766", darkText: true },
-  pending_payment: { label: "Pending Payment", bgColor: "#E70000", darkText: false },
-  cancelled: { label: "Cancelled", bgColor: "#E70000", darkText: false },
-  shipped: { label: "Shipped", bgColor: "#2563EB", darkText: false },
+  pending_payment: { label: "Pending Payment", bgColor: "#EC0000", darkText: false },
+  cancelled: { label: "Cancelled", bgColor: "#EC0000", darkText: false },
+  shipped: { label: "Shipped", bgColor: "#2D63E8", darkText: false },
   delivered: { label: "Delivered", bgColor: "#00AE30", darkText: false },
 } as const;
 
@@ -4821,7 +4821,7 @@ function OrderHistoryStatusChip({ status }: { status: OrderHistoryEntry["order_s
   const config = ORDER_HISTORY_STATUS_CONFIG[status];
   return (
     <span
-      className={`inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full pl-3 pr-1 text-[11px] font-semibold ${config.darkText ? "text-[#020202]" : "text-white"}`}
+      className={`inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[11px] font-semibold ${config.darkText ? "text-[#020202]" : "text-white"}`}
       style={{ backgroundColor: config.bgColor }}
     >
       {config.label}
@@ -4830,12 +4830,13 @@ function OrderHistoryStatusChip({ status }: { status: OrderHistoryEntry["order_s
   );
 }
 
-function OrderHistoryPayByChip({ payBy, showStatus = false, neutral = false }: { payBy: OrderHistoryEntry["payment_method"]; showStatus?: boolean; neutral?: boolean }) {
+function OrderHistoryPayByChip({ payBy, showStatus = false, neutral = false, isPaid }: { payBy: OrderHistoryEntry["payment_method"]; showStatus?: boolean; neutral?: boolean; isPaid?: boolean }) {
   const isPatient = payBy === "patient";
+  const paymentIsPaid = isPaid ?? payBy === "clinic_ach";
   return (
     <span
-      className={`inline-flex h-7 items-center justify-center gap-1 whitespace-nowrap rounded-full py-1 pl-3 pr-1 text-[11px] text-[#282828] ${neutral ? "font-medium" : "font-semibold"}`}
-      style={{ backgroundColor: neutral ? (isPatient ? "#ADEBBE" : "#6DE9ED") : isPatient ? "#ADEBBE" : "#0FECEF" }}
+      className={`inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full pl-3 text-[11px] text-[#171717] ${showStatus ? "pr-1" : "pr-3"} ${neutral ? "font-medium" : "font-semibold"}`}
+      style={{ backgroundColor: isPatient ? "#ACEABB" : "#20D8DB" }}
     >
       {isPatient ? "Pay by Patient" : "Pay by Clinic"}
       <span className="flex size-3.5 items-center justify-center">
@@ -4845,8 +4846,8 @@ function OrderHistoryPayByChip({ payBy, showStatus = false, neutral = false }: {
           <svg width="14" height="14" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.125 10.5H10.875M1.875 1.5V10.5M7.125 1.5V10.5M10.125 3.75V10.5M3.375 3.375H3.75M3.375 4.875H3.75M3.375 6.375H3.75M5.25 3.375H5.625M5.25 4.875H5.625M5.25 6.375H5.625M3.375 10.5V8.8125C3.375 8.50184 3.62684 8.25 3.9375 8.25H5.0625C5.37316 8.25 5.625 8.50184 5.625 8.8125V10.5M1.5 1.5H7.5M7.125 3.75H10.5M8.625 5.625H8.62875V5.62875H8.625V5.625ZM8.625 7.125H8.62875V7.12875H8.625V7.125ZM8.625 8.625H8.62875V8.62875H8.625V8.625Z" stroke="#020202" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
         )}
       </span>
-      {showStatus && payBy === "clinic_ach" && <span className="inline-flex h-5 items-center rounded-full bg-white px-2 text-[8px] font-bold text-[#101010]">PAID</span>}
-      {showStatus && payBy !== "clinic_ach" && <span className="inline-flex h-5 items-center rounded-full bg-[#fb3e75] px-2 text-[8px] font-bold text-white">UNPAID</span>}
+      {showStatus && paymentIsPaid && <span className="ml-[6px] inline-flex h-5 items-center rounded-full bg-white px-2 text-[8px] font-bold text-[#101010]">PAID</span>}
+      {showStatus && !paymentIsPaid && <span className="ml-[6px] inline-flex h-5 items-center rounded-full bg-[#fb3e75] px-2 text-[8px] font-bold text-white">UNPAID</span>}
     </span>
   );
 }
@@ -5050,19 +5051,19 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                       onClick={() => onNavigate("orders")}
                       className="cursor-pointer transition-colors even:bg-[#fbfbfb] hover:bg-[#f1f1f1] even:hover:bg-[#f1f1f1]"
                     >
-                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">{formatDate(order.created_at)}</td>
-                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">#{order.order_id.slice(-8).toUpperCase()}</td>
-                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">{order.is_multi_patient ? "Multiple Patients" : order.patient_name || "—"}</td>
-                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">{order.is_custom ? "Custom" : order.order_type === "refill" ? "Refill" : "Order"}</td>
-                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]"><OrderHistoryStatusChip status={order.order_status} /></td>
-                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]"><OrderHistoryPayByChip payBy={order.payment_method} /></td>
-                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">{orderHistoryMoney(order.total_price)}</td>
-                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">{order.refunded_amount > 0 ? `-${orderHistoryMoney(order.refunded_amount)}` : "—"}</td>
-                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">
+                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">{formatDate(order.created_at)}</td>
+                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">#{order.order_id.slice(-8).toUpperCase()}</td>
+                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">{order.is_multi_patient ? "Multiple Patients" : order.patient_name || "—"}</td>
+                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">{order.is_custom ? "Custom" : order.order_type === "refill" ? "Refill" : "Order"}</td>
+                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]"><OrderHistoryStatusChip status={order.order_status} /></td>
+                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]"><OrderHistoryPayByChip payBy={order.payment_method} /></td>
+                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">{orderHistoryMoney(order.total_price)}</td>
+                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">{order.refunded_amount > 0 ? `-${orderHistoryMoney(order.refunded_amount)}` : "—"}</td>
+                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">
                         {order.is_paid ? (
-                          <span className="flex flex-col gap-0.5 font-semibold text-[#37703b]">
-                            {orderHistoryMoney(order.net_paid)}
-                            {order.payment_timestamp && <span className="text-[12px] font-medium text-[#9a9a90]">{formatDate(order.payment_timestamp)}</span>}
+                          <span className="flex flex-col gap-[2px] font-semibold leading-[13px] text-[#37703b]">
+                            <span>{orderHistoryMoney(order.net_paid)}</span>
+                            {order.payment_timestamp && <span className="text-[10px] font-medium leading-[11px] text-[#9a9a90]">{formatDate(order.payment_timestamp)}</span>}
                           </span>
                         ) : order.is_cancelled ? (
                           "—"
@@ -5070,7 +5071,7 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                           <span className="font-semibold text-[#9a4b3c]">Unpaid</span>
                         )}
                       </td>
-                      <td className="max-w-[500px] px-4 py-1 text-[12px] font-medium leading-5 text-[#121212]">
+                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">
                         <button
                           type="button"
                           onClick={event => { event.stopPropagation(); handleDownloadInvoice(order.order_id); }}
@@ -5279,7 +5280,7 @@ function PendingShipToChip({ shipTo }: { shipTo: "patient" | "clinic" }) {
   const isPatient = shipTo === "patient";
   return (
     <span
-      className={`inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full pl-3 pr-1 text-[11px] font-medium text-[#171717] ${isPatient ? "bg-[#ADEBBE]" : "bg-[#6DE9ED]"}`}
+      className={`inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full pl-3 pr-3 text-[11px] font-medium text-[#171717] ${isPatient ? "bg-[#ADEBBE]" : "bg-[#6DE9ED]"}`}
     >
       {isPatient ? "Ship to Patient" : "Ship to Clinic"}
       <span className="flex size-3.5 items-center justify-center">
@@ -5446,11 +5447,9 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
         </div>
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setIsRejectModalOpen(true)} className="inline-flex h-10 items-center gap-1.5 rounded-full border border-[#d8d8d8] bg-white px-4 text-[12px] font-semibold text-[#121212] transition-colors hover:bg-[#f1f1f1]">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></svg>
             Reject
           </button>
           <button onClick={() => setIsApprovalModalOpen(true)} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-[12px] font-semibold text-white transition-colors hover:bg-[#242424]">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
             Approve Order
           </button>
         </div>
@@ -5471,29 +5470,27 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
             <div>
               <p className={metaLabel}>Status</p>
               <div className="mt-1 flex">
-                <span className="inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-full bg-[#6D7280] px-3 text-[10px] font-bold uppercase text-white">Pending Approval</span>
+                <span className="inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full bg-[#EC0000] px-3 text-[11px] font-semibold text-white">Pending payment <CreditCard size={13} /></span>
               </div>
             </div>
             <div>
               <p className={metaLabel}>Ship To</p>
               <div className="mt-1 flex">
-                <span className={`inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[10px] font-bold ${approval.shipTo === "clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
-                  {approval.shipTo === "clinic" ? "Ship to clinic" : "Ship to patient"}
-                  {approval.shipTo === "clinic" ? <Building2 size={12} /> : <User size={12} />}
+                <span className={`inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[11px] font-semibold ${approval.shipTo === "clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
+                  {approval.shipTo === "clinic" ? "Ship To Clinic" : "Ship To Patient"}
+                  {approval.shipTo === "clinic" ? <Building2 size={13} /> : <User size={13} />}
                 </span>
               </div>
             </div>
             <div>
               <p className={metaLabel}>Payment Method</p>
               <div className="mt-1 flex">
-                <span className={`inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[10px] font-bold ${payToClinic ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
-                  {payToClinic ? "Pay by clinic" : "Pay by patient"}
-                  {payToClinic ? <Building2 size={12} /> : <User size={12} />}
-                  {approval.paymentMethod === "clinic_ach" ? (
-                    <span className="inline-flex h-4 items-center justify-center rounded-full bg-[#f97316] px-1.5 text-[8px] font-bold leading-none text-white">ACH</span>
-                  ) : (
-                    <span className="inline-flex h-4 min-w-[42px] items-center justify-center rounded-full bg-[#ff4a87] px-2 text-[8px] font-bold uppercase leading-none text-white">Unpaid</span>
-                  )}
+                <span className={`inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full pl-3 pr-1 text-[11px] font-semibold ${payToClinic ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
+                  {payToClinic ? "Pay By Clinic" : "Pay By Patient"}
+                  {payToClinic ? <Building2 size={13} /> : <User size={13} />}
+                  <span className={`ml-1 inline-flex h-5 items-center justify-center rounded-full px-2 text-[8px] font-bold leading-none ${approval.paymentMethod === "clinic_ach" ? "bg-white text-[#101010]" : "bg-[#ff4a87] text-white"}`}>
+                    {approval.paymentMethod === "clinic_ach" ? "PAID" : "UNPAID"}
+                  </span>
                 </span>
               </div>
             </div>
@@ -5756,7 +5753,7 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
               <thead>
                 <tr>
                   {["ORDER ID", "PATIENT", "CREATED BY", "CREATED AT", "PAY BY", "SHIP TO", "ITEMS", "STATUS", "TOTAL", "ACTION"].map((header, index) => (
-                    <th key={index} className="whitespace-nowrap border-b border-[#e5e7eb] bg-[#fbfbfb] px-4 py-2 text-[12px] font-medium uppercase leading-5 text-[#999999]">
+                    <th key={index} className={`whitespace-nowrap border-b border-[#e5e7eb] bg-[#fbfbfb] py-2 text-[12px] font-medium uppercase leading-5 text-[#999999] ${index === 4 || index === 5 ? "w-px px-2" : "px-4"}`}>
                       {header}
                     </th>
                   ))}
@@ -5782,8 +5779,8 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
                           <span className="text-[10px] text-[#686868]">{created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
                         </div>
                       </td>
-                      <td className={tdClass}><OrderHistoryPayByChip payBy={approval.paymentMethod} showStatus neutral /></td>
-                      <td className={tdClass}><PendingShipToChip shipTo={approval.shipTo} /></td>
+                      <td className="w-px whitespace-nowrap px-2 py-2 text-[12px] font-normal leading-5 text-[#121212]"><OrderHistoryPayByChip payBy={approval.paymentMethod} showStatus neutral /></td>
+                      <td className="w-px whitespace-nowrap px-2 py-2 text-[12px] font-normal leading-5 text-[#121212]"><PendingShipToChip shipTo={approval.shipTo} /></td>
                       <td className={tdClass}>{pendingApprovalRxCount(approval)}</td>
                       <td className={tdClass}>
                         <span className="whitespace-nowrap text-[11px] font-semibold text-[#B25327]">Pending Approval</span>
@@ -6611,7 +6608,7 @@ const PATIENTS = [
 
 function PatientCreateModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   if (!open) return null;
-  const inputClass = "mt-1.5 h-10 w-full rounded-[9px] border border-[#dddcd8] bg-white px-3 text-[12px] outline-none placeholder:text-[#b8b8b5] focus:border-[#202020]";
+  const inputClass = "mt-1.5 h-10 w-full rounded-[10px] border border-[#dddcd8] bg-white px-3 text-[12px] outline-none placeholder:text-[#b8b8b5] focus:border-[#202020]";
   const fields = [
     ["First Name", "firstName", "Write...", true], ["Last Name", "lastName", "Write...", true],
     ["Primary Phone", "primaryPhone", "(000) 000-0000", true], ["Secondary Phone", "secondaryPhone", "(000) 000-0000", false],
@@ -6640,12 +6637,12 @@ function PatientCreateModal({ open, onClose }: { open: boolean; onClose: () => v
           <div className="mt-5 border-t border-[#ece9e5] pt-5">
             <h3 className="text-[12px] font-semibold text-[#242424]">BMI Classification</h3>
             <div className="mt-3 grid gap-4 sm:grid-cols-2">
-              <label className="text-[11px] font-medium text-[#242424]">Weight<div className="mt-1.5 flex gap-2"><input type="number" min="0" placeholder="Write..." className={inputClass.replace("mt-1.5 ", "")} /><select className="h-10 w-20 rounded-[9px] border border-[#dddcd8] bg-white px-2 text-[12px]"><option>lb</option><option>kg</option></select></div></label>
-              <label className="text-[11px] font-medium text-[#242424]">Height<div className="mt-1.5 flex gap-2"><input type="number" min="0" placeholder="Write..." className={inputClass.replace("mt-1.5 ", "")} /><select className="h-10 w-20 rounded-[9px] border border-[#dddcd8] bg-white px-2 text-[12px]"><option>in</option><option>cm</option></select></div></label>
+              <label className="text-[11px] font-medium text-[#242424]">Weight<div className="mt-1.5 flex gap-2"><input type="number" min="0" placeholder="Write..." className={inputClass.replace("mt-1.5 ", "")} /><select className="h-10 w-20 rounded-[10px] border border-[#dddcd8] bg-white px-2 text-[12px]"><option>lb</option><option>kg</option></select></div></label>
+              <label className="text-[11px] font-medium text-[#242424]">Height<div className="mt-1.5 flex gap-2"><input type="number" min="0" placeholder="Write..." className={inputClass.replace("mt-1.5 ", "")} /><select className="h-10 w-20 rounded-[10px] border border-[#dddcd8] bg-white px-2 text-[12px]"><option>in</option><option>cm</option></select></div></label>
             </div>
           </div>
         </div>
-        <div className="border-t border-[#ece9e5] px-6 py-4"><button type="submit" className="h-11 w-full rounded-[8px] bg-[#111] px-6 text-[12px] font-semibold text-white">Save Patient</button></div>
+        <div className="border-t border-[#ece9e5] px-6 py-4"><button type="submit" className="h-11 w-full rounded-full bg-[#111] px-6 text-[12px] font-semibold text-white transition-colors hover:bg-black">Save Patient</button></div>
       </form>
     </div>
   );
@@ -6843,6 +6840,17 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const [cardAuthorized, setCardAuthorized] = useState(true);
   const [cardSaving, setCardSaving] = useState(false);
   const [savedClinicCard, setSavedClinicCard] = useState(() => window.sessionStorage.getItem("clinic-card-saved") === "true");
+  const [addUserOpen, setAddUserOpen] = useState(false);
+  const [showUserPassword, setShowUserPassword] = useState(false);
+  const [newUserAdmin, setNewUserAdmin] = useState(false);
+  const [newUserActive, setNewUserActive] = useState(true);
+  const [newUser, setNewUser] = useState({ firstName: "", lastName: "", email: "", phone: "", title: "" });
+  const generatedUserPassword = "Rx!8k2mQ9";
+  const [addPrescriberOpen, setAddPrescriberOpen] = useState(false);
+  const [showPrescriberPassword, setShowPrescriberPassword] = useState(false);
+  const [newPrescriberActive, setNewPrescriberActive] = useState(true);
+  const [newPrescriber, setNewPrescriber] = useState({ email: "", title: "", firstName: "", lastName: "", dob: "", npi: "", dea: "", license: "", phone: "", fax: "", cell: "", address1: "", address2: "", city: "", state: "", zip: "" });
+  const generatedPrescriberPassword = "Rx!4p7vN2";
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const signatureDrawingRef = useRef(false);
 
@@ -7061,7 +7069,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Users</h3>
               <div className="flex gap-2">
                 <button className="h-10 rounded-full border border-[#EAE8E1] bg-white px-4 text-[12px] font-medium text-[#1a1a1a] transition-colors hover:bg-[#FBFBFB]">Invite</button>
-                <button className="flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
+                <button onClick={() => setAddUserOpen(true)} className="flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
                   <Plus size={15} /> Add User
                 </button>
               </div>
@@ -7076,7 +7084,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Prescribers</h3>
               <div className="flex gap-2">
                 <button className="h-10 rounded-full border border-[#EAE8E1] bg-white px-4 text-[12px] font-medium text-[#1a1a1a] transition-colors hover:bg-[#FBFBFB]">Invite</button>
-                <button className="flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
+                <button onClick={() => setAddPrescriberOpen(true)} className="flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
                   <Plus size={15} /> Add Prescriber
                 </button>
               </div>
@@ -7228,6 +7236,107 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           )}
         </div>
       </div>
+      {addPrescriberOpen && (
+        <div className="fixed inset-0 z-[95] flex items-center justify-center bg-black/35 p-5 backdrop-blur-[2px]">
+          <button className="absolute inset-0 cursor-default" onClick={() => setAddPrescriberOpen(false)} aria-label="Close add prescriber" />
+          <form onSubmit={event => { event.preventDefault(); setAddPrescriberOpen(false); }} className="relative z-10 max-h-[calc(100vh-40px)] w-full max-w-[1020px] overflow-y-auto rounded-[16px] border border-[#e3e3e3] bg-white shadow-[0_24px_70px_rgba(0,0,0,0.2)]">
+            <div className="flex items-start justify-between border-b border-[#ececec] px-6 py-5">
+              <div><h2 className="text-[21px] font-semibold text-[#171717]">Add prescriber</h2><p className="mt-1 text-[11px] text-[#777]">Add identity, licensing, and contact information.</p></div>
+              <button type="button" onClick={() => setAddPrescriberOpen(false)} className="flex size-9 items-center justify-center rounded-full border border-[#e2e2e2] text-[#777] transition-colors hover:bg-[#f2f2f2] hover:text-black" aria-label="Close"><X size={17} /></button>
+            </div>
+
+            <div className="grid gap-6 p-6 lg:grid-cols-[1.3fr_.7fr]">
+              <div className="grid gap-4 sm:grid-cols-6">
+                <label className="block sm:col-span-6"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Email <span className="text-[#b4473d]">*</span></span><input required type="email" value={newPrescriber.email} onChange={event => setNewPrescriber(current => ({ ...current, email: event.target.value }))} placeholder="name@company.com" className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black" /></label>
+                <label className="block sm:col-span-2"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Title <span className="text-[#b4473d]">*</span></span><select required value={newPrescriber.title} onChange={event => setNewPrescriber(current => ({ ...current, title: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] bg-white px-3 text-[12px] outline-none focus:border-black"><option value="" disabled>Select</option><option>MD</option><option>DO</option><option>NP</option><option>PA</option></select></label>
+                {([['First name','firstName'],['Last name','lastName']] as const).map(([label,key]) => <label key={key} className="block sm:col-span-2"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">{label} <span className="text-[#b4473d]">*</span></span><input required value={newPrescriber[key]} onChange={event => setNewPrescriber(current => ({ ...current, [key]: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none focus:border-black" /></label>)}
+                <label className="block sm:col-span-3"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Date of birth</span><input type="date" value={newPrescriber.dob} onChange={event => setNewPrescriber(current => ({ ...current, dob: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none focus:border-black" /></label>
+                <label className="block sm:col-span-3"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">NPI number <span className="text-[#b4473d]">*</span></span><input required value={newPrescriber.npi} onChange={event => setNewPrescriber(current => ({ ...current, npi: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none focus:border-black" /></label>
+                <label className="block sm:col-span-3"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">DEA number</span><input value={newPrescriber.dea} onChange={event => setNewPrescriber(current => ({ ...current, dea: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none focus:border-black" /></label>
+                <label className="block sm:col-span-3"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">License number <span className="text-[#b4473d]">*</span></span><input required value={newPrescriber.license} onChange={event => setNewPrescriber(current => ({ ...current, license: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none focus:border-black" /></label>
+                {([['Phone number','phone',true],['Fax number','fax',false],['Cellphone','cell',false]] as const).map(([label,key,required]) => <label key={key} className="block sm:col-span-2"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">{label} {required && <span className="text-[#b4473d]">*</span>}</span><input required={required} type="tel" value={newPrescriber[key]} onChange={event => setNewPrescriber(current => ({ ...current, [key]: event.target.value }))} placeholder="(000) 000-0000" className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black" /></label>)}
+                <label className="block sm:col-span-6"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Address line 1 <span className="text-[#b4473d]">*</span></span><input required value={newPrescriber.address1} onChange={event => setNewPrescriber(current => ({ ...current, address1: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none focus:border-black" /></label>
+                {([['Address line 2','address2',false],['City','city',true],['State','state',true],['Zip code','zip',true]] as const).map(([label,key,required]) => <label key={key} className="block sm:col-span-3"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">{label} {required && <span className="text-[#b4473d]">*</span>}</span><input required={required} value={newPrescriber[key]} onChange={event => setNewPrescriber(current => ({ ...current, [key]: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none focus:border-black" /></label>)}
+                <label className="flex cursor-pointer items-center justify-between rounded-[10px] border border-[#e3e3e3] bg-[#fafafa] px-3.5 py-3 sm:col-span-6"><span><span className="block text-[12px] font-medium text-[#202020]">Active prescriber</span><span className="mt-0.5 block text-[10px] text-[#7c7c7c]">Can sign in and prescribe immediately</span></span><input type="checkbox" checked={newPrescriberActive} onChange={event => setNewPrescriberActive(event.target.checked)} className="peer sr-only" /><span className="relative h-6 w-11 rounded-full bg-[#dedede] transition-colors peer-checked:bg-black after:absolute after:left-1 after:top-1 after:size-4 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-5" /></label>
+              </div>
+
+              <aside className="h-fit rounded-[18px] border border-white/70 bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)] p-5 shadow-[0_10px_28px_rgba(38,54,45,0.08)] lg:sticky lg:top-0">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8b8b8b]">Account summary</p><h3 className="mt-1 text-[16px] font-semibold text-[#1b1b1b]">Login credentials</h3>
+                <div className="mt-5 space-y-3 text-[11px]"><div className="rounded-[10px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.76),rgba(255,255,255,0.42))] px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className="text-[#888]">Login URL</p><p className="mt-1 font-semibold text-[#222]">scriptlinkrx.com/login</p></div><div className="rounded-[10px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.76),rgba(255,255,255,0.42))] px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className="text-[#888]">Email</p><p className={`mt-1 truncate font-semibold ${newPrescriber.email ? "text-[#222]" : "text-[#aaa]"}`}>{newPrescriber.email || "Not entered yet"}</p></div><div className="rounded-[10px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.76),rgba(255,255,255,0.42))] px-3.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className="text-[#888]">Temporary password</p><div className="mt-0.5 flex items-center justify-between"><p className="font-mono text-[12px] font-semibold tracking-[0.08em]">{showPrescriberPassword ? generatedPrescriberPassword : "•••••••••"}</p><button type="button" onClick={() => setShowPrescriberPassword(current => !current)} className="flex size-8 items-center justify-center rounded-full text-[#777] hover:bg-white/60 hover:text-black">{showPrescriberPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button></div></div></div>
+                <button type="button" onClick={() => navigator.clipboard?.writeText(`Login: https://scriptlinkrx.com/login\nEmail: ${newPrescriber.email}\nPassword: ${generatedPrescriberPassword}`)} className="mt-6 flex h-10 w-full items-center justify-center gap-2 rounded-full border border-white/80 bg-white text-[11px] font-semibold shadow-[0_3px_12px_rgba(34,46,39,0.06)] transition-transform hover:-translate-y-0.5"><Copy size={14} /> Copy credentials</button>
+              </aside>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-[#ececec] px-6 py-4"><button type="button" onClick={() => setAddPrescriberOpen(false)} className="h-10 rounded-full border border-[#d8d8d8] bg-white px-5 text-[12px] font-medium hover:bg-[#f2f2f2]">Cancel</button><button type="submit" className="h-10 rounded-full bg-black px-6 text-[12px] font-semibold text-white hover:bg-[#222]">Add prescriber</button></div>
+          </form>
+        </div>
+      )}
+      {addUserOpen && (
+        <div className="fixed inset-0 z-[95] flex items-center justify-center bg-black/35 p-5 backdrop-blur-[2px]">
+          <button className="absolute inset-0 cursor-default" onClick={() => setAddUserOpen(false)} aria-label="Close add user" />
+          <form
+            onSubmit={event => { event.preventDefault(); setAddUserOpen(false); }}
+            className="relative z-10 max-h-[calc(100vh-40px)] w-full max-w-[900px] overflow-y-auto rounded-[16px] border border-[#e3e3e3] bg-white shadow-[0_24px_70px_rgba(0,0,0,0.2)]"
+          >
+            <div className="flex items-start justify-between border-b border-[#ececec] px-6 py-5">
+              <div><h2 className="text-[21px] font-semibold text-[#171717]">Add user</h2><p className="mt-1 text-[11px] text-[#777]">Create an account and choose its access level.</p></div>
+              <button type="button" onClick={() => setAddUserOpen(false)} className="flex size-9 items-center justify-center rounded-full border border-[#e2e2e2] text-[#777] transition-colors hover:bg-[#f2f2f2] hover:text-black" aria-label="Close"><X size={17} /></button>
+            </div>
+
+            <div className="grid gap-6 p-6 lg:grid-cols-[1.15fr_.85fr]">
+              <div className="grid h-fit content-start gap-x-4 gap-y-3 sm:grid-cols-2">
+                {([
+                  ["First name", "firstName", "e.g. John"],
+                  ["Last name", "lastName", "e.g. Doe"],
+                  ["Email", "email", "name@company.com"],
+                  ["Phone number", "phone", "+1 (000) 000-0000"],
+                  ["User title", "title", "e.g. Office manager"],
+                ] as const).map(([label, key, placeholder]) => (
+                  <label key={key} className={key === "title" ? "block sm:col-span-2" : "block"}>
+                    <span className="mb-1.5 block text-[11px] font-medium text-[#292929]">{label} <span className="text-[#b4473d]">*</span></span>
+                    <input
+                      required
+                      type={key === "email" ? "email" : key === "phone" ? "tel" : "text"}
+                      value={newUser[key]}
+                      onChange={event => setNewUser(current => ({ ...current, [key]: event.target.value }))}
+                      placeholder={placeholder}
+                      className="h-10 w-full rounded-[10px] border border-[#d8d8d8] bg-white px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black focus:shadow-[0_0_0_2px_rgba(0,0,0,0.05)]"
+                    />
+                  </label>
+                ))}
+
+                <div className="grid gap-3 border-t border-[#ececec] pt-4 sm:col-span-2 sm:grid-cols-2">
+                  <label className="flex cursor-pointer items-center justify-between rounded-[10px] border border-[#e3e3e3] bg-[#fafafa] px-3.5 py-3">
+                    <span><span className="block text-[12px] font-medium text-[#202020]">Administrator</span><span className="mt-0.5 block text-[10px] text-[#7c7c7c]">Full account access</span></span>
+                    <input type="checkbox" checked={newUserAdmin} onChange={event => setNewUserAdmin(event.target.checked)} className="peer sr-only" />
+                    <span className="relative h-6 w-11 rounded-full bg-[#dedede] transition-colors peer-checked:bg-black after:absolute after:left-1 after:top-1 after:size-4 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-5" />
+                  </label>
+                  <label className="flex cursor-pointer items-center justify-between rounded-[10px] border border-[#e3e3e3] bg-[#fafafa] px-3.5 py-3">
+                    <span><span className="block text-[12px] font-medium text-[#202020]">Active user</span><span className="mt-0.5 block text-[10px] text-[#7c7c7c]">Can sign in immediately</span></span>
+                    <input type="checkbox" checked={newUserActive} onChange={event => setNewUserActive(event.target.checked)} className="peer sr-only" />
+                    <span className="relative h-6 w-11 rounded-full bg-[#dedede] transition-colors peer-checked:bg-black after:absolute after:left-1 after:top-1 after:size-4 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-5" />
+                  </label>
+                </div>
+              </div>
+
+              <aside className="rounded-[18px] border border-white/70 bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)] p-5 shadow-[0_10px_28px_rgba(38,54,45,0.08)]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8b8b8b]">Account summary</p>
+                <h3 className="mt-1 text-[16px] font-semibold text-[#1b1b1b]">Login credentials</h3>
+                <div className="mt-5 space-y-3 text-[11px]">
+                  <div className="rounded-[10px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.76),rgba(255,255,255,0.42))] px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className="text-[#888]">Login URL</p><p className="mt-1 font-semibold text-[#222]">scriptlinkrx.com/login</p></div>
+                  <div className="rounded-[10px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.76),rgba(255,255,255,0.42))] px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className="text-[#888]">Email</p><p className={`mt-1 truncate font-semibold ${newUser.email ? "text-[#222]" : "text-[#aaa]"}`}>{newUser.email || "Not entered yet"}</p></div>
+                  <div className="rounded-[10px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.76),rgba(255,255,255,0.42))] px-3.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className="text-[#888]">Temporary password</p><div className="mt-0.5 flex items-center justify-between gap-2"><p className="font-mono text-[12px] font-semibold tracking-[0.08em] text-[#222]">{showUserPassword ? generatedUserPassword : "•••••••••"}</p><button type="button" onClick={() => setShowUserPassword(current => !current)} className="flex size-8 items-center justify-center rounded-full text-[#777] hover:bg-white/60 hover:text-black" aria-label={showUserPassword ? "Hide password" : "Show password"}>{showUserPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button></div></div>
+                </div>
+                <button type="button" onClick={() => navigator.clipboard?.writeText(`Login: https://scriptlinkrx.com/login\nEmail: ${newUser.email}\nPassword: ${generatedUserPassword}`)} className="mt-6 flex h-10 w-full items-center justify-center gap-2 rounded-full border border-white/80 bg-white text-[11px] font-semibold text-[#222] shadow-[0_3px_12px_rgba(34,46,39,0.06)] transition-transform hover:-translate-y-0.5"><Copy size={14} /> Copy credentials</button>
+              </aside>
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-[#ececec] px-6 py-4">
+              <button type="button" onClick={() => setAddUserOpen(false)} className="h-10 rounded-full border border-[#d8d8d8] bg-white px-5 text-[12px] font-medium text-black hover:bg-[#f2f2f2]">Cancel</button>
+              <button type="submit" className="h-10 rounded-full bg-black px-6 text-[12px] font-semibold text-white transition-colors hover:bg-[#222]">Add user</button>
+            </div>
+          </form>
+        </div>
+      )}
       {creditCardOpen && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-[#101512]/35 p-5 backdrop-blur-[2px]">
           <button className="absolute inset-0 cursor-default" onClick={() => setCreditCardOpen(false)} aria-label="Close add credit card" />
@@ -8278,7 +8387,7 @@ function MultiPatientCartPage({
 
   function requiredFieldClass(value: string | undefined) {
     if (!value?.trim()) {
-      return "border-[#DD9463] bg-white focus:border-[#DD9463]";
+      return "border-[#7F9EE3] bg-white focus:border-[#7F9EE3]";
     }
     return "border-[#EAE8E1] bg-white focus:border-[#183229]";
   }
