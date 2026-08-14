@@ -4158,7 +4158,7 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
 
   return (
     <>
-      <div className="max-w-[1300px]">
+      <div className="max-w-[1400px]">
       <div className="mb-5 flex flex-col gap-3">
         <div className="flex flex-col items-start gap-3">
           <h1 className="flex h-[38px] items-center text-[28px] font-semibold leading-tight text-[#1a1a1a]">Orders</h1>
@@ -4234,7 +4234,7 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
                     index,
                   }));
               return (
-                <section key={order.id} onClick={() => onOrderSelect(order)} className="cursor-pointer rounded-[10px] bg-[#F8F8F8] px-5 py-5 transition-colors hover:bg-[#f6f6f5]">
+                <section key={order.id} onClick={() => onOrderSelect(order)} className="cursor-pointer rounded-[10px] bg-[#F8F8F8] px-5 pb-3 pt-5 transition-colors hover:bg-[#f6f6f5]">
                   <div className="mb-2 hidden grid-cols-[minmax(310px,1.05fr)_minmax(260px,1fr)_minmax(240px,0.9fr)_70px] gap-7 px-5 md:grid">
                     <p className="text-[12px] font-semibold text-[#555]">Prescription</p>
                     <p className="text-[12px] font-semibold text-[#555]">Patient</p>
@@ -4281,26 +4281,26 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
                   </div>
                   <div className="mt-4 flex flex-wrap items-center gap-3 px-1">
                     <span className="mr-1 text-[15px] font-bold text-[#161a18]">{order.id}</span>
-                    <span className="inline-flex h-9 items-center gap-2 rounded-full bg-[#F1F0EF] px-3 text-[12px] font-semibold text-[#183229]">
+                    <span className="inline-flex h-[26px] items-center gap-2 rounded-full bg-[#F1F0EF] pl-3 pr-1 text-[12px] font-semibold text-[#183229]">
                       Order Type
-                      <span className="inline-flex h-6 items-center rounded-full bg-white px-2.5 text-[11px] font-semibold text-[#111]">{labelCase(order.orderType)}</span>
+                      <span className="inline-flex h-5 items-center rounded-full bg-white px-2.5 text-[11px] font-semibold text-[#111]">{labelCase(order.orderType)}</span>
                     </span>
-                    <span className="inline-flex h-9 items-center gap-2 rounded-full bg-[#F1F0EF] px-3 text-[12px] font-semibold text-[#183229]">
+                    <span className="inline-flex h-[26px] items-center gap-2 rounded-full bg-[#F1F0EF] pl-3 pr-1 text-[12px] font-semibold text-[#183229]">
                       Order Timestamp
-                      <span className="inline-flex h-6 items-center rounded-full bg-white px-2.5 text-[11px] font-semibold text-[#111]">{order.timestamp}</span>
+                      <span className="inline-flex h-5 items-center rounded-full bg-white px-2.5 text-[11px] font-semibold text-[#111]">{order.timestamp}</span>
                     </span>
-                    <span className={`inline-flex h-8 items-center gap-2 rounded-full px-3 text-[11px] font-semibold ${order.payMethod === "Pay by Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
+                    <span className={`inline-flex h-[26px] items-center gap-2 rounded-full pl-3 pr-1 text-[11px] font-semibold ${order.payMethod === "Pay by Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
                       {order.payMethod.replace("by", "By")}
                       {order.payMethod === "Pay by Clinic" ? <Building2 size={13} /> : <User size={13} />}
                       <span className={`rounded-full px-2 py-1 text-[8px] font-bold ${order.payStatus === "PAID" ? "bg-white text-[#173d25]" : "bg-[#FF4A87] text-white"}`}>{order.payStatus}</span>
                     </span>
-                    <span className={`inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[11px] font-semibold ${silverStatusPillStyle[order.status] ?? "bg-[#FFC55B] text-[#151515]"}`}>{labelCase(order.status)} {silverStatusIcon(order.status)}</span>
-                    <span className={`inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[11px] font-semibold ${order.shipMethod === "Ship to Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
+                    <span className={`inline-flex h-[26px] items-center gap-1.5 rounded-full px-3 text-[11px] font-semibold ${silverStatusPillStyle[order.status] ?? "bg-[#FFC55B] text-[#151515]"}`}>{labelCase(order.status)} {silverStatusIcon(order.status)}</span>
+                    <span className={`inline-flex h-[26px] items-center gap-1.5 rounded-full px-3 text-[11px] font-semibold ${order.shipMethod === "Ship to Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
                       {order.shipMethod.replace("to", "To")} {order.shipMethod === "Ship to Clinic" ? <Building2 size={13} /> : <User size={13} />}
                     </span>
-                    <span className="ml-auto inline-flex h-9 items-center gap-2 rounded-full bg-[#F1F0EF] px-3 text-[12px] font-semibold text-[#183229]">
+                    <span className="ml-auto inline-flex h-[26px] items-center gap-2 rounded-full bg-[#F1F0EF] pl-3 pr-1 text-[12px] font-semibold text-[#183229]">
                       Total
-                      <strong className="inline-flex h-6 items-center rounded-full bg-white px-2.5 text-[11px] font-semibold text-[#111]">{order.total}</strong>
+                      <strong className="inline-flex h-5 items-center rounded-full bg-white px-2.5 text-[11px] font-semibold text-[#111]">{order.total}</strong>
                     </span>
                   </div>
 	                </section>
@@ -4567,7 +4567,7 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
           : "bg-[#6D7280] text-white";
   return (
     <>
-      <div className="max-w-[1300px]">
+      <div className="max-w-[1400px]">
       <div className="mb-5 flex flex-col items-start gap-3">
         <div className="flex items-center gap-3">
           <PageBackButton onClick={() => onNavigate("orders")} label="Back to orders" />
@@ -4821,7 +4821,7 @@ function OrderHistoryStatusChip({ status }: { status: OrderHistoryEntry["order_s
   const config = ORDER_HISTORY_STATUS_CONFIG[status];
   return (
     <span
-      className={`inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[11px] font-semibold ${config.darkText ? "text-[#020202]" : "text-white"}`}
+      className={`inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full pl-3 pr-1 text-[11px] font-semibold ${config.darkText ? "text-[#020202]" : "text-white"}`}
       style={{ backgroundColor: config.bgColor }}
     >
       {config.label}
@@ -5032,7 +5032,7 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           </div>
         ) : (
           <div className="rounded-xl bg-white">
-            <div className="w-full max-w-[1300px] overflow-x-auto bg-white">
+            <div className="w-full max-w-[1400px] overflow-x-auto bg-white">
               <table className="w-full min-w-max border-collapse text-left text-sm">
                 <thead>
                   <tr>
@@ -5279,7 +5279,7 @@ function PendingShipToChip({ shipTo }: { shipTo: "patient" | "clinic" }) {
   const isPatient = shipTo === "patient";
   return (
     <span
-      className={`inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[11px] font-medium text-[#171717] ${isPatient ? "bg-[#ADEBBE]" : "bg-[#6DE9ED]"}`}
+      className={`inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-full pl-3 pr-1 text-[11px] font-medium text-[#171717] ${isPatient ? "bg-[#ADEBBE]" : "bg-[#6DE9ED]"}`}
     >
       {isPatient ? "Ship to Patient" : "Ship to Clinic"}
       <span className="flex size-3.5 items-center justify-center">
@@ -5337,10 +5337,10 @@ function PendingApprovalModal({ isOpen, onClose, onApprove, isLoading }: { isOpe
           </div>
         </div>
         <div className="flex justify-end gap-3 border-t border-[#e5e7eb] px-6 py-4">
-          <button onClick={onClose} className="flex items-center justify-center gap-2 rounded-lg border-2 bg-white px-3.5 py-1.5 text-[14px] font-medium transition-colors hover:bg-[#f0f9f1]" style={{ borderColor: SUPPORT_PRIMARY, color: SUPPORT_PRIMARY }}>
+          <button onClick={onClose} className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-[#d8d8d8] bg-white px-4 text-[12px] font-semibold text-[#121212] transition-colors hover:bg-[#f1f1f1]">
             Cancel
           </button>
-          <button onClick={onApprove} disabled={isLoading} className="flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-[14px] font-medium text-white transition-colors disabled:opacity-50" style={{ background: SUPPORT_PRIMARY }}>
+          <button onClick={onApprove} disabled={isLoading} className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-black px-4 text-[12px] font-semibold text-white transition-colors hover:bg-[#242424] disabled:opacity-50">
             {isLoading && <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />}
             Approve Order
           </button>
@@ -5384,10 +5384,10 @@ function PendingRejectModal({ isOpen, onClose, onReject, isLoading }: { isOpen: 
           </div>
         </div>
         <div className="flex justify-end gap-3 border-t border-[#e5e7eb] px-6 py-4">
-          <button onClick={handleClose} className="flex items-center justify-center gap-2 rounded-lg border-2 bg-white px-3.5 py-1.5 text-[14px] font-medium transition-colors hover:bg-[#f0f9f1]" style={{ borderColor: SUPPORT_PRIMARY, color: SUPPORT_PRIMARY }}>
+          <button onClick={handleClose} className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-[#d8d8d8] bg-white px-4 text-[12px] font-semibold text-[#121212] transition-colors hover:bg-[#f1f1f1]">
             Cancel
           </button>
-          <button onClick={() => onReject(reason || undefined)} disabled={isLoading} className="flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-[14px] font-medium text-white transition-colors disabled:opacity-50" style={{ background: SUPPORT_PRIMARY }}>
+          <button onClick={() => onReject(reason || undefined)} disabled={isLoading} className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-black px-4 text-[12px] font-semibold text-white transition-colors hover:bg-[#242424] disabled:opacity-50">
             {isLoading && <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />}
             Reject Order
           </button>
@@ -5445,11 +5445,11 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
           <h1 className="text-[22px] font-semibold text-[#1a1a1a]">Pending Approvals</h1>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => setIsRejectModalOpen(true)} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[#ffe7d6] px-4 text-[11px] font-semibold text-[#7b003b] transition-colors hover:bg-[#ffdcc4]">
+          <button onClick={() => setIsRejectModalOpen(true)} className="inline-flex h-10 items-center gap-1.5 rounded-full border border-[#d8d8d8] bg-white px-4 text-[12px] font-semibold text-[#121212] transition-colors hover:bg-[#f1f1f1]">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></svg>
             Reject
           </button>
-          <button onClick={() => setIsApprovalModalOpen(true)} className="inline-flex h-9 items-center gap-1.5 rounded-lg px-4 text-[11px] font-semibold text-white" style={{ background: SUPPORT_PRIMARY }}>
+          <button onClick={() => setIsApprovalModalOpen(true)} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-[12px] font-semibold text-white transition-colors hover:bg-[#242424]">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
             Approve Order
           </button>
@@ -5711,7 +5711,7 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
   const tdClass = "max-w-[500px] px-4 py-2 text-[12px] font-normal leading-5 text-[#121212]";
 
   return (
-    <div className="max-w-[1300px]">
+    <div className="max-w-[1400px]">
       <div className="mb-5 flex flex-col gap-3">
         <div className="flex flex-col items-start gap-3">
           <h1 className="flex h-[38px] items-center text-[28px] font-medium leading-tight text-[#1a1a1a]">
@@ -5751,7 +5751,7 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
             </p>
           </div>
         ) : (
-          <div className="w-full max-w-[1300px] overflow-x-auto bg-white">
+          <div className="w-full max-w-[1400px] overflow-x-auto bg-white">
             <table className="w-full min-w-max border-collapse text-left text-sm">
               <thead>
                 <tr>
@@ -6739,7 +6739,7 @@ function UsersPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
   return (
     <>
-      <div className="max-w-[1300px]">
+      <div className="max-w-[1400px]">
         <div className="mb-5 flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="flex h-[38px] items-center text-[28px] font-semibold text-[#1a1a1a] leading-tight">
@@ -8312,7 +8312,7 @@ function MultiPatientCartPage({
     <>
       <Header title="Cart" onNavigate={onNavigate} />
 
-      <div className="max-w-[1300px]">
+      <div className="max-w-[1400px]">
         {extraVariants && <div className="mb-5 flex flex-wrap items-center gap-2">
           <span className="mr-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#777]">Card style</span>
           {([1, 4, 3, 5, 6] as const).map(variant => (
@@ -11237,7 +11237,7 @@ export default function App() {
             {/* Main content area */}
             <main ref={mainScrollRef} className="app-main-scroll h-screen min-w-0 flex-1 overflow-y-scroll p-3 pl-1.5">
               <div className="bg-card rounded-[10px] min-h-full p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-                <div className="w-full max-w-[1300px]">
+                <div className="w-full max-w-[1400px]">
                   {renderPage()}
                 </div>
               </div>
