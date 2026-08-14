@@ -4568,15 +4568,15 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
   return (
     <>
       <div className="max-w-[1400px]">
-      <div className="mb-5 flex flex-col items-start gap-3">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <PageBackButton onClick={() => onNavigate("orders")} label="Back to orders" />
           <h1 className="text-[22px] font-semibold text-[#1a1a1a]">Orders</h1>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[#d8dedb] bg-white px-4 text-[11px] font-semibold text-[#31583F] transition-colors hover:bg-[#f7f8f7]"><Download size={13} /> Download receipt</button>
+        <div className="ml-auto flex flex-wrap justify-end gap-2">
+          <button className="inline-flex h-10 items-center gap-1.5 rounded-full border border-[#d8dedb] bg-white px-4 text-[11px] font-semibold text-black transition-colors hover:bg-[#f1f1f1]"><Download size={13} /> Download receipt</button>
           <button onClick={() => onNavigate("support")} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#272727] px-4 text-[11px] font-semibold text-white transition-colors hover:bg-[#111]"><Plus size={13} /> Create Ticket</button>
-          <button className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[#FFE7D6] px-4 text-[11px] font-semibold text-[#7B003B] transition-colors hover:bg-[#ffdcc4]"><XCircle size={13} /> Request cancellation</button>
+          <button className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#FFE7D6] px-4 text-[11px] font-semibold text-[#7B003B] transition-colors hover:bg-[#ffdcc4]"><XCircle size={13} /> Request cancellation</button>
         </div>
       </div>
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -6841,6 +6841,8 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const [cardSaving, setCardSaving] = useState(false);
   const [savedClinicCard, setSavedClinicCard] = useState(() => window.sessionStorage.getItem("clinic-card-saved") === "true");
   const [addUserOpen, setAddUserOpen] = useState(false);
+  const [openUserMenu, setOpenUserMenu] = useState<string | null>(null);
+  const [openPrescriberMenu, setOpenPrescriberMenu] = useState<string | null>(null);
   const [showUserPassword, setShowUserPassword] = useState(false);
   const [newUserAdmin, setNewUserAdmin] = useState(false);
   const [newUserActive, setNewUserActive] = useState(true);
@@ -6993,19 +6995,51 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       ? ["#", "Full Name", "User Phone", "User Email", "User Title", "Status", ""]
       : ["#", "Full Name", "Prescriber Phone", "Prescriber Email", "NPI Number", "Status", ""];
     return (
-      <div className="overflow-hidden rounded-[12px] bg-[#FBFBFB] p-2">
+      <div className="rounded-[12px] bg-[#FBFBFB] p-2">
         <div className="grid grid-cols-[40px_1.25fr_1fr_1.55fr_1fr_92px_38px] rounded-t-[9px] bg-[#FBFBFB] px-4 py-3">
           {headers.map(h => (
             <span key={h} className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8c8c8c]">{h}</span>
           ))}
         </div>
         {rows.map(row => (
-          <div key={`${type}-${row[0]}`} className="grid grid-cols-[40px_1.25fr_1fr_1.55fr_1fr_92px_38px] items-center bg-white px-4 py-3.5 text-[12px] text-[#1a1a1a] transition-colors hover:bg-[var(--app-soft-hover)]">
+          <div key={`${type}-${row[0]}`} className="relative grid grid-cols-[40px_1.25fr_1fr_1.55fr_1fr_92px_38px] items-center bg-white px-4 py-3.5 text-[12px] text-[#1a1a1a] transition-colors hover:bg-[var(--app-soft-hover)]">
             {row.map((cell, index) => index === 1 ? <span key={cell} className="min-w-0 truncate font-semibold">{cell}</span> : <span key={`${index}-${cell}`} className={`min-w-0 truncate ${index === 0 ? "text-[#999]" : ""}`}>{cell}</span>)}
             <span className="inline-flex w-fit rounded-full bg-[#ecf8ef] px-3 py-1.5 text-[10px] font-semibold text-[#31583F]">Active</span>
-            <button className="flex size-7 items-center justify-center rounded-[7px] text-[#8c95a1] transition-colors hover:bg-[#f2f7f4] hover:text-[#183229]" aria-label="More actions">
-              <MoreHorizontal size={15} />
-            </button>
+            <div className="relative">
+              <button onClick={() => type === "users" ? setOpenUserMenu(current => current === row[0] ? null : row[0]) : setOpenPrescriberMenu(current => current === row[0] ? null : row[0])} className="flex size-7 items-center justify-center rounded-[7px] text-[#8c95a1] transition-colors hover:bg-[#f2f7f4] hover:text-[#183229]" aria-label="More actions" aria-expanded={type === "users" ? openUserMenu === row[0] : openPrescriberMenu === row[0]}>
+                <MoreHorizontal size={15} />
+              </button>
+              {type === "users" && openUserMenu === row[0] && (
+                <div className="absolute right-0 top-8 z-50 w-[190px] overflow-hidden rounded-[9px] border border-[#e2e2e2] bg-white py-1.5 shadow-[0_12px_32px_rgba(0,0,0,0.14)]">
+                  {[
+                    ["Edit User", "text-[#555]"],
+                    ["Change Email", "text-[#555]"],
+                    ["Change Password", "text-[#555]"],
+                    ["Convert to Prescriber", "text-[#635BFF]"],
+                    ["Delete User", "text-[#ef3030]"],
+                  ].map(([label, color]) => (
+                    <button key={label} type="button" onClick={() => setOpenUserMenu(null)} className={`flex h-10 w-full items-center px-3 text-left text-[13px] font-medium transition-colors hover:bg-[#f1f1f1] ${color}`}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {type === "prescribers" && openPrescriberMenu === row[0] && (
+                <div className="absolute right-0 top-8 z-50 w-[190px] overflow-hidden rounded-[9px] border border-[#e2e2e2] bg-white py-1.5 shadow-[0_12px_32px_rgba(0,0,0,0.14)]">
+                  {[
+                    ["Edit Prescriber", "text-[#555]"],
+                    ["Change Email", "text-[#555]"],
+                    ["Change Password", "text-[#555]"],
+                    ["EPCS Sync", "text-[#555]"],
+                    ["Delete", "text-[#ef3030]"],
+                  ].map(([label, color]) => (
+                    <button key={label} type="button" onClick={() => setOpenPrescriberMenu(null)} className={`flex h-10 w-full items-center px-3 text-left text-[13px] font-medium transition-colors hover:bg-[#f1f1f1] ${color}`}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         ))}
       </div>
@@ -7237,16 +7271,17 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
         </div>
       </div>
       {addPrescriberOpen && (
-        <div className="fixed inset-0 z-[95] flex items-center justify-center bg-black/35 p-5 backdrop-blur-[2px]">
+        <div className="fixed inset-0 z-[95] flex items-stretch justify-end bg-black/35 backdrop-blur-[2px]">
           <button className="absolute inset-0 cursor-default" onClick={() => setAddPrescriberOpen(false)} aria-label="Close add prescriber" />
-          <form onSubmit={event => { event.preventDefault(); setAddPrescriberOpen(false); }} className="relative z-10 max-h-[calc(100vh-40px)] w-full max-w-[1020px] overflow-y-auto rounded-[16px] border border-[#e3e3e3] bg-white shadow-[0_24px_70px_rgba(0,0,0,0.2)]">
-            <div className="flex items-start justify-between border-b border-[#ececec] px-6 py-5">
+          <form onSubmit={event => { event.preventDefault(); setAddPrescriberOpen(false); }} className="relative z-10 flex h-full w-full max-w-[820px] flex-col overflow-hidden border-l border-[#e3e3e3] bg-white shadow-[-20px_0_60px_rgba(0,0,0,0.16)]">
+            <div className="flex shrink-0 items-start justify-between border-b border-[#ececec] px-6 py-5">
               <div><h2 className="text-[21px] font-semibold text-[#171717]">Add prescriber</h2><p className="mt-1 text-[11px] text-[#777]">Add identity, licensing, and contact information.</p></div>
-              <button type="button" onClick={() => setAddPrescriberOpen(false)} className="flex size-9 items-center justify-center rounded-full border border-[#e2e2e2] text-[#777] transition-colors hover:bg-[#f2f2f2] hover:text-black" aria-label="Close"><X size={17} /></button>
+              <button type="button" onClick={() => setAddPrescriberOpen(false)} className="flex size-9 items-center justify-center text-[#777] transition-colors hover:text-black" aria-label="Close"><X size={19} /></button>
             </div>
 
-            <div className="grid gap-6 p-6 lg:grid-cols-[1.3fr_.7fr]">
-              <div className="grid gap-4 sm:grid-cols-6">
+            <div className="min-h-0 flex-1 overflow-y-auto p-6">
+              <div className="flex flex-col gap-6">
+              <div className="order-2 grid gap-4 sm:grid-cols-6">
                 <label className="block sm:col-span-6"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Email <span className="text-[#b4473d]">*</span></span><input required type="email" value={newPrescriber.email} onChange={event => setNewPrescriber(current => ({ ...current, email: event.target.value }))} placeholder="name@company.com" className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none placeholder:text-[#aaa] focus:border-black" /></label>
                 <label className="block sm:col-span-2"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Title <span className="text-[#b4473d]">*</span></span><select required value={newPrescriber.title} onChange={event => setNewPrescriber(current => ({ ...current, title: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] bg-white px-3 text-[12px] outline-none focus:border-black"><option value="" disabled>Select</option><option>MD</option><option>DO</option><option>NP</option><option>PA</option></select></label>
                 {([['First name','firstName'],['Last name','lastName']] as const).map(([label,key]) => <label key={key} className="block sm:col-span-2"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">{label} <span className="text-[#b4473d]">*</span></span><input required value={newPrescriber[key]} onChange={event => setNewPrescriber(current => ({ ...current, [key]: event.target.value }))} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] px-3.5 text-[12px] outline-none focus:border-black" /></label>)}
@@ -7260,30 +7295,36 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 <label className="flex cursor-pointer items-center justify-between rounded-[10px] border border-[#e3e3e3] bg-[#fafafa] px-3.5 py-3 sm:col-span-6"><span><span className="block text-[12px] font-medium text-[#202020]">Active prescriber</span><span className="mt-0.5 block text-[10px] text-[#7c7c7c]">Can sign in and prescribe immediately</span></span><input type="checkbox" checked={newPrescriberActive} onChange={event => setNewPrescriberActive(event.target.checked)} className="peer sr-only" /><span className="relative h-6 w-11 rounded-full bg-[#dedede] transition-colors peer-checked:bg-black after:absolute after:left-1 after:top-1 after:size-4 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-5" /></label>
               </div>
 
-              <aside className="h-fit rounded-[18px] border border-white/70 bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)] p-5 shadow-[0_10px_28px_rgba(38,54,45,0.08)] lg:sticky lg:top-0">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8b8b8b]">Account summary</p><h3 className="mt-1 text-[16px] font-semibold text-[#1b1b1b]">Login credentials</h3>
-                <div className="mt-5 space-y-3 text-[11px]"><div className="rounded-[10px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.76),rgba(255,255,255,0.42))] px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className="text-[#888]">Login URL</p><p className="mt-1 font-semibold text-[#222]">scriptlinkrx.com/login</p></div><div className="rounded-[10px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.76),rgba(255,255,255,0.42))] px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className="text-[#888]">Email</p><p className={`mt-1 truncate font-semibold ${newPrescriber.email ? "text-[#222]" : "text-[#aaa]"}`}>{newPrescriber.email || "Not entered yet"}</p></div><div className="rounded-[10px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.76),rgba(255,255,255,0.42))] px-3.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className="text-[#888]">Temporary password</p><div className="mt-0.5 flex items-center justify-between"><p className="font-mono text-[12px] font-semibold tracking-[0.08em]">{showPrescriberPassword ? generatedPrescriberPassword : "•••••••••"}</p><button type="button" onClick={() => setShowPrescriberPassword(current => !current)} className="flex size-8 items-center justify-center rounded-full text-[#777] hover:bg-white/60 hover:text-black">{showPrescriberPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button></div></div></div>
+              <aside className="order-1 rounded-[18px] border border-white/70 bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)] p-5 shadow-[0_10px_28px_rgba(38,54,45,0.08)]">
+                <h3 className="text-[16px] font-semibold text-[#1b1b1b]">Login credentials</h3>
+                <div className="mt-4 grid gap-3 text-[11px] sm:grid-cols-3">
+                  <div><p className="mb-1.5 text-[#888]">Login URL</p><div className="rounded-[12px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.78),rgba(255,255,255,0.4))] px-4 py-4 font-semibold text-[#222] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl">scriptlinkrx.com/login</div></div>
+                  <div><p className="mb-1.5 text-[#888]">Email</p><div className="rounded-[12px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.78),rgba(255,255,255,0.4))] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className={`truncate font-semibold ${newPrescriber.email ? "text-[#222]" : "text-[#aaa]"}`}>{newPrescriber.email || "zee@scriptlinkrx.com"}</p></div></div>
+                  <div><p className="mb-1.5 text-[#888]">Temporary password</p><div className="flex items-center justify-between rounded-[12px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.78),rgba(255,255,255,0.4))] px-4 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className="font-mono text-[12px] font-semibold tracking-[0.08em]">{showPrescriberPassword ? generatedPrescriberPassword : "•••••••••"}</p><button type="button" onClick={() => setShowPrescriberPassword(current => !current)} className="flex size-7 items-center justify-center text-[#777] hover:text-black">{showPrescriberPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button></div></div>
+                </div>
                 <button type="button" onClick={() => navigator.clipboard?.writeText(`Login: https://scriptlinkrx.com/login\nEmail: ${newPrescriber.email}\nPassword: ${generatedPrescriberPassword}`)} className="mt-6 flex h-10 w-full items-center justify-center gap-2 rounded-full border border-white/80 bg-white text-[11px] font-semibold shadow-[0_3px_12px_rgba(34,46,39,0.06)] transition-transform hover:-translate-y-0.5"><Copy size={14} /> Copy credentials</button>
               </aside>
+              </div>
             </div>
-            <div className="flex justify-end gap-2 border-t border-[#ececec] px-6 py-4"><button type="button" onClick={() => setAddPrescriberOpen(false)} className="h-10 rounded-full border border-[#d8d8d8] bg-white px-5 text-[12px] font-medium hover:bg-[#f2f2f2]">Cancel</button><button type="submit" className="h-10 rounded-full bg-black px-6 text-[12px] font-semibold text-white hover:bg-[#222]">Add prescriber</button></div>
+            <div className="flex shrink-0 flex-col gap-2 border-t border-[#ececec] bg-white px-6 py-4"><button type="submit" className="h-11 w-full rounded-full bg-black px-8 text-[13px] font-semibold text-white hover:bg-[#222]">Add prescriber</button><button type="button" onClick={() => setAddPrescriberOpen(false)} className="h-11 w-full rounded-full border border-[#d8d8d8] bg-white px-6 text-[12px] font-medium hover:bg-[#f2f2f2]">Cancel</button></div>
           </form>
         </div>
       )}
       {addUserOpen && (
-        <div className="fixed inset-0 z-[95] flex items-center justify-center bg-black/35 p-5 backdrop-blur-[2px]">
+        <div className="fixed inset-0 z-[95] flex items-stretch justify-end bg-black/35 backdrop-blur-[2px]">
           <button className="absolute inset-0 cursor-default" onClick={() => setAddUserOpen(false)} aria-label="Close add user" />
           <form
             onSubmit={event => { event.preventDefault(); setAddUserOpen(false); }}
-            className="relative z-10 max-h-[calc(100vh-40px)] w-full max-w-[900px] overflow-y-auto rounded-[16px] border border-[#e3e3e3] bg-white shadow-[0_24px_70px_rgba(0,0,0,0.2)]"
+            className="relative z-10 flex h-full w-full max-w-[760px] flex-col overflow-hidden border-l border-[#e3e3e3] bg-white shadow-[-20px_0_60px_rgba(0,0,0,0.16)]"
           >
-            <div className="flex items-start justify-between border-b border-[#ececec] px-6 py-5">
+            <div className="flex shrink-0 items-start justify-between border-b border-[#ececec] px-6 py-5">
               <div><h2 className="text-[21px] font-semibold text-[#171717]">Add user</h2><p className="mt-1 text-[11px] text-[#777]">Create an account and choose its access level.</p></div>
-              <button type="button" onClick={() => setAddUserOpen(false)} className="flex size-9 items-center justify-center rounded-full border border-[#e2e2e2] text-[#777] transition-colors hover:bg-[#f2f2f2] hover:text-black" aria-label="Close"><X size={17} /></button>
+              <button type="button" onClick={() => setAddUserOpen(false)} className="flex size-9 items-center justify-center text-[#777] transition-colors hover:text-black" aria-label="Close"><X size={19} /></button>
             </div>
 
-            <div className="grid gap-6 p-6 lg:grid-cols-[1.15fr_.85fr]">
-              <div className="grid h-fit content-start gap-x-4 gap-y-3 sm:grid-cols-2">
+            <div className="min-h-0 flex-1 overflow-y-auto p-6">
+              <div className="flex flex-col gap-6">
+              <div className="order-2 grid h-fit content-start gap-x-4 gap-y-3 sm:grid-cols-2">
                 {([
                   ["First name", "firstName", "e.g. John"],
                   ["Last name", "lastName", "e.g. Doe"],
@@ -7318,21 +7359,21 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 </div>
               </div>
 
-              <aside className="rounded-[18px] border border-white/70 bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)] p-5 shadow-[0_10px_28px_rgba(38,54,45,0.08)]">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8b8b8b]">Account summary</p>
-                <h3 className="mt-1 text-[16px] font-semibold text-[#1b1b1b]">Login credentials</h3>
-                <div className="mt-5 space-y-3 text-[11px]">
-                  <div className="rounded-[10px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.76),rgba(255,255,255,0.42))] px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className="text-[#888]">Login URL</p><p className="mt-1 font-semibold text-[#222]">scriptlinkrx.com/login</p></div>
-                  <div className="rounded-[10px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.76),rgba(255,255,255,0.42))] px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className="text-[#888]">Email</p><p className={`mt-1 truncate font-semibold ${newUser.email ? "text-[#222]" : "text-[#aaa]"}`}>{newUser.email || "Not entered yet"}</p></div>
-                  <div className="rounded-[10px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.76),rgba(255,255,255,0.42))] px-3.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className="text-[#888]">Temporary password</p><div className="mt-0.5 flex items-center justify-between gap-2"><p className="font-mono text-[12px] font-semibold tracking-[0.08em] text-[#222]">{showUserPassword ? generatedUserPassword : "•••••••••"}</p><button type="button" onClick={() => setShowUserPassword(current => !current)} className="flex size-8 items-center justify-center rounded-full text-[#777] hover:bg-white/60 hover:text-black" aria-label={showUserPassword ? "Hide password" : "Show password"}>{showUserPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button></div></div>
+              <aside className="order-1 rounded-[18px] border border-white/70 bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)] p-5 shadow-[0_10px_28px_rgba(38,54,45,0.08)]">
+                <h3 className="text-[16px] font-semibold text-[#1b1b1b]">Login credentials</h3>
+                <div className="mt-4 grid gap-3 text-[11px] sm:grid-cols-3">
+                  <div><p className="mb-1.5 text-[#888]">Login URL</p><div className="rounded-[12px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.78),rgba(255,255,255,0.4))] px-4 py-4 font-semibold text-[#222] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl">scriptlinkrx.com/login</div></div>
+                  <div><p className="mb-1.5 text-[#888]">Email</p><div className="rounded-[12px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.78),rgba(255,255,255,0.4))] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className={`truncate font-semibold ${newUser.email ? "text-[#222]" : "text-[#aaa]"}`}>{newUser.email || "zee@scriptlinkrx.com"}</p></div></div>
+                  <div><p className="mb-1.5 text-[#888]">Temporary password</p><div className="flex items-center justify-between rounded-[12px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.78),rgba(255,255,255,0.4))] px-4 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(34,46,39,0.06)] backdrop-blur-xl"><p className="font-mono text-[12px] font-semibold tracking-[0.08em] text-[#222]">{showUserPassword ? generatedUserPassword : "•••••••••"}</p><button type="button" onClick={() => setShowUserPassword(current => !current)} className="flex size-7 items-center justify-center text-[#777] hover:text-black" aria-label={showUserPassword ? "Hide password" : "Show password"}>{showUserPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button></div></div>
                 </div>
                 <button type="button" onClick={() => navigator.clipboard?.writeText(`Login: https://scriptlinkrx.com/login\nEmail: ${newUser.email}\nPassword: ${generatedUserPassword}`)} className="mt-6 flex h-10 w-full items-center justify-center gap-2 rounded-full border border-white/80 bg-white text-[11px] font-semibold text-[#222] shadow-[0_3px_12px_rgba(34,46,39,0.06)] transition-transform hover:-translate-y-0.5"><Copy size={14} /> Copy credentials</button>
               </aside>
+              </div>
             </div>
 
-            <div className="flex justify-end gap-2 border-t border-[#ececec] px-6 py-4">
-              <button type="button" onClick={() => setAddUserOpen(false)} className="h-10 rounded-full border border-[#d8d8d8] bg-white px-5 text-[12px] font-medium text-black hover:bg-[#f2f2f2]">Cancel</button>
-              <button type="submit" className="h-10 rounded-full bg-black px-6 text-[12px] font-semibold text-white transition-colors hover:bg-[#222]">Add user</button>
+            <div className="flex shrink-0 flex-col gap-2 border-t border-[#ececec] bg-white px-6 py-4">
+              <button type="submit" className="h-11 w-full rounded-full bg-black px-8 text-[13px] font-semibold text-white transition-colors hover:bg-[#222]">Add user</button>
+              <button type="button" onClick={() => setAddUserOpen(false)} className="h-11 w-full rounded-full border border-[#d8d8d8] bg-white px-6 text-[12px] font-medium text-black hover:bg-[#f2f2f2]">Cancel</button>
             </div>
           </form>
         </div>
