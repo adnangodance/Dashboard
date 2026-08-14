@@ -452,6 +452,7 @@ function NavItem({
   const isHovered = hoveredItem === label;
   const menuOpen = openMenu === label;
   const [isDragOver, setIsDragOver] = useState(false);
+  const badgeCount = label === "Orders" ? 5 : label === "Cart" ? 100 : null;
 
   return (
     <div
@@ -484,7 +485,7 @@ function NavItem({
       >
         <Icon size={16} strokeWidth={1.65} className="flex-shrink-0 text-[#303332] transition-transform duration-200 ease-out group-hover:-translate-y-px group-hover:translate-x-0.5 group-hover:rotate-6" />
         <span className="flex-1">{label}</span>
-        <span className="size-6 flex-shrink-0" />
+        {badgeCount !== null ? <span className="inline-flex h-5 min-w-5 flex-shrink-0 items-center justify-center rounded-full bg-[#e9eaec] px-1.5 text-[10px] font-semibold tabular-nums text-[#35383a]">{badgeCount}</span> : <span className="size-6 flex-shrink-0" />}
       </div>
     </div>
   );
@@ -4708,7 +4709,7 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
                 <button onClick={() => navigator.clipboard.writeText(patientTrackingLink).then(() => { setTrackingLinkCopied(true); window.setTimeout(() => setTrackingLinkCopied(false), 1600); })} className="flex shrink-0 items-center justify-center text-[#98a2b3] hover:text-[#183229]" aria-label="Copy patient tracking link">{trackingLinkCopied ? <CheckCircle2 size={15} /> : <svg width="15" height="15" viewBox="0 0 12 12" fill="none"><rect x="3.5" y="3.5" width="7" height="7" rx="1.2" stroke="currentColor"/><path d="M1.5 8V1.5H8" stroke="currentColor" strokeLinecap="round"/></svg>}</button>
               </div>
             </section>
-          </> : <section className="rounded-[18px] bg-white p-6 shadow-[0_18px_50px_rgba(20,26,23,0.06)]"><h2 className="text-[18px] font-semibold">Receipt</h2><p className="mt-1 text-[11px] text-[#667085]">Order {order.id}</p><div className="mt-5 space-y-3">{order.items.map(item => <div key={item.name} className="flex justify-between gap-3 text-[11px]"><span className="text-[#667085]">{item.name}</span><span className="font-semibold">{item.price}</span></div>)}</div><div className="mt-5 border-t border-[#e8e3df] pt-4"><div className="flex justify-between text-[12px]"><span>Shipping</span><span className="font-semibold">Included</span></div><div className="mt-3 flex justify-between text-[15px] font-bold"><span>Total</span><span className="text-[#183229]">{order.total}</span></div></div><button className="mt-5 flex h-10 w-full items-center justify-center gap-2 rounded-[8px] bg-[#111] text-[11px] font-semibold text-white"><Download size={13} /> Download receipt</button></section>}
+          </> : <section className="rounded-[18px] bg-white p-6 shadow-[0_18px_50px_rgba(20,26,23,0.06)]"><h2 className="text-[18px] font-semibold">Receipt</h2><p className="mt-1 text-[11px] text-[#667085]">Order {order.id}</p><div className="mt-5 space-y-3">{order.items.map(item => <div key={item.name} className="flex justify-between gap-3 text-[11px]"><span className="text-[#667085]">{item.name}</span><span className="font-semibold">{item.price}</span></div>)}</div><div className="mt-5 border-t border-[#e8e3df] pt-4"><div className="flex justify-between text-[12px]"><span>Shipping</span><span className="font-semibold">Included</span></div><div className="mt-3 flex justify-between text-[15px] font-bold"><span>Total</span><span className="text-[#183229]">{order.total}</span></div></div><button className="mt-5 flex h-10 w-full items-center justify-center gap-2 rounded-full bg-[#111] text-[11px] font-semibold text-white"><Download size={13} /> Download receipt</button></section>}
         </aside>
       </div>
       </div>
