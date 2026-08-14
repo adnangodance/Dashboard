@@ -1412,7 +1412,7 @@ function PharmacyCatalogCard({
           <span className="shrink-0 text-[14px] font-semibold text-[#171a18]">{price}</span>
         </div>
         <div className="mt-auto rounded-[9px] bg-[#f5f7f6] px-3 py-2.5">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <span className="flex size-6 shrink-0 items-center justify-center rounded-[6px] bg-white text-[#31583f]"><Building2 size={13} strokeWidth={1.7} /></span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-[10px] font-semibold text-[#26302b]">{pharmacy}</p>
@@ -1995,12 +1995,12 @@ function ProductsPage({
   return (
     <>
       {/* Page header — matches Figma layout */}
-      <div className="flex items-start justify-between mb-0">
-        <h1 className="font-['Inter',sans-serif] font-medium text-[32px] text-black leading-none">Products</h1>
+      <div className="mb-0 flex h-[38px] items-center justify-between">
+        <h1 className="flex h-[38px] items-center font-['Inter',sans-serif] text-[28px] font-semibold leading-tight text-[#1a1a1a]">Products</h1>
       </div>
 
       {/* Search + filters bar */}
-      <div className="sticky top-0 z-30 -mx-2 mb-5 flex items-end gap-[14px] border-b border-[#eeeeec] bg-white/95 px-2 py-3 backdrop-blur-sm">
+      <div className="sticky top-0 z-30 -mx-2 mb-5 flex items-end gap-[14px] border-b border-[#eeeeec] bg-white/95 px-2 pb-4 pt-3 backdrop-blur-sm">
         {/* Search box — from Figma import Group1216401138 */}
         <div className="group w-[220px] flex-shrink-0 transition-all duration-300 ease-out focus-within:w-[310px]">
         <div className="flex h-[38px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:border-2 focus-within:border-black">
@@ -4160,9 +4160,9 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
     <>
       <div className="max-w-[1300px]">
       <div className="mb-5 flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-[28px] font-semibold leading-tight text-[#1a1a1a]">Orders</h1>
-          <div className="group flex h-[38px] w-full items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:border-2 focus-within:border-black sm:w-[220px] sm:focus-within:w-[310px]">
+        <div className="flex flex-col items-start gap-3">
+          <h1 className="flex h-[38px] items-center text-[28px] font-semibold leading-tight text-[#1a1a1a]">Orders</h1>
+          <div className="group mt-[17px] flex h-[38px] w-full items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:border-2 focus-within:border-black sm:w-[220px] sm:focus-within:w-[310px]">
             <Search size={14} strokeWidth={1.8} className="flex-shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110" />
             <input
               value={search}
@@ -4568,7 +4568,7 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
   return (
     <>
       <div className="max-w-[1300px]">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-5 flex flex-col items-start gap-3">
         <div className="flex items-center gap-3">
           <PageBackButton onClick={() => onNavigate("orders")} label="Back to orders" />
           <h1 className="text-[22px] font-semibold text-[#1a1a1a]">Orders</h1>
@@ -4980,30 +4980,17 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
   return (
     <>
-      <div className="mb-5 flex items-center justify-between">
-        <h1 className="text-[28px] font-semibold leading-tight text-[#1a1a1a]">
+      <div className="mb-5 flex flex-col items-start gap-3">
+        <h1 className="flex h-[38px] items-center text-[28px] font-semibold leading-tight text-[#1a1a1a]">
           Order History <span className="text-[16px] font-normal text-[#9d9d9d]">({orders.length})</span>
         </h1>
-      </div>
-
-      <div className="flex flex-col gap-5">
-        <div className="flex flex-wrap items-end gap-4 border-b border-[#eeeeec] pb-4">
-          <div className="group order-2 ml-auto flex h-[38px] w-[220px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:w-[310px] focus-within:border-2 focus-within:border-black">
+        <div className="flex w-full flex-wrap items-end gap-4 border-b border-[#eeeeec] pb-4">
+          <div className="group mt-[17px] flex h-[38px] w-full items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:border-2 focus-within:border-black sm:w-[220px] sm:focus-within:w-[310px]">
             <Search size={14} strokeWidth={1.8} className="shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110" />
-            <input
-              value={search}
-              onChange={event => setSearch(event.target.value)}
-              placeholder="Search order history"
-              className="min-w-0 flex-1 bg-transparent text-[11px] font-medium text-[#1a1a1a] outline-none placeholder:font-medium placeholder:text-[#686868]"
-            />
-            {search ? (
-              <button type="button" onClick={() => setSearch("")} className="text-[14px] text-[#777] hover:text-black" aria-label="Clear search">×</button>
-            ) : (
-              <span className="shrink-0 text-[10px] text-[#686868]">⌘ F</span>
-            )}
+            <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Search order history" className="min-w-0 flex-1 bg-transparent text-[11px] font-medium text-[#1a1a1a] outline-none placeholder:font-medium placeholder:text-[#686868]" />
+            {search ? <button type="button" onClick={() => setSearch("")} className="text-[14px] text-[#777] hover:text-black" aria-label="Clear search">×</button> : <span className="shrink-0 text-[10px] text-[#686868]">⌘ F</span>}
           </div>
-
-          <div className="order-1 flex flex-wrap items-end gap-3.5">
+          <div className="ml-auto flex flex-wrap items-end justify-end gap-3.5">
             <div className="w-[180px]">
               <OrderHistorySelect label="Period" options={ORDER_HISTORY_RANGE_PRESETS} value={rangePreset} onChange={setRangePreset} />
             </div>
@@ -5022,6 +5009,9 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="flex flex-col gap-5">
 
         {orders.length === 0 ? (
           <div className="flex w-full flex-col items-center justify-center rounded-lg border border-[#e5e7eb] bg-white px-5 py-[60px] text-center">
@@ -5676,8 +5666,6 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
 function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Page) => void }) {
   const [approvals, setApprovals] = useState<PendingApproval[]>(PENDING_APPROVALS_MOCK);
   const [searchQuery, setSearchQuery] = useState("");
-  const [approvalPeriod, setApprovalPeriod] = useState("this_month");
-  const [approvalPayer, setApprovalPayer] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // ⌘F / Ctrl+F focuses the search box instead of the browser find bar
@@ -5709,17 +5697,6 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
   }
 
   const filteredApprovals = approvals.filter(approval => {
-    const created = new Date(approval.createdAt);
-    const now = new Date();
-    const matchesPeriod = approvalPeriod === "all" ||
-      (approvalPeriod === "this_month" && created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear()) ||
-      (approvalPeriod === "last_month" && created.getMonth() === new Date(now.getFullYear(), now.getMonth() - 1, 1).getMonth() && created.getFullYear() === new Date(now.getFullYear(), now.getMonth() - 1, 1).getFullYear()) ||
-      (approvalPeriod === "this_year" && created.getFullYear() === now.getFullYear());
-    const matchesPayer = approvalPayer === "all" ||
-      (approvalPayer === "patient" && approval.paymentMethod === "patient") ||
-      (approvalPayer === "clinic" && approval.paymentMethod === "clinic") ||
-      (approvalPayer === "clinic_ach" && approval.paymentMethod === "clinic_ach");
-    if (!matchesPeriod || !matchesPayer) return false;
     if (!searchQuery) return true;
     const searchLower = searchQuery.toLowerCase();
     const patientName = `${approval.patient.firstName} ${approval.patient.lastName}`.toLowerCase();
@@ -5736,11 +5713,11 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
   return (
     <div className="max-w-[1300px]">
       <div className="mb-5 flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-[28px] font-medium leading-tight text-[#1a1a1a]">
+        <div className="flex flex-col items-start gap-3">
+          <h1 className="flex h-[38px] items-center text-[28px] font-medium leading-tight text-[#1a1a1a]">
             Pending Approvals <span className="text-[16px] font-normal text-[#9d9d9d]">({approvals.length})</span>
           </h1>
-          <label className="group flex h-[38px] w-[220px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:w-[310px] focus-within:border-2 focus-within:border-black">
+          <label className="group mt-[17px] flex h-[38px] w-full items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:border-2 focus-within:border-black sm:w-[220px] sm:focus-within:w-[310px]">
             <span className="flex shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
             </span>
@@ -5754,14 +5731,6 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
             />
             <span className="shrink-0 text-[10px] text-[#686868]">⌘ F</span>
           </label>
-        </div>
-        <div className="flex flex-wrap items-end gap-3.5 border-b border-[#eeeeec] pb-4">
-          <div className="w-[180px]">
-            <OrderHistorySelect label="Period" options={ORDER_HISTORY_RANGE_PRESETS.filter(option => option.value !== "custom")} value={approvalPeriod} onChange={setApprovalPeriod} />
-          </div>
-          <div className="w-[180px]">
-            <OrderHistorySelect label="Paid by" options={ORDER_HISTORY_PAYER_OPTIONS} value={approvalPayer} onChange={setApprovalPayer} />
-          </div>
         </div>
       </div>
 
@@ -6771,35 +6740,30 @@ function UsersPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   return (
     <>
       <div className="max-w-[1300px]">
-        {/* Page header row */}
-        <div className="flex items-center justify-between mb-5">
-          <h1 className="text-[28px] font-semibold text-[#1a1a1a] leading-tight">
-            Patients{" "}
-            <span className="text-[16px] font-normal text-[#9d9d9d]">({patients.length})</span>
-          </h1>
-          <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1.5 rounded-full border border-[#d8dedb] bg-white px-4 py-2 text-[12px] font-medium text-black transition-colors hover:bg-[#f7f8f7]">
-              <Upload size={15} />
-              Upload Patients
-            </button>
-            <button onClick={() => setCreatePatientOpen(true)} className="flex items-center gap-1.5 rounded-full bg-[#111] px-4 py-2 text-[12px] font-medium text-white transition-colors hover:bg-black">
-              <Plus size={15} />
-              Create Patient
-            </button>
+        <div className="mb-5 flex flex-col gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h1 className="flex h-[38px] items-center text-[28px] font-semibold text-[#1a1a1a] leading-tight">
+              Patients{" "}
+              <span className="text-[16px] font-normal text-[#9d9d9d]">({patients.length})</span>
+            </h1>
           </div>
-        </div>
 
-        {/* Search bar */}
-        <div className="mb-4">
-          <div className="group flex h-[38px] w-[220px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:w-[310px] focus-within:border-2 focus-within:border-black">
-            <Search size={14} strokeWidth={1.8} className="flex-shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="min-w-0 flex-1 bg-transparent text-[11px] font-medium text-[#1a1a1a] outline-none placeholder:font-medium placeholder:text-[#686868]"
-              placeholder="Search"
-            />
-            <span className="shrink-0 text-[10px] text-[#686868]">⌘ F</span>
+          <div className="flex w-full flex-wrap items-end gap-3">
+            <div className="group mt-[17px] flex h-[38px] w-full items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:border-2 focus-within:border-black sm:w-[220px] sm:focus-within:w-[310px]">
+              <Search size={14} strokeWidth={1.8} className="flex-shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110" />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} className="min-w-0 flex-1 bg-transparent text-[11px] font-medium text-[#1a1a1a] outline-none placeholder:font-medium placeholder:text-[#686868]" placeholder="Search patients" />
+              <span className="shrink-0 text-[10px] text-[#686868]">⌘ F</span>
+            </div>
+            <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+              <button className="flex items-center gap-1.5 rounded-full border border-[#d8dedb] bg-white px-4 py-2 text-[12px] font-medium text-black transition-colors hover:bg-[#f7f8f7]">
+                <Upload size={15} />
+                Upload Patients
+              </button>
+              <button onClick={() => setCreatePatientOpen(true)} className="flex items-center gap-1.5 rounded-full bg-[#111] px-4 py-2 text-[12px] font-medium text-white transition-colors hover:bg-black">
+                <Plus size={15} />
+                Create Patient
+              </button>
+            </div>
           </div>
         </div>
 
