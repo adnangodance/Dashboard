@@ -7192,7 +7192,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               {paymentTab === "Bank Account (ACH)" && (
                 <div className="rounded-[14px] bg-[#FBFBFB] p-6">
                   <div className="mb-5 flex items-center justify-between gap-3 border-b border-[#e8e9e8] pb-4">
-                    <div>
+                    <div className="pt-[10px]">
                       <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Bank Account (ACH)</h3>
                       <p className="mt-1 text-[11px] text-[#7b827e]">Use a clinic bank account to pay for patient prescriptions directly from the account.</p>
                     </div>
@@ -9728,19 +9728,19 @@ function CheckoutPrescriptionPage({ onNavigate }: { onNavigate: (p: Page) => voi
   );
 }
 
-function LoginPage({ onLogin, onRegister, onSingleSignOn }: { onLogin: () => void; onRegister: () => void; onSingleSignOn: () => void }) {
+function LoginPage({ onLogin, onRegister, onSingleSignOn }: { onLogin: (destination: "business" | "setup") => void; onRegister: () => void; onSingleSignOn: () => void }) {
   const [loginRole, setLoginRole] = useState<"provider" | "pharmacy">("provider");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
   function submitLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (password !== "12345") {
+    if (password !== "test123" && password !== "12345") {
       setLoginError("Incorrect password. Please try again.");
       return;
     }
     setLoginError("");
-    onLogin();
+    onLogin(password === "test123" ? "business" : "setup");
   }
 
   return (
@@ -9821,6 +9821,40 @@ function LoginPage({ onLogin, onRegister, onSingleSignOn }: { onLogin: () => voi
           <button type="button" className="mt-8 text-[12px] font-semibold text-[#1a1a1a] underline underline-offset-4 hover:text-[#183229]">
             Forgot password?
           </button>
+        </section>
+      </div>
+    </main>
+  );
+}
+
+function BusinessSelectionPage({ onSelect, onBack }: { onSelect: (business: string) => void; onBack: () => void }) {
+  const businesses = [
+    { name: "Shpend Clinic", location: "Bronx, NY" },
+    { name: "ScriptLinkRx Demo", location: "Bronx, NY" },
+  ];
+
+  return (
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#fafafa] px-5 py-10 font-['Inter',sans-serif] text-[#171717]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(circle_at_50%_0%,rgba(219,232,255,0.9),rgba(237,244,255,0.55)_38%,rgba(250,250,250,0)_76%)]" />
+      <div className="relative w-full max-w-[520px]">
+        <div className="mb-5 flex items-center justify-center gap-2.5">
+            <img src={scriptlinkrxLogo} alt="ScriptLinkRx" className="h-[26px] w-8 object-contain" />
+            <span className="font-['Poppins',sans-serif] text-[14px] font-semibold uppercase tracking-wide text-[#183229]">S<span className="lowercase">CRIPTLINKrx</span></span>
+        </div>
+        <section className="w-full overflow-hidden rounded-[10px] border border-white/80 bg-white/65 shadow-[0_20px_60px_rgba(25,35,50,0.12)] backdrop-blur-[18px]">
+        <div className="border-b border-white/70 px-6 pb-6 pt-11 text-center">
+          <h1 className="text-[22px] font-semibold tracking-[-0.03em]">Select a business</h1>
+          <p className="mt-1.5 text-[12px] leading-5 text-[#6f7782]">Choose the business you want to access for this session.</p>
+        </div>
+        <div className="space-y-3 p-6">
+          {businesses.map(business => (
+            <button key={business.name} type="button" onClick={() => onSelect(business.name)} className="group flex w-full items-center gap-3 rounded-[10px] border border-[#e2e4e8] bg-white px-4 py-4 text-left transition-colors hover:border-[#c7d7f7] hover:bg-[#f5f8ff]">
+              <span className="min-w-0 flex-1"><span className="block text-[14px] font-semibold text-[#171717]">{business.name}</span><span className="mt-1 block text-[11px] text-[#737b88]">{business.location}</span></span>
+              <ChevronRight size={17} className="text-[#a2a8b1] transition-transform group-hover:translate-x-0.5 group-hover:text-[#2563EB]" />
+            </button>
+          ))}
+          <button type="button" onClick={onBack} className="h-10 w-full rounded-full bg-white text-[12px] font-semibold text-[#171A18] transition-colors hover:bg-[#f1f1f1]">Cancel</button>
+        </div>
         </section>
       </div>
     </main>
@@ -11061,7 +11095,7 @@ function LandingPage({ onLoginClick, onRegisterClick, onRequestDemoClick, onCont
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [authView, setAuthView] = useState<"landing" | "login" | "organization" | "register" | "single-sign-on" | "request-demo" | "contact">("landing");
+  const [authView, setAuthView] = useState<"landing" | "login" | "business-select" | "organization" | "register" | "single-sign-on" | "request-demo" | "contact">("landing");
   const [appTheme, setAppTheme] = useState<AppTheme>(() => {
     const savedTheme = window.localStorage.getItem("scriptlinkrx-theme");
     return savedTheme === "orange" ? "orange" : "default";
@@ -11361,8 +11395,21 @@ export default function App() {
         <LoginPage
           onRegister={() => setAuthView("register")}
           onSingleSignOn={() => setAuthView("single-sign-on")}
-          onLogin={() => {
-            setAuthView("organization");
+          onLogin={destination => {
+            setAuthView(destination === "business" ? "business-select" : "organization");
+          }}
+        />
+      );
+    }
+
+    if (authView === "business-select") {
+      return (
+        <BusinessSelectionPage
+          onBack={() => setAuthView("login")}
+          onSelect={business => {
+            window.localStorage.setItem("scriptlinkrx-selected-business", business);
+            setIsAuthenticated(true);
+            setPage("products");
           }}
         />
       );
