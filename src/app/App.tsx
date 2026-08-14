@@ -142,17 +142,17 @@ function CheckoutSubmissionFooter({
   if (state === "submitted") {
     return (
       <div className="w-full">
-        <div className="mb-4 rounded-[14px] border border-[#dce8df] bg-[#f7faf8] px-4 py-5 text-center">
-          <span className="mx-auto flex size-10 items-center justify-center rounded-full bg-[#e1efe7] text-[#183229]">
+        <div className="mb-4 rounded-[14px] border border-[#dedede] bg-[#f5f5f5] px-4 py-5 text-center">
+          <span className="mx-auto flex size-10 items-center justify-center rounded-full bg-[#e5e5e5] text-[#555555]">
             <CheckCircle2 size={20} strokeWidth={1.9} />
           </span>
           <p className="mt-3 text-[17px] font-semibold tracking-[-0.02em] text-[#171717]">Your order has been submitted!</p>
           <p className="mt-1 text-[11px] leading-[17px] text-[#6f7782]">We&apos;ll follow up with status updates once it&apos;s shipped.</p>
         </div>
-        <button onClick={onGoToOrders} className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#111] text-[13px] font-semibold text-white transition-colors hover:bg-[#183229]">
+        <button onClick={onGoToOrders} className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#111] text-[13px] font-semibold text-white transition-colors hover:bg-[#121212]">
           Go to orders
         </button>
-        <button className="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-full text-[12px] font-semibold text-[#183229] transition-colors hover:bg-[#f2f4f3]">
+        <button className="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-full bg-[#f1f1f1] text-[12px] font-semibold text-black transition-colors hover:bg-[#e7e7e7]">
           <Download size={14} /> Download receipt
         </button>
       </div>
@@ -2038,12 +2038,12 @@ function ProductsPage({
             const filterWidthClass = isShippingState ? "w-[142px]" : isAreaOfTreatment ? "w-[165px]" : "w-[94px]";
             return (
               <div key={label} className="relative flex flex-col gap-1.5">
-                <span className="px-0.5 text-[11px] font-normal leading-none text-[#667085]">
+                <span className="px-0.5 text-[11px] font-medium leading-none text-[#667085]">
                   {label}
                 </span>
                 <button
                   onClick={() => setOpenCatalogFilter(isOpen ? null : label)}
-                  className={`flex h-[38px] ${filterWidthClass} cursor-pointer items-center justify-between gap-2 rounded-[9px] border bg-white px-3 text-[12px] font-normal leading-none transition-colors ${
+                  className={`flex h-[38px] ${filterWidthClass} cursor-pointer items-center justify-between gap-2 rounded-[9px] border bg-white px-3 text-[12px] font-medium leading-none transition-colors ${
                     hasSelection
                       ? isShippingState
                         ? "border-[#9DBBFF] bg-[#F3F7FF] text-[#2563EB]"
@@ -2139,11 +2139,11 @@ function ProductsPage({
             );
           })}
           <div className="relative flex flex-col gap-1.5">
-            <span className="px-0.5 text-[11px] font-normal leading-none text-transparent">Legend</span>
+            <span className="px-0.5 text-[11px] font-medium leading-none text-transparent">Legend</span>
             <button
               type="button"
               onClick={() => setOpenCatalogFilter(openCatalogFilter === "Legend" ? null : "Legend")}
-              className={`flex h-[38px] w-[108px] items-center justify-between gap-2 rounded-[9px] border bg-white px-3 text-[12px] font-normal leading-none text-[#344054] transition-colors ${openCatalogFilter === "Legend" ? "border-black" : "border-[#cfcfcf] hover:border-[#aeb8c5]"}`}
+              className={`flex h-[38px] w-[108px] items-center justify-between gap-2 rounded-[9px] border bg-white px-3 text-[12px] font-medium leading-none text-[#344054] transition-colors ${openCatalogFilter === "Legend" ? "border-black" : "border-[#cfcfcf] hover:border-[#aeb8c5]"}`}
               aria-expanded={openCatalogFilter === "Legend"}
             >
               <span className="inline-flex items-center gap-1.5"><Info size={14} strokeWidth={2} /> Legend</span>
@@ -4575,7 +4575,7 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
         </div>
         <div className="flex flex-wrap gap-2">
           <button className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[#d8dedb] bg-white px-4 text-[11px] font-semibold text-[#31583F] transition-colors hover:bg-[#f7f8f7]"><Download size={13} /> Download receipt</button>
-          <button onClick={() => onNavigate("support")} className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#272727] px-4 text-[11px] font-semibold text-white transition-colors hover:bg-[#111]"><Plus size={13} /> Create Ticket</button>
+          <button onClick={() => onNavigate("support")} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#272727] px-4 text-[11px] font-semibold text-white transition-colors hover:bg-[#111]"><Plus size={13} /> Create Ticket</button>
           <button className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[#FFE7D6] px-4 text-[11px] font-semibold text-[#7B003B] transition-colors hover:bg-[#ffdcc4]"><XCircle size={13} /> Request cancellation</button>
         </div>
       </div>
@@ -4859,7 +4859,7 @@ function OrderHistorySelect({ label, options, value, onChange }: { label: string
         <select
           value={value}
           onChange={event => onChange(event.target.value)}
-          className="h-[38px] w-full cursor-pointer appearance-none rounded-[9px] border border-[#cfcfcf] bg-white py-1 pl-3 pr-9 text-[12px] leading-5 text-[#121212] outline-none transition-all duration-200 focus:border-black focus:shadow-[0_0_0_2px_rgba(0,0,0,0.06)]"
+          className="h-[38px] w-full cursor-pointer appearance-none rounded-[9px] border border-[#cfcfcf] bg-white py-1 pl-3 pr-9 text-[12px] font-medium leading-5 text-[#121212] outline-none transition-all duration-200 focus:border-black focus:shadow-[0_0_0_2px_rgba(0,0,0,0.06)]"
         >
           {options.map(option => (
             <option key={option.value} value={option.value}>{option.label}</option>
@@ -4910,7 +4910,7 @@ function OrderHistoryDateInput({ label, value, onChange, min, max }: { label: st
           placeholder="MM/DD/YYYY"
           maxLength={10}
           inputMode="numeric"
-          className="h-[38px] w-full rounded-[9px] border border-[#cfcfcf] bg-white py-2 pl-3 pr-11 text-[12px] leading-5 text-[#121212] outline-none transition-all duration-200 placeholder:font-medium placeholder:text-[#999999] focus:border-black focus:shadow-[0_0_0_2px_rgba(0,0,0,0.06)]"
+          className="h-[38px] w-full rounded-[9px] border border-[#cfcfcf] bg-white py-2 pl-3 pr-11 text-[12px] font-medium leading-5 text-[#121212] outline-none transition-all duration-200 placeholder:font-medium placeholder:text-[#999999] focus:border-black focus:shadow-[0_0_0_2px_rgba(0,0,0,0.06)]"
         />
         <span className="pointer-events-none absolute right-3 top-1/2 z-[1] flex -translate-y-1/2 items-center justify-center p-1 text-[#6b7280]">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -5032,7 +5032,7 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           </div>
         ) : (
           <div className="rounded-xl bg-white">
-            <div className="w-max max-w-full overflow-x-auto bg-white">
+            <div className="w-full max-w-[1300px] overflow-x-auto bg-white">
               <table className="w-full min-w-max border-collapse text-left text-sm">
                 <thead>
                   <tr>
@@ -5077,7 +5077,7 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                           disabled={downloadingOrderId === order.order_id}
                           aria-label="Download invoice"
                           title="Download invoice"
-                          className="inline-flex items-center gap-1.5 rounded-full border border-black bg-black px-3 py-[7px] text-[12px] font-semibold text-white transition-colors hover:border-[#242424] hover:bg-[#242424] disabled:cursor-default disabled:opacity-60 disabled:hover:border-black disabled:hover:bg-black"
+                          className="inline-flex h-[30px] items-center gap-1.5 rounded-full border border-black bg-black px-3 text-[12px] font-semibold text-white transition-colors hover:border-[#242424] hover:bg-[#242424] disabled:cursor-default disabled:opacity-60 disabled:hover:border-black disabled:hover:bg-black"
                         >
                           {downloadingOrderId === order.order_id ? (
                             <span className="size-[13px] animate-spin rounded-full border-2 border-[#d8d8d2] border-t-[#183229]" aria-hidden="true" />
@@ -5751,7 +5751,7 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
             </p>
           </div>
         ) : (
-          <div className="w-max max-w-full overflow-x-auto bg-white">
+          <div className="w-full max-w-[1300px] overflow-x-auto bg-white">
             <table className="w-full min-w-max border-collapse text-left text-sm">
               <thead>
                 <tr>
@@ -5793,7 +5793,7 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
                         <div className="flex items-center gap-1.5">
                           <button
                             onClick={event => { event.stopPropagation(); setSelectedId(approval.id); }}
-                            className="inline-flex items-center justify-center rounded-full bg-black px-3 py-[7px] text-[11px] font-medium text-white transition-colors hover:bg-[#242424]"
+                            className="inline-flex h-[30px] items-center justify-center rounded-full bg-black px-3 text-[11px] font-medium text-white transition-colors hover:bg-[#242424]"
                             aria-label={`Review order for ${approval.patient.firstName} ${approval.patient.lastName}`}
                           >
                             Review
@@ -6419,7 +6419,7 @@ function SupportCreateTicketModal({ open, onClose, onCreate }: { open: boolean; 
           </div>
           <div className="flex justify-end gap-2 border-t border-[#e5e9e6] pt-5">
             <button type="button" onClick={onClose} className="rounded-full border border-[#dedede] bg-white px-4 py-2 text-[12px] font-medium text-black transition-colors hover:bg-[#f1f1f1]">Cancel</button>
-            <button type="submit" className="flex items-center justify-center gap-2 rounded-full bg-[#111] px-4 py-2 text-[12px] font-medium text-white transition-colors hover:bg-black">
+            <button type="submit" className="flex h-10 items-center justify-center gap-2 rounded-full bg-[#111] px-4 text-[12px] font-medium text-white transition-colors hover:bg-black">
               Create Ticket
             </button>
           </div>
@@ -6509,7 +6509,7 @@ function SupportPage({ onNavigate: _onNavigate }: { onNavigate: (p: Page) => voi
               type="button"
               onClick={() => setIsCreateModalOpen(true)}
               aria-label="Create Ticket"
-              className="flex items-center gap-1.5 rounded-full bg-[#111] px-4 py-2 text-[12px] font-medium text-white transition-colors hover:bg-black"
+              className="flex h-10 items-center gap-1.5 rounded-full bg-[#111] px-4 text-[12px] font-medium text-white transition-colors hover:bg-black"
             >
               <Plus size={15} />
               Create Ticket
@@ -6755,11 +6755,11 @@ function UsersPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               <span className="shrink-0 text-[10px] text-[#686868]">⌘ F</span>
             </div>
             <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-              <button className="flex items-center gap-1.5 rounded-full border border-[#d8dedb] bg-white px-4 py-2 text-[12px] font-medium text-black transition-colors hover:bg-[#f7f8f7]">
+              <button className="flex h-10 items-center gap-1.5 rounded-full border border-[#d8dedb] bg-white px-4 text-[12px] font-medium text-black transition-colors hover:bg-[#f7f8f7]">
                 <Upload size={15} />
                 Upload Patients
               </button>
-              <button onClick={() => setCreatePatientOpen(true)} className="flex items-center gap-1.5 rounded-full bg-[#111] px-4 py-2 text-[12px] font-medium text-white transition-colors hover:bg-black">
+              <button onClick={() => setCreatePatientOpen(true)} className="flex h-10 items-center gap-1.5 rounded-full bg-[#111] px-4 text-[12px] font-medium text-white transition-colors hover:bg-black">
                 <Plus size={15} />
                 Create Patient
               </button>
@@ -7035,7 +7035,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             <div className="rounded-[14px] bg-[#FBFBFB] p-6">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Business Account</h3>
-                <button className="rounded-full bg-black px-4 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
+                <button className="h-10 rounded-full bg-black px-4 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
                   Edit Profile
                 </button>
               </div>
@@ -7060,8 +7060,8 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Users</h3>
               <div className="flex gap-2">
-                <button className="rounded-full border border-[#EAE8E1] bg-white px-4 py-2 text-[12px] font-medium text-[#1a1a1a] transition-colors hover:bg-[#FBFBFB]">Invite</button>
-                <button className="flex items-center gap-1.5 rounded-full bg-black px-4 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
+                <button className="h-10 rounded-full border border-[#EAE8E1] bg-white px-4 text-[12px] font-medium text-[#1a1a1a] transition-colors hover:bg-[#FBFBFB]">Invite</button>
+                <button className="flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
                   <Plus size={15} /> Add User
                 </button>
               </div>
@@ -7075,8 +7075,8 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Prescribers</h3>
               <div className="flex gap-2">
-                <button className="rounded-full border border-[#EAE8E1] bg-white px-4 py-2 text-[12px] font-medium text-[#1a1a1a] transition-colors hover:bg-[#FBFBFB]">Invite</button>
-                <button className="flex items-center gap-1.5 rounded-full bg-black px-4 py-2 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
+                <button className="h-10 rounded-full border border-[#EAE8E1] bg-white px-4 text-[12px] font-medium text-[#1a1a1a] transition-colors hover:bg-[#FBFBFB]">Invite</button>
+                <button className="flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-[12px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90">
                   <Plus size={15} /> Add Prescriber
                 </button>
               </div>
@@ -7114,7 +7114,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                   <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Credit Card</h3>
                   <p className="mt-1 text-[11px] text-[#7b827e]">Manage the credit card used for clinic purchases.</p>
                 </div>
-                <button onClick={() => setCreditCardOpen(true)} className="flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Credit Card</button>
+                <button onClick={() => setCreditCardOpen(true)} className="flex h-10 items-center gap-1.5 rounded-[8px] bg-black px-3 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Credit Card</button>
               </div>
               <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
                 {savedClinicCard ? (
@@ -7135,7 +7135,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 ) : (
                   <div className="flex min-h-[190px] flex-col items-center justify-center rounded-[10px] border border-[#eaeaea] bg-white p-6 text-center">
                     <Package size={28} strokeWidth={1.5} className="mb-3 text-[#9d9d9d]" /><p className="text-[14px] font-semibold text-[#1a1a1a]">No credit card found</p><p className="mt-2 text-[12px] text-[#8c8c8c]">Add a credit card to enable Pay by Clinic.</p>
-                    <button onClick={() => setCreditCardOpen(true)} className="mt-4 flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[11px] font-medium text-white"><Plus size={14} /> Add Credit Card</button>
+                    <button onClick={() => setCreditCardOpen(true)} className="mt-4 flex h-10 items-center gap-1.5 rounded-[8px] bg-black px-3 text-[11px] font-medium text-white"><Plus size={14} /> Add Credit Card</button>
                   </div>
                 )}
                 <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-5"><AlertCircle size={17} className="mb-3 text-[#667085]" /><p className="text-[12px] leading-relaxed text-[#667085]">The card on file is charged when a new prescription is submitted using Pay by Clinic.</p></div>
@@ -7197,7 +7197,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                     <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Payout bank account</h3>
                     <p className="mt-1 text-[11px] text-[#7b827e]">Clinic earnings and reimbursements are deposited into this account.</p>
                   </div>
-                  <button className="flex items-center gap-1.5 rounded-full bg-black px-3 py-2 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add payout account</button>
+                  <button className="flex h-10 items-center gap-1.5 rounded-full bg-black px-3 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add payout account</button>
                 </div>
 
                 <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
@@ -11237,7 +11237,9 @@ export default function App() {
             {/* Main content area */}
             <main ref={mainScrollRef} className="app-main-scroll h-screen min-w-0 flex-1 overflow-y-scroll p-3 pl-1.5">
               <div className="bg-card rounded-[10px] min-h-full p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-                {renderPage()}
+                <div className="w-full max-w-[1300px]">
+                  {renderPage()}
+                </div>
               </div>
             </main>
 
