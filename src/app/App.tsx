@@ -4551,6 +4551,9 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
   const [paymentLinkSent, setPaymentLinkSent] = useState(false);
   const [paymentLinkModalOpen, setPaymentLinkModalOpen] = useState(false);
   const [paymentPhone, setPaymentPhone] = useState(() => "patients" in order ? order.patients[0]?.phone ?? "" : order.patient.phone);
+  const [cancellationModalOpen, setCancellationModalOpen] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState("");
+  const [createTicketModalOpen, setCreateTicketModalOpen] = useState(false);
   const [detailSideTab, setDetailSideTab] = useState<"status" | "receipt">("status");
   const patients = "patients" in order ? order.patients : [order.patient];
   const patientTrackingLink = `https://scriptlinkrx.com/track/${order.id.replace('#','')}`;
@@ -4580,8 +4583,8 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
         </div>
         <div className="ml-auto flex flex-wrap justify-end gap-2">
           <button className="inline-flex h-[35px] items-center gap-1.5 rounded-full border border-[#d8dedb] bg-white px-4 text-[11px] font-semibold text-black transition-colors hover:bg-[#f1f1f1]"><Download size={13} /> Download receipt</button>
-          <button onClick={() => onNavigate("support")} className="inline-flex h-[35px] items-center gap-1.5 rounded-full bg-[#272727] px-4 text-[11px] font-semibold text-white transition-colors hover:bg-[#111]"><Plus size={13} /> Create Ticket</button>
-          <button className="inline-flex h-[35px] items-center rounded-full bg-[#FFE7D6] px-4 text-[11px] font-semibold text-[#7B003B] transition-colors hover:bg-[#ffdcc4]">Request cancellation</button>
+          <button onClick={() => setCreateTicketModalOpen(true)} className="inline-flex h-[35px] items-center gap-1.5 rounded-full bg-[#272727] px-4 text-[11px] font-semibold text-white transition-colors hover:bg-[#111]"><Plus size={13} /> Create Ticket</button>
+          <button onClick={() => setCancellationModalOpen(true)} className="inline-flex h-[35px] items-center rounded-full bg-[#FFE7D6] px-4 text-[11px] font-semibold text-[#7B003B] transition-colors hover:bg-[#ffdcc4]">Request cancellation</button>
         </div>
       </div>
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -4727,6 +4730,25 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
           </form>
         </div>
       )}
+      {cancellationModalOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 p-5 backdrop-blur-[2px]">
+          <button type="button" className="absolute inset-0 cursor-default" onClick={() => setCancellationModalOpen(false)} aria-label="Close cancellation request" />
+          <form onSubmit={event => { event.preventDefault(); if (!cancellationReason.trim()) return; setCancellationModalOpen(false); setCancellationReason(""); }} className="relative z-10 w-full max-w-[500px] overflow-hidden rounded-[10px] bg-white shadow-[0_24px_70px_rgba(0,0,0,0.2)]">
+            <div className="flex items-start justify-between border-b border-[#ececec] px-6 py-5">
+              <div><h2 className="text-[19px] font-semibold text-[#171717]">Request order cancellation</h2><p className="mt-1.5 max-w-[380px] text-[12px] leading-5 text-[#667085]">Please provide a reason for requesting cancellation of this order.</p></div>
+              <button type="button" onClick={() => setCancellationModalOpen(false)} className="flex size-8 items-center justify-center text-[#777] transition-colors hover:text-black" aria-label="Close"><X size={18} /></button>
+            </div>
+            <div className="px-6 py-5">
+              <label className="block"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Reason <span className="text-[#d92d20]">*</span></span><textarea autoFocus required value={cancellationReason} onChange={event => setCancellationReason(event.target.value)} rows={5} placeholder="Explain why this order should be cancelled" className="w-full resize-none rounded-[10px] border border-[#d8d8d8] bg-white px-3.5 py-3 text-[12px] leading-5 text-[#171717] outline-none placeholder:text-[#aaa] focus:border-black" /></label>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-[#ececec] px-6 py-4">
+              <button type="button" onClick={() => setCancellationModalOpen(false)} className="h-[35px] rounded-full border border-[#d8d8d8] bg-white px-5 text-[11px] font-medium text-black transition-colors hover:bg-[#f1f1f1]">Back</button>
+              <button type="submit" disabled={!cancellationReason.trim()} className="h-[35px] rounded-full px-5 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed disabled:bg-[#ededed] disabled:text-[#999] enabled:bg-[#D92D20] enabled:text-white enabled:hover:bg-[#b42318]">Request cancellation</button>
+            </div>
+          </form>
+        </div>
+      )}
+      <SupportCreateTicketModal open={createTicketModalOpen} onClose={() => setCreateTicketModalOpen(false)} onCreate={() => setCreateTicketModalOpen(false)} />
     </>
   );
 }
@@ -6407,10 +6429,10 @@ function SupportCreateTicketModal({ open, onClose, onCreate }: { open: boolean; 
 
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/35 p-4 backdrop-blur-[2px]" onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
-      <div className="max-h-[90vh] w-full max-w-[500px] overflow-y-auto rounded-[14px] border border-[#e5e5e5] bg-white p-7 shadow-[0_24px_70px_rgba(0,0,0,0.18)]">
+      <div className="max-h-[90vh] w-full max-w-[500px] overflow-y-auto rounded-[10px] border border-[#e5e5e5] bg-white p-7 shadow-[0_24px_70px_rgba(0,0,0,0.18)]">
         <div className="mb-6 flex items-start justify-between">
           <div><h2 className="text-[22px] font-semibold text-[#1a1a1a]">Create Ticket</h2><p className="mt-1 text-[12px] text-[#6f7782]">Tell us what you need help with.</p></div>
-          <button type="button" onClick={onClose} className="flex size-9 items-center justify-center rounded-full border border-[#dedede] bg-white text-xl leading-none text-[#777] transition-colors hover:bg-[#f1f1f1] hover:text-black" aria-label="Close">×</button>
+          <button type="button" onClick={onClose} className="flex size-9 items-center justify-center text-[#777] transition-colors hover:text-black" aria-label="Close"><X size={19} /></button>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-8">
@@ -6443,8 +6465,8 @@ function SupportCreateTicketModal({ open, onClose, onCreate }: { open: boolean; 
             </div>
           </div>
           <div className="flex justify-end gap-2 border-t border-[#e5e9e6] pt-5">
-            <button type="button" onClick={onClose} className="rounded-full border border-[#dedede] bg-white px-4 py-2 text-[12px] font-medium text-black transition-colors hover:bg-[#f1f1f1]">Cancel</button>
-            <button type="submit" className="flex h-10 items-center justify-center gap-2 rounded-full bg-[#111] px-4 text-[12px] font-medium text-white transition-colors hover:bg-black">
+            <button type="button" onClick={onClose} className="h-[35px] rounded-full border border-[#dedede] bg-white px-4 text-[11px] font-medium text-black transition-colors hover:bg-[#f1f1f1]">Cancel</button>
+            <button type="submit" disabled={!description.trim()} className="flex h-[35px] items-center justify-center gap-2 rounded-full px-4 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed disabled:bg-[#ededed] disabled:text-[#999] enabled:bg-black enabled:text-white enabled:hover:bg-[#242424]">
               Create Ticket
             </button>
           </div>
