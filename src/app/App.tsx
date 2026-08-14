@@ -470,7 +470,7 @@ function NavItem({
         <div className="absolute inset-x-0 top-0 h-0.5 bg-[#183229] rounded-full -translate-y-px" />
       )}
       <div
-        className={`flex h-10 w-full cursor-grab select-none items-center gap-2.5 rounded-[9px] px-2.5 text-[13px] font-normal text-[#242424] transition-colors active:cursor-grabbing ${
+        className={`group flex h-10 w-full cursor-grab select-none items-center gap-2.5 rounded-[9px] px-2.5 text-[13px] font-normal text-[#242424] transition-colors active:cursor-grabbing ${
           isActive ? "bg-[#F2F3F4] text-[#171717]" : isDragOver ? "bg-[#F6F7F7]" : "hover:bg-[#F6F6F5]"
         }`}
         onClick={() => {
@@ -482,7 +482,7 @@ function NavItem({
           onOpenMenu(null);
         }}
       >
-        <Icon size={16} strokeWidth={1.65} className="flex-shrink-0 text-[#303332]" />
+        <Icon size={16} strokeWidth={1.65} className="flex-shrink-0 text-[#303332] transition-transform duration-200 ease-out group-hover:-translate-y-px group-hover:translate-x-0.5 group-hover:rotate-6" />
         <span className="flex-1">{label}</span>
         <span className="size-6 flex-shrink-0" />
       </div>
@@ -735,9 +735,9 @@ function SidebarSupportVersion({ onNavigate, onLogout }: { onNavigate: (p: Page)
           </div>
       )}
       <div className="mt-3 space-y-0.5 border-t border-[#ECEEEA] pt-3">
-        <button onClick={() => onNavigate("settings")} className="flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12px] font-medium text-[#555D59] transition-colors hover:bg-[var(--app-menu-bg)] hover:text-[#1F2220]"><Settings size={15} strokeWidth={1.6} /> Settings</button>
-        <button onClick={() => window.location.reload()} className="flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12px] font-medium text-[#555D59] transition-colors hover:bg-[var(--app-menu-bg)] hover:text-[#1F2220]"><RefreshCw size={15} strokeWidth={1.6} /> Hard Refresh</button>
-        <button onClick={onLogout} className="flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12px] font-medium text-[#555D59] transition-colors hover:bg-[var(--app-menu-bg)] hover:text-[#1F2220]"><LogOut size={15} strokeWidth={1.6} /> Log out</button>
+        <button onClick={() => onNavigate("settings")} className="group flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12px] font-normal text-[#242424] transition-colors hover:bg-[var(--app-menu-bg)]"><Settings size={15} strokeWidth={1.6} className="text-[#303332] transition-transform duration-200 ease-out group-hover:-translate-y-px group-hover:translate-x-0.5 group-hover:rotate-6" /> Settings</button>
+        <button onClick={() => window.location.reload()} className="group flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12px] font-normal text-[#242424] transition-colors hover:bg-[var(--app-menu-bg)]"><RefreshCw size={15} strokeWidth={1.6} className="text-[#303332] transition-transform duration-200 ease-out group-hover:-translate-y-px group-hover:translate-x-0.5 group-hover:rotate-6" /> Hard Refresh</button>
+        <button onClick={onLogout} className="group flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12px] font-normal text-[#242424] transition-colors hover:bg-[var(--app-menu-bg)]"><LogOut size={15} strokeWidth={1.6} className="text-[#303332] transition-transform duration-200 ease-out group-hover:-translate-y-px group-hover:translate-x-0.5 group-hover:rotate-6" /> Log out</button>
       </div>
     </div>
   );
