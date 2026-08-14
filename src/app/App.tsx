@@ -603,7 +603,7 @@ function Sidebar({
       </div>
 
       {/* Main Menu */}
-      <div>
+      <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain pb-7 [scrollbar-width:thin]">
         <p className="mb-1.5 px-2.5 text-[10px] font-medium uppercase tracking-[0.08em] text-[#A0A4A2]">Main Menu</p>
         <div className="flex flex-col gap-0.5">
           {mainMenu.map((item) => {
@@ -611,11 +611,13 @@ function Sidebar({
             return <NavItem key={item.label} item={item} isPinned={false} isActive={isActive} section="main" {...navItemProps} />;
           })}
         </div>
+        <div className="sticky bottom-0 mt-2 flex items-center justify-center gap-1 bg-gradient-to-t from-[#FCFBFA] via-[#FCFBFA] to-transparent pb-1 pt-5 text-[9px] font-medium text-[#8c948f] [@media(min-height:850px)]:hidden">
+          <ChevronDown size={11} /> Scroll for more
+        </div>
       </div>
 
-      <div className="mt-auto" />
       <SidebarSupportVersion onNavigate={onNavigate} onLogout={onLogout} />
-      <div className="pb-3 pt-4">
+      <div className="shrink-0 pb-3 pt-4">
         <UserChip onNavigate={onNavigate} appTheme={appTheme} setAppTheme={setAppTheme} extraVariants={extraVariants} setExtraVariants={setExtraVariants} oldCatalog={oldCatalog} setOldCatalog={setOldCatalog} pharmacyCatalog={pharmacyCatalog} setPharmacyCatalog={setPharmacyCatalog} />
       </div>
     </aside>
@@ -657,7 +659,7 @@ function SidebarSupportVersion({ onNavigate, onLogout }: { onNavigate: (p: Page)
   }, [clinicPaymentNoticeVisible]);
 
   return (
-    <div className="border-y border-[#ECEEEA] py-4">
+    <div className="shrink-0 border-y border-[#ECEEEA] py-4">
       <div className="mb-3 flex items-center gap-2 px-1 text-[#8c948f]">
         <p className="text-[11px] font-medium uppercase tracking-[0.08em]">Customer Support</p>
       </div>
@@ -9936,7 +9938,7 @@ function LoginPage({ onLogin, onRegister, onSingleSignOn }: { onLogin: (destinat
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-white font-['Inter',sans-serif] text-[#1a1a1a]">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(circle_at_50%_0%,rgba(197,216,83,0.28),rgba(217,251,244,0.26)_32%,rgba(255,255,255,0)_72%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(circle_at_50%_0%,rgba(219,232,255,0.9),rgba(237,244,255,0.55)_38%,rgba(255,255,255,0)_76%)]" />
       <div className="relative mx-auto flex min-h-screen w-full max-w-[620px] flex-col items-center px-6 pt-7">
         <div className="flex items-center gap-2.5">
           <img src={scriptlinkrxLogo} alt="ScriptLinkRx" className="h-[30px] w-9 object-contain" />
@@ -10105,7 +10107,7 @@ function OrganizationSetupPage({ onCreate }: { onCreate: () => void }) {
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white px-6 py-10 font-['Inter',sans-serif] text-[#171717]">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(circle_at_50%_0%,rgba(197,216,83,0.28),rgba(217,251,244,0.26)_32%,rgba(255,255,255,0)_72%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(circle_at_50%_0%,rgba(219,232,255,0.9),rgba(237,244,255,0.55)_38%,rgba(255,255,255,0)_76%)]" />
       <section className="relative w-full max-w-[470px] px-5 py-8">
         <div className="mx-auto w-full">
           <div className="mb-5 flex items-center justify-center gap-2.5">
