@@ -5059,7 +5059,7 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                           disabled={downloadingOrderId === order.order_id}
                           aria-label="Download invoice"
                           title="Download invoice"
-                          className="inline-flex items-center gap-1.5 rounded-full border border-[#d8d8d2] bg-white px-3 py-[7px] text-[12px] font-semibold text-black transition-colors hover:border-black hover:bg-[#f1f1f1] disabled:cursor-default disabled:opacity-60 disabled:hover:border-[#d8d8d2] disabled:hover:bg-white"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-black bg-black px-3 py-[7px] text-[12px] font-semibold text-white transition-colors hover:border-[#242424] hover:bg-[#242424] disabled:cursor-default disabled:opacity-60 disabled:hover:border-black disabled:hover:bg-black"
                         >
                           {downloadingOrderId === order.order_id ? (
                             <span className="size-[13px] animate-spin rounded-full border-2 border-[#d8d8d2] border-t-[#183229]" aria-hidden="true" />
@@ -5690,14 +5690,14 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
     );
   });
 
-  const tdClass = "max-w-[500px] px-4 py-1 text-[12px] font-normal leading-5 text-[#121212]";
+  const tdClass = "max-w-[500px] px-4 py-2 text-[12px] font-normal leading-5 text-[#121212]";
 
   return (
     <div className="max-w-[1300px]">
       <div className="mb-5 flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-[28px] font-medium leading-tight text-[#1a1a1a]">
-            Pending Approvals <span className="text-[18px] font-normal text-[#7b7f86]">({approvals.length})</span>
+            Pending Approvals <span className="text-[16px] font-normal text-[#9d9d9d]">({approvals.length})</span>
           </h1>
           <label className="group flex h-[38px] w-[220px] items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:w-[310px] focus-within:border-2 focus-within:border-black">
             <span className="flex shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110">
@@ -5716,7 +5716,7 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
         </div>
       </div>
 
-      <div className="mt-3 flex flex-col gap-6">
+      <div className="flex flex-col gap-5">
         {filteredApprovals.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-[10px] bg-[#f8f8f8] px-5 py-[60px] text-center">
             <div className="mb-2.5">
@@ -5737,7 +5737,7 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
             <table className="w-full min-w-max border-collapse text-left text-sm">
               <thead>
                 <tr>
-                  {["ORDER ID", "PATIENT", "CREATED BY", "CREATED AT", "PAY BY", "SHIP TO", "ITEMS", "STATUS", "TOTAL", ""].map((header, index) => (
+                  {["ORDER ID", "PATIENT", "CREATED BY", "CREATED AT", "PAY BY", "SHIP TO", "ITEMS", "STATUS", "TOTAL", "ACTION"].map((header, index) => (
                     <th key={index} className="whitespace-nowrap border-b border-[#e5e7eb] bg-[#fbfbfb] px-4 py-2 text-[12px] font-medium uppercase leading-5 text-[#999999]">
                       {header}
                     </th>
@@ -5775,10 +5775,10 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
                         <div className="flex items-center gap-1.5">
                           <button
                             onClick={event => { event.stopPropagation(); setSelectedId(approval.id); }}
-                            className="cursor-pointer rounded-full px-2 py-1 transition-all hover:bg-[#e7e7e7]"
-                            aria-label="See order"
+                            className="inline-flex items-center justify-center rounded-full bg-black px-3 py-[7px] text-[11px] font-medium text-white transition-colors hover:bg-[#242424]"
+                            aria-label={`Review order for ${approval.patient.firstName} ${approval.patient.lastName}`}
                           >
-                            <svg width="18" height="19" viewBox="0 0 18 19" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.75 5L11.25 9.5L6.75 14" stroke="#A5A5A5" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            Review
                           </button>
                         </div>
                       </td>
