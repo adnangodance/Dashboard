@@ -4548,6 +4548,9 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
 
 function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; onNavigate: (page: Page) => void }) {
   const [trackingLinkCopied, setTrackingLinkCopied] = useState(false);
+  const [paymentLinkSent, setPaymentLinkSent] = useState(false);
+  const [paymentLinkModalOpen, setPaymentLinkModalOpen] = useState(false);
+  const [paymentPhone, setPaymentPhone] = useState(() => "patients" in order ? order.patients[0]?.phone ?? "" : order.patient.phone);
   const [detailSideTab, setDetailSideTab] = useState<"status" | "receipt">("status");
   const patients = "patients" in order ? order.patients : [order.patient];
   const patientTrackingLink = `https://scriptlinkrx.com/track/${order.id.replace('#','')}`;
@@ -4576,9 +4579,9 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
           <h1 className="text-[22px] font-semibold text-[#1a1a1a]">Orders</h1>
         </div>
         <div className="ml-auto flex flex-wrap justify-end gap-2">
-          <button className="inline-flex h-10 items-center gap-1.5 rounded-full border border-[#d8dedb] bg-white px-4 text-[11px] font-semibold text-black transition-colors hover:bg-[#f1f1f1]"><Download size={13} /> Download receipt</button>
-          <button onClick={() => onNavigate("support")} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#272727] px-4 text-[11px] font-semibold text-white transition-colors hover:bg-[#111]"><Plus size={13} /> Create Ticket</button>
-          <button className="inline-flex h-10 items-center rounded-full bg-[#FFE7D6] px-4 text-[11px] font-semibold text-[#7B003B] transition-colors hover:bg-[#ffdcc4]">Request cancellation</button>
+          <button className="inline-flex h-[35px] items-center gap-1.5 rounded-full border border-[#d8dedb] bg-white px-4 text-[11px] font-semibold text-black transition-colors hover:bg-[#f1f1f1]"><Download size={13} /> Download receipt</button>
+          <button onClick={() => onNavigate("support")} className="inline-flex h-[35px] items-center gap-1.5 rounded-full bg-[#272727] px-4 text-[11px] font-semibold text-white transition-colors hover:bg-[#111]"><Plus size={13} /> Create Ticket</button>
+          <button className="inline-flex h-[35px] items-center rounded-full bg-[#FFE7D6] px-4 text-[11px] font-semibold text-[#7B003B] transition-colors hover:bg-[#ffdcc4]">Request cancellation</button>
         </div>
       </div>
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -4678,12 +4681,17 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
               <div className="mt-6">{statusSteps.map((step,index) => (
                 <div key={step} className="flex gap-4">
                   <div className="flex flex-col items-center">
-                    <span className={`flex size-9 items-center justify-center rounded-full ${index <= activeStep ? order.payStatus === "UNPAID" ? "bg-[linear-gradient(135deg,#4C1D95_0%,#8B5CF6_52%,#EDE9FE_100%)] text-white" : order.status === "Processing" || order.status === "Shipped" ? "bg-[linear-gradient(135deg,#1746D1_0%,#3B82F6_48%,#A7C8FF_100%)] text-white" : "bg-[#56203B] text-white" : "bg-[#edf0f2] text-[#9aa1a8]"}`}>{index === 0 ? <Package size={15}/> : <CheckCircle2 size={15}/>}</span>
+                    <span className={`flex size-9 items-center justify-center rounded-full ${index <= activeStep ? order.payStatus === "UNPAID" ? "bg-[linear-gradient(135deg,#56203B_0%,#8F3F63_52%,#E8BFD2_100%)] text-white" : order.status === "Processing" || order.status === "Shipped" ? "bg-[linear-gradient(135deg,#1746D1_0%,#3B82F6_48%,#A7C8FF_100%)] text-white" : "bg-[#56203B] text-white" : "bg-[#edf0f2] text-[#9aa1a8]"}`}>{index === 0 ? <Package size={15}/> : <CheckCircle2 size={15}/>}</span>
                     {index < statusSteps.length - 1 && <span className="h-10 w-px bg-[#dfe5e2]" />}
                   </div>
                   <div className="pt-1"><p className="text-[13px] font-semibold text-[#161a18]">{step}</p>{index === 0 && <><p className="mt-1 text-[11px] text-[#667085]">{order.timestamp}</p><p className={`mt-1 text-[11px] font-semibold ${order.payStatus === "PAID" ? "text-[#2563EB]" : "text-[#d92d20]"}`}>Payment {order.payStatus.toLowerCase()}</p></>}</div>
                 </div>
               ))}</div>
+              {order.status === "Pending Payment" && (
+                <button type="button" onClick={() => setPaymentLinkModalOpen(true)} className="mt-5 flex h-[35px] w-full items-center justify-center gap-2 rounded-full bg-black px-4 text-[11px] font-semibold text-white transition-colors hover:bg-[#242424]">
+                  <Send size={13} /> {paymentLinkSent ? "Payment link sent" : "Resend payment link"}
+                </button>
+              )}
               <div className="mt-6 flex items-center gap-3 rounded-[12px] bg-[radial-gradient(circle_at_90%_0%,rgba(219,232,255,0.98),transparent_52%),linear-gradient(145deg,#f8fbff_0%,#edf4ff_100%)] px-4 py-3">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-[#667085]"><Bell size={15} /></span>
                 <div><p className="text-[12px] font-semibold text-[#161a18]">Live updates.</p><p className="mt-0.5 text-[11px] leading-4 text-[#667085]">Always in the know.</p></div>
@@ -4701,6 +4709,24 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
         </aside>
       </div>
       </div>
+      {paymentLinkModalOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 p-5 backdrop-blur-[2px]">
+          <button type="button" className="absolute inset-0 cursor-default" onClick={() => setPaymentLinkModalOpen(false)} aria-label="Close resend payment link" />
+          <form onSubmit={event => { event.preventDefault(); setPaymentLinkModalOpen(false); setPaymentLinkSent(true); window.setTimeout(() => setPaymentLinkSent(false), 2200); }} className="relative z-10 w-full max-w-[440px] overflow-hidden rounded-[10px] bg-white shadow-[0_24px_70px_rgba(0,0,0,0.2)]">
+            <div className="flex items-start justify-between border-b border-[#ececec] px-6 py-5">
+              <div><h2 className="text-[19px] font-semibold text-[#171717]">Resend payment link</h2><p className="mt-1.5 max-w-[330px] text-[12px] leading-5 text-[#667085]">We’ll send a secure payment link by SMS to the patient’s phone number.</p></div>
+              <button type="button" onClick={() => setPaymentLinkModalOpen(false)} className="flex size-8 items-center justify-center text-[#777] transition-colors hover:text-black" aria-label="Close"><X size={18} /></button>
+            </div>
+            <div className="px-6 py-5">
+              <label className="block"><span className="mb-1.5 block text-[11px] font-medium text-[#292929]">Phone number <span className="text-[#d92d20]">*</span></span><input required type="tel" value={paymentPhone} onChange={event => setPaymentPhone(event.target.value)} className="h-10 w-full rounded-[10px] border border-[#d8d8d8] bg-white px-3.5 text-[12px] text-[#171717] outline-none focus:border-black" /></label>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-[#ececec] px-6 py-4">
+              <button type="button" onClick={() => setPaymentLinkModalOpen(false)} className="h-[35px] rounded-full border border-[#d8d8d8] bg-white px-5 text-[11px] font-medium text-black transition-colors hover:bg-[#f1f1f1]">Cancel</button>
+              <button type="submit" className="h-[35px] rounded-full bg-black px-6 text-[11px] font-semibold text-white transition-colors hover:bg-[#242424]">Send link</button>
+            </div>
+          </form>
+        </div>
+      )}
     </>
   );
 }
