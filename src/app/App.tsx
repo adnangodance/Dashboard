@@ -56,6 +56,7 @@ import {
   Copy,
   Tag,
   History,
+  Info,
 } from "lucide-react";
 
 import img430 from "@/imports/ScriptlinkrxDashboard/9b6fa0a3b334659006bcf39e91b4da387a7b4cf0.png";
@@ -1996,11 +1997,6 @@ function ProductsPage({
       {/* Page header — matches Figma layout */}
       <div className="flex items-start justify-between mb-0">
         <h1 className="font-['Inter',sans-serif] font-medium text-[32px] text-black leading-none">Products</h1>
-        <div className="flex items-center gap-5 whitespace-nowrap rounded-[11px] bg-[#F8F8FA] px-4 py-2.5">
-          <span className="inline-flex items-center gap-2 text-[11px] font-medium text-[#4A505A]"><span className="flex size-6 items-center justify-center rounded-full bg-[#EEF4FF] text-[#2563EB]"><Snowflake size={13} strokeWidth={2} /></span> Refrigerated</span>
-          <span className="inline-flex items-center gap-2 text-[11px] font-medium text-[#4A505A]"><span className="flex size-6 items-center justify-center rounded-full bg-[#FFF0F0] text-[11px] font-semibold text-[#D84B4B]">C</span> Controlled</span>
-          <span className="inline-flex items-center gap-2 text-[11px] font-medium text-[#4A505A]"><span className="flex size-6 items-center justify-center rounded-full bg-[#EEF4FF]"><Heart size={13} className="fill-[#2563EB] text-[#2563EB]" /></span> Favorite</span>
-        </div>
       </div>
 
       {/* Search + filters bar */}
@@ -2042,12 +2038,12 @@ function ProductsPage({
             const filterWidthClass = isShippingState ? "w-[142px]" : isAreaOfTreatment ? "w-[165px]" : "w-[94px]";
             return (
               <div key={label} className="relative flex flex-col gap-1.5">
-                <span className="px-0.5 text-[10px] font-semibold leading-none text-[#667085]">
+                <span className="px-0.5 text-[11px] font-normal leading-none text-[#667085]">
                   {label}
                 </span>
                 <button
                   onClick={() => setOpenCatalogFilter(isOpen ? null : label)}
-                  className={`flex h-[34px] ${filterWidthClass} cursor-pointer items-center justify-between gap-2 rounded-[5px] border bg-white px-2.5 text-[13px] font-semibold leading-none shadow-[0_1px_2px_rgba(16,24,40,0.08)] transition-colors ${
+                  className={`flex h-[38px] ${filterWidthClass} cursor-pointer items-center justify-between gap-2 rounded-[9px] border bg-white px-3 text-[12px] font-normal leading-none transition-colors ${
                     hasSelection
                       ? isShippingState
                         ? "border-[#9DBBFF] bg-[#F3F7FF] text-[#2563EB]"
@@ -2060,7 +2056,7 @@ function ProductsPage({
                 </button>
 
                 {isOpen && (
-                  <div className={`absolute top-[52px] z-20 overflow-hidden rounded-[6px] border border-[#d7dee8] bg-white shadow-[0_18px_40px_rgba(16,24,40,0.16)] ${
+                  <div className={`absolute top-[56px] z-20 overflow-hidden rounded-[9px] border border-[#d7dee8] bg-white shadow-[0_18px_40px_rgba(16,24,40,0.16)] ${
                     isDosage ? "right-0 w-[180px]" : isAreaOfTreatment ? "left-0 w-[220px]" : "left-0 w-[240px]"
                   }`}>
                     <div className="border-b border-[#e7ebf0] p-2">
@@ -2070,7 +2066,7 @@ function ProductsPage({
                           value={catalogFilterSearch[label] ?? ""}
                           onChange={(e) => setCatalogFilterSearch(prev => ({ ...prev, [label]: e.target.value }))}
                           autoFocus
-                          className="h-full min-w-0 flex-1 bg-transparent text-[13px] font-medium text-[#344054] outline-none placeholder:text-[#98a2b3]"
+                          className="h-full min-w-0 flex-1 bg-transparent text-[13px] font-normal text-[#344054] outline-none placeholder:text-[#98a2b3]"
                         />
                       </div>
                     </div>
@@ -2085,7 +2081,7 @@ function ProductsPage({
                           return (
                             <label
                               key={option}
-                              className="flex cursor-pointer items-center gap-2 px-4 py-2 text-[13px] font-medium text-[#344054] transition-colors hover:bg-[#f6f8fa]"
+                              className="flex cursor-pointer items-center gap-2 px-4 py-2 text-[13px] font-normal text-[#344054] transition-colors hover:bg-[#f6f8fa]"
                             >
                               <input
                                 type="checkbox"
@@ -2118,7 +2114,7 @@ function ProductsPage({
                                   : [...prev, option]
                               ));
                             }}
-                            className="flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-[13px] font-medium text-[#344054] transition-colors hover:bg-[#f6f8fa]"
+                            className="flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-[13px] font-normal text-[#344054] transition-colors hover:bg-[#f6f8fa]"
                           >
                             <span className="flex-1">{option}</span>
                             {checked && <CheckCircle2 size={14} strokeWidth={2.4} className="fill-[#475467] text-white" />}
@@ -2132,7 +2128,7 @@ function ProductsPage({
                     {hasSelection && (
                       <button
                         onClick={() => setValues([])}
-                        className="w-full cursor-pointer border-t border-[#e7ebf0] px-4 py-2.5 text-left text-[12px] font-semibold text-[#667085] transition-colors hover:bg-[#f6f8fa] hover:text-[#183229]"
+                        className="w-full cursor-pointer border-t border-[#e7ebf0] px-4 py-2.5 text-left text-[12px] font-normal text-[#667085] transition-colors hover:bg-[#f6f8fa] hover:text-[#183229]"
                       >
                         Clear {label}
                       </button>
@@ -2142,6 +2138,37 @@ function ProductsPage({
               </div>
             );
           })}
+          <div className="relative flex flex-col gap-1.5">
+            <span className="px-0.5 text-[11px] font-normal leading-none text-transparent">Legend</span>
+            <button
+              type="button"
+              onClick={() => setOpenCatalogFilter(openCatalogFilter === "Legend" ? null : "Legend")}
+              className={`flex h-[38px] w-[108px] items-center justify-between gap-2 rounded-[9px] border bg-white px-3 text-[12px] font-normal leading-none text-[#344054] transition-colors ${openCatalogFilter === "Legend" ? "border-black" : "border-[#cfcfcf] hover:border-[#aeb8c5]"}`}
+              aria-expanded={openCatalogFilter === "Legend"}
+            >
+              <span className="inline-flex items-center gap-1.5"><Info size={14} strokeWidth={2} /> Legend</span>
+              <ChevronDown size={14} className={`transition-transform ${openCatalogFilter === "Legend" ? "rotate-180" : ""}`} />
+            </button>
+
+            {openCatalogFilter === "Legend" && (
+              <div className="absolute right-0 top-[56px] z-30 w-[300px] rounded-[10px] border border-[#d7dee8] bg-white p-4 shadow-[0_18px_40px_rgba(16,24,40,0.16)]">
+                <div className="space-y-3.5">
+                  <div className="flex items-start gap-3">
+                    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#EEF4FF] text-[#2563EB]"><Snowflake size={14} strokeWidth={2} /></span>
+                    <div><p className="text-[12px] font-medium text-[#1f2937]">Refrigerated</p><p className="mt-0.5 text-[11px] font-normal leading-4 text-[#667085]">Requires cold storage and ships refrigerated.</p></div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#FFF0F0] text-[11px] font-semibold text-[#D84B4B]">C</span>
+                    <div><p className="text-[12px] font-medium text-[#1f2937]">Controlled</p><p className="mt-0.5 text-[11px] font-normal leading-4 text-[#667085]">Controlled substance—additional prescribing requirements apply.</p></div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#EEF4FF]"><Heart size={14} className="fill-[#2563EB] text-[#2563EB]" /></span>
+                    <div><p className="text-[12px] font-medium text-[#1f2937]">Favorite</p><p className="mt-0.5 text-[11px] font-normal leading-4 text-[#667085]">A product you’ve favorited—shown in your Favorites row.</p></div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -5649,6 +5676,8 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
 function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Page) => void }) {
   const [approvals, setApprovals] = useState<PendingApproval[]>(PENDING_APPROVALS_MOCK);
   const [searchQuery, setSearchQuery] = useState("");
+  const [approvalPeriod, setApprovalPeriod] = useState("this_month");
+  const [approvalPayer, setApprovalPayer] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // ⌘F / Ctrl+F focuses the search box instead of the browser find bar
@@ -5680,6 +5709,17 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
   }
 
   const filteredApprovals = approvals.filter(approval => {
+    const created = new Date(approval.createdAt);
+    const now = new Date();
+    const matchesPeriod = approvalPeriod === "all" ||
+      (approvalPeriod === "this_month" && created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear()) ||
+      (approvalPeriod === "last_month" && created.getMonth() === new Date(now.getFullYear(), now.getMonth() - 1, 1).getMonth() && created.getFullYear() === new Date(now.getFullYear(), now.getMonth() - 1, 1).getFullYear()) ||
+      (approvalPeriod === "this_year" && created.getFullYear() === now.getFullYear());
+    const matchesPayer = approvalPayer === "all" ||
+      (approvalPayer === "patient" && approval.paymentMethod === "patient") ||
+      (approvalPayer === "clinic" && approval.paymentMethod === "clinic") ||
+      (approvalPayer === "clinic_ach" && approval.paymentMethod === "clinic_ach");
+    if (!matchesPeriod || !matchesPayer) return false;
     if (!searchQuery) return true;
     const searchLower = searchQuery.toLowerCase();
     const patientName = `${approval.patient.firstName} ${approval.patient.lastName}`.toLowerCase();
@@ -5714,6 +5754,14 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
             />
             <span className="shrink-0 text-[10px] text-[#686868]">⌘ F</span>
           </label>
+        </div>
+        <div className="flex flex-wrap items-end gap-3.5 border-b border-[#eeeeec] pb-4">
+          <div className="w-[180px]">
+            <OrderHistorySelect label="Period" options={ORDER_HISTORY_RANGE_PRESETS.filter(option => option.value !== "custom")} value={approvalPeriod} onChange={setApprovalPeriod} />
+          </div>
+          <div className="w-[180px]">
+            <OrderHistorySelect label="Paid by" options={ORDER_HISTORY_PAYER_OPTIONS} value={approvalPayer} onChange={setApprovalPayer} />
+          </div>
         </div>
       </div>
 
@@ -5760,16 +5808,16 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
                       </td>
                       <td className={tdClass}>{approval.submittedBy}</td>
                       <td className={tdClass}>
-                        <div className="inline-flex h-7 items-center gap-2 whitespace-nowrap rounded-full bg-[#f1f1f1] py-1 pl-3 pr-1 text-[11px] font-medium text-[#282828]">
+                        <div className="inline-flex items-center gap-2 whitespace-nowrap text-[11px] font-normal text-[#282828]">
                           <span>{created.getMonth() + 1}/{created.getDate()}/{created.getFullYear()}</span>
-                          <span className="inline-flex h-5 items-center rounded-full bg-white px-2 text-[9px] font-medium text-[#686868]">{created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
+                          <span className="text-[10px] text-[#686868]">{created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
                         </div>
                       </td>
                       <td className={tdClass}><OrderHistoryPayByChip payBy={approval.paymentMethod} showStatus neutral /></td>
                       <td className={tdClass}><PendingShipToChip shipTo={approval.shipTo} /></td>
                       <td className={tdClass}>{pendingApprovalRxCount(approval)}</td>
                       <td className={tdClass}>
-                        <span className="inline-flex h-7 items-center justify-center whitespace-nowrap rounded-full bg-[#FFF0D2] px-3.5 text-[11px] font-semibold text-[#56203B]">Pending Approval</span>
+                        <span className="whitespace-nowrap text-[11px] font-semibold text-[#B25327]">Pending Approval</span>
                       </td>
                       <td className={tdClass}>${pendingApprovalTotal(approval).toFixed(2)}</td>
                       <td className={tdClass}>
