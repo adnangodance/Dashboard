@@ -1,4 +1,4 @@
-import { Fragment, createContext, useContext, useState, useRef, useEffect, useLayoutEffect, useMemo, type CSSProperties, type Dispatch, type FormEvent, type PointerEvent as ReactPointerEvent, type SetStateAction } from "react";
+import { Fragment, createContext, useContext, useState, useRef, useEffect, useLayoutEffect, useMemo, type CSSProperties, type Dispatch, type FormEvent, type PointerEvent as ReactPointerEvent, type ReactNode, type SetStateAction } from "react";
 import {
   LayoutDashboard,
   BookOpen,
@@ -6829,6 +6829,147 @@ function UsersPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
 // ─── Settings ─────────────────────────────────────────────────────────────────
 
+// Centered modal shell — replica of the reference settings Modal (variant="centered", width 500)
+const settingsModalInputClass = "h-11 w-full rounded-[10px] border border-white/90 bg-white px-3.5 text-[12px] text-[#222] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_5px_16px_rgba(34,46,39,0.05)] outline-none placeholder:text-[#aaa] focus:border-black";
+
+function SettingsCenteredModal({ title, subtitle, submitLabel, onClose, onSubmit, isSubmitting, children }: { title: string; subtitle: string; submitLabel: string; onClose: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void; isSubmitting: boolean; children: ReactNode }) {
+  const handleClose = () => {
+    if (!isSubmitting) onClose();
+  };
+  return (
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/35 p-5 backdrop-blur-[3px]">
+      <button type="button" className="absolute inset-0 cursor-default" onClick={handleClose} aria-label="Close modal" tabIndex={-1} />
+      <form onSubmit={onSubmit} role="dialog" aria-modal="true" className="relative z-[1] flex max-h-[calc(100vh-40px)] w-full max-w-[500px] flex-col overflow-hidden rounded-[10px] border border-white/70 bg-white shadow-[0_24px_70px_rgba(20,28,24,0.2)]">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-[#ececec] px-6 py-5">
+          <div className="min-w-0">
+            <h2 className="text-[20px] font-semibold text-[#171717]">{title}</h2>
+            <p className="mt-1 text-[11px] text-[#777]">{subtitle}</p>
+          </div>
+          <button type="button" className="flex size-9 shrink-0 items-center justify-center text-[#777] transition-colors hover:text-black" onClick={handleClose} aria-label="Close">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+          </button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto p-6">{children}</div>
+        <div className="flex shrink-0 flex-col gap-2 border-t border-[#ececec] bg-white px-6 py-4">
+          <button type="submit" disabled={isSubmitting} className="inline-flex h-[45px] w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-black px-[22px] text-[13px] font-medium text-white transition-colors hover:bg-[#121212] disabled:cursor-not-allowed disabled:opacity-50">
+            {isSubmitting ? <span className="size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent opacity-80" aria-hidden="true" /> : submitLabel}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function SettingsChangeEmailModal({ isOpen, currentEmail, onClose, onSave, isSubmitting }: { isOpen: boolean; currentEmail: string; onClose: () => void; onSave: (email: string) => void; isSubmitting: boolean }) {
+  const [email, setEmail] = useState(currentEmail);
+
+  useEffect(() => {
+    setEmail(currentEmail);
+  }, [currentEmail, isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <SettingsCenteredModal
+      title="Change email"
+      subtitle="The account will sign in with the new address."
+      submitLabel="Change email"
+      onClose={onClose}
+      isSubmitting={isSubmitting}
+      onSubmit={event => {
+        event.preventDefault();
+        if (!isSubmitting) onSave(email);
+      }}
+    >
+      <div className="rounded-2xl bg-[#fafafa] p-5">
+        <label className="block">
+          <span className="mb-2 block text-[11px] font-medium text-[#292929]">
+            New email address <span className="text-[#b4473d]">*</span>
+          </span>
+          <input
+            autoFocus
+            required
+            type="email"
+            value={email}
+            onChange={event => setEmail(event.target.value)}
+            placeholder="newemail@example.com"
+            className={settingsModalInputClass}
+          />
+        </label>
+      </div>
+    </SettingsCenteredModal>
+  );
+}
+
+function SettingsChangePasswordModal({ isOpen, onClose, onSave, isSubmitting }: { isOpen: boolean; onClose: () => void; onSave: () => void; isSubmitting: boolean }) {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setPasswordError("");
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const fields = [
+    { label: "Current password", value: currentPassword, set: setCurrentPassword, placeholder: "Enter current password" },
+    { label: "New password", value: newPassword, set: setNewPassword, placeholder: "Enter new password" },
+    { label: "Confirm new password", value: confirmNewPassword, set: setConfirmNewPassword, placeholder: "Confirm new password" },
+  ];
+
+  return (
+    <SettingsCenteredModal
+      title="Change password"
+      subtitle="Set a new password for this account."
+      submitLabel="Change password"
+      onClose={onClose}
+      isSubmitting={isSubmitting}
+      onSubmit={event => {
+        event.preventDefault();
+        if (isSubmitting) return;
+        if (newPassword !== confirmNewPassword) {
+          setPasswordError("New passwords do not match");
+          return;
+        }
+        if (newPassword.length < 6) {
+          setPasswordError("New password must be at least 6 characters long");
+          return;
+        }
+        setPasswordError("");
+        onSave();
+      }}
+    >
+      <div className="flex flex-col gap-3.5 rounded-2xl bg-[#fafafa] p-5">
+        {fields.map(({ label, value, set, placeholder }, index) => (
+          <label key={label} className="block">
+            <span className="mb-2 block text-[11px] font-medium text-[#292929]">
+              {label} <span className="text-[#b4473d]">*</span>
+            </span>
+            <input
+              autoFocus={index === 0}
+              required
+              minLength={index === 0 ? undefined : 6}
+              type="password"
+              value={value}
+              onChange={event => set(event.target.value)}
+              placeholder={placeholder}
+              className={settingsModalInputClass}
+            />
+          </label>
+        ))}
+        {passwordError && <p className="text-[12px] text-[#b4473d]">{passwordError}</p>}
+      </div>
+    </SettingsCenteredModal>
+  );
+}
+
 function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const shouldOpenPaymentSetup = () => window.sessionStorage.getItem("open-payment-setup") === "true";
   const shouldOpenPaymentOverview = () => window.sessionStorage.getItem("open-payment-overview") === "true";
@@ -6847,6 +6988,11 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const [invitePrescriberEmail, setInvitePrescriberEmail] = useState("");
   const [openUserMenu, setOpenUserMenu] = useState<string | null>(null);
   const [openPrescriberMenu, setOpenPrescriberMenu] = useState<string | null>(null);
+  const { showToast } = useAppLoading();
+  const [changeEmailTarget, setChangeEmailTarget] = useState<{ name: string; email: string } | null>(null);
+  const [changePasswordTarget, setChangePasswordTarget] = useState<{ name: string } | null>(null);
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [passwordSaving, setPasswordSaving] = useState(false);
   const [showUserPassword, setShowUserPassword] = useState(false);
   const [newUserAdmin, setNewUserAdmin] = useState(false);
   const [newUserActive, setNewUserActive] = useState(true);
@@ -6958,6 +7104,37 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
     }, 1100);
   }
 
+  // Row menus close on any outside press, matching the reference settings tables.
+  useEffect(() => {
+    if (!openUserMenu && !openPrescriberMenu) return;
+    const handleMouseDown = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (target.closest("[data-row-menu]") || target.closest("[data-menu-trigger]")) return;
+      setOpenUserMenu(null);
+      setOpenPrescriberMenu(null);
+    };
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => document.removeEventListener("mousedown", handleMouseDown);
+  }, [openUserMenu, openPrescriberMenu]);
+
+  function handleSaveEmail() {
+    setEmailSaving(true);
+    window.setTimeout(() => {
+      setEmailSaving(false);
+      setChangeEmailTarget(null);
+      showToast("Email updated successfully");
+    }, 900);
+  }
+
+  function handleSavePassword() {
+    setPasswordSaving(true);
+    window.setTimeout(() => {
+      setPasswordSaving(false);
+      setChangePasswordTarget(null);
+      showToast("Password updated successfully");
+    }, 900);
+  }
+
   const users = [
     ["1", "Adnan Godanci", "(646)-617-9881", "adnan@batchrx.com", "Manager"],
     ["2", "Anna Robinson", "(646)-690-9596", "anna@scriptlinkrx.com", "Prescriber"],
@@ -7010,34 +7187,34 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             {row.map((cell, index) => index === 1 ? <span key={cell} className="min-w-0 truncate font-semibold">{cell}</span> : <span key={`${index}-${cell}`} className={`min-w-0 truncate ${index === 0 ? "text-[#999]" : ""}`}>{cell}</span>)}
             <span className="inline-flex w-fit rounded-full bg-[#ecf8ef] px-3 py-1.5 text-[10px] font-semibold text-[#31583F]">Active</span>
             <div className="relative">
-              <button onClick={() => type === "users" ? setOpenUserMenu(current => current === row[0] ? null : row[0]) : setOpenPrescriberMenu(current => current === row[0] ? null : row[0])} className="flex size-7 items-center justify-center rounded-[7px] text-[#8c95a1] transition-colors hover:bg-[#f2f7f4] hover:text-[#183229]" aria-label="More actions" aria-expanded={type === "users" ? openUserMenu === row[0] : openPrescriberMenu === row[0]}>
+              <button data-menu-trigger onClick={() => type === "users" ? setOpenUserMenu(current => current === row[0] ? null : row[0]) : setOpenPrescriberMenu(current => current === row[0] ? null : row[0])} className={`flex size-7 items-center justify-center rounded-[7px] transition-colors ${(type === "users" ? openUserMenu === row[0] : openPrescriberMenu === row[0]) ? "bg-[#f2f7f4] text-[#183229]" : "text-[#8c95a1] hover:bg-[#f2f7f4] hover:text-[#183229]"}`} aria-label={`Actions for ${row[1]}`} aria-expanded={type === "users" ? openUserMenu === row[0] : openPrescriberMenu === row[0]}>
                 <MoreHorizontal size={15} />
               </button>
               {type === "users" && openUserMenu === row[0] && (
-                <div className="absolute right-0 top-8 z-50 w-[190px] overflow-hidden rounded-[9px] border border-[#e2e2e2] bg-white py-1.5 shadow-[0_12px_32px_rgba(0,0,0,0.14)]">
+                <div data-row-menu className="absolute right-0 top-8 z-50 w-[190px] overflow-hidden rounded-[9px] border border-[#e2e2e2] bg-white py-1.5 shadow-[0_12px_32px_rgba(0,0,0,0.14)]">
                   {[
-                    ["Edit User", "text-[#555]"],
-                    ["Change Email", "text-[#555]"],
-                    ["Change Password", "text-[#555]"],
-                    ["Convert to Prescriber", "text-[#635BFF]"],
-                    ["Delete User", "text-[#ef3030]"],
-                  ].map(([label, color]) => (
-                    <button key={label} type="button" onClick={() => setOpenUserMenu(null)} className={`flex h-10 w-full items-center px-3 text-left text-[13px] font-medium transition-colors hover:bg-[#f1f1f1] ${color}`}>
+                    { label: "Edit User", color: "text-[#555]" },
+                    { label: "Change Email", color: "text-[#555]", action: () => setChangeEmailTarget({ name: row[1], email: row[3] }) },
+                    { label: "Change Password", color: "text-[#555]", action: () => setChangePasswordTarget({ name: row[1] }) },
+                    { label: "Convert to Prescriber", color: "text-[#635BFF]" },
+                    { label: "Delete User", color: "text-[#ef3030]" },
+                  ].map(({ label, color, action }) => (
+                    <button key={label} type="button" onClick={() => { setOpenUserMenu(null); action?.(); }} className={`flex h-10 w-full items-center gap-2 px-3 text-left text-[13px] font-medium leading-5 transition-colors hover:bg-[#f1f1f1] ${color}`}>
                       {label}
                     </button>
                   ))}
                 </div>
               )}
               {type === "prescribers" && openPrescriberMenu === row[0] && (
-                <div className="absolute right-0 top-8 z-50 w-[190px] overflow-hidden rounded-[9px] border border-[#e2e2e2] bg-white py-1.5 shadow-[0_12px_32px_rgba(0,0,0,0.14)]">
+                <div data-row-menu className="absolute right-0 top-8 z-50 w-[190px] overflow-hidden rounded-[9px] border border-[#e2e2e2] bg-white py-1.5 shadow-[0_12px_32px_rgba(0,0,0,0.14)]">
                   {[
-                    ["Edit Prescriber", "text-[#555]"],
-                    ["Change Email", "text-[#555]"],
-                    ["Change Password", "text-[#555]"],
-                    ["EPCS Sync", "text-[#555]"],
-                    ["Delete", "text-[#ef3030]"],
-                  ].map(([label, color]) => (
-                    <button key={label} type="button" onClick={() => setOpenPrescriberMenu(null)} className={`flex h-10 w-full items-center px-3 text-left text-[13px] font-medium transition-colors hover:bg-[#f1f1f1] ${color}`}>
+                    { label: "Edit User", color: "text-[#555]" },
+                    { label: "Change Email", color: "text-[#555]", action: () => setChangeEmailTarget({ name: row[1], email: row[3] }) },
+                    { label: "Change Password", color: "text-[#555]", action: () => setChangePasswordTarget({ name: row[1] }) },
+                    { label: "EPCS Sync", color: "text-[#555]" },
+                    { label: "Delete", color: "text-[#ef3030]" },
+                  ].map(({ label, color, action }) => (
+                    <button key={label} type="button" onClick={() => { setOpenPrescriberMenu(null); action?.(); }} className={`flex h-10 w-full items-center gap-2 px-3 text-left text-[13px] font-medium leading-5 transition-colors hover:bg-[#f1f1f1] ${color}`}>
                       {label}
                     </button>
                   ))}
@@ -7053,6 +7230,20 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   return (
     <>
       <Header title="Settings" onNavigate={onNavigate} />
+
+      <SettingsChangeEmailModal
+        isOpen={!!changeEmailTarget}
+        currentEmail={changeEmailTarget?.email ?? ""}
+        onClose={() => setChangeEmailTarget(null)}
+        onSave={handleSaveEmail}
+        isSubmitting={emailSaving}
+      />
+      <SettingsChangePasswordModal
+        isOpen={!!changePasswordTarget}
+        onClose={() => setChangePasswordTarget(null)}
+        onSave={handleSavePassword}
+        isSubmitting={passwordSaving}
+      />
 
       <div className="grid grid-cols-[220px_1fr] gap-6">
         <nav className="flex flex-col gap-1">
