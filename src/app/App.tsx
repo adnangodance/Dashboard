@@ -8841,7 +8841,12 @@ function MultiPatientCartPage({
 
                   <article
                     style={{ backgroundColor: activeCardTheme.item, borderColor: activeCardTheme.border }}
-                    className={`relative transition-opacity ${
+                    onClick={event => {
+                      if (!(cartCardVariant === 3 || cartCardVariant === 4 || cartCardVariant === 5 || cartCardVariant === 6) || !hasFocusedOpenForm || isCompactActive) return;
+                      if ((event.target as HTMLElement).closest("button, input, select, textarea, a")) return;
+                      setExpandedPrescriptionIds(new Set([item.id]));
+                    }}
+                    className={`relative transition-opacity ${hasFocusedOpenForm && !isCompactActive ? "cursor-pointer" : ""} ${
                       cartCardVariant === 3
                         ? `${isExpanded ? "border-l-2 border-l-[#183229] bg-[#FCFCFC] px-5" : "px-3"} border-b py-7 ${isBoomDimmed ? "opacity-45 hover:opacity-75" : ""}`
                         : isAdnanStyleVariant
