@@ -85,6 +85,7 @@ import landingTriMix from "@/assets/landing-tri-mix.png";
 import imgProduct452 from "@/imports/ScriptlinkrxProductPage/a7404d4186f9383142485474193c8c2ca1b2259c.png";
 import scriptlinkrxLogo from "@/assets/scriptlinkrx-logo.svg";
 import scriptlinkrxLandingLogo from "@/assets/scriptlinkrx-landing-logo.png";
+import checkoutCelebration from "@/assets/checkout-celebration.png";
 import supportShayne from "@/assets/support-shayne.png";
 import supportZee from "@/assets/support-zee.png";
 import userVerifiedIcon from "@/assets/user-verified.svg";
@@ -522,6 +523,8 @@ function Sidebar({
   const [mainMenu, setMainMenu] = useState<MenuItem[]>(INITIAL_MAIN);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [canScrollMainMenu, setCanScrollMainMenu] = useState(false);
+  const menuScrollRef = useRef<HTMLDivElement>(null);
   const dragItem = useRef<{ label: string; section: "fav" | "main" } | null>(null);
   const dragOverItem = useRef<{ label: string; section: "fav" | "main" } | null>(null);
 
@@ -572,6 +575,22 @@ function Sidebar({
     onPin: handlePin, onDrop: handleDrop,
   };
 
+  useEffect(() => {
+    const menu = menuScrollRef.current;
+    if (!menu) return;
+    const updateScrollHint = () => {
+      setCanScrollMainMenu(menu.scrollTop + menu.clientHeight < menu.scrollHeight - 2);
+    };
+    updateScrollHint();
+    const resizeObserver = new ResizeObserver(updateScrollHint);
+    resizeObserver.observe(menu);
+    window.addEventListener("resize", updateScrollHint);
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateScrollHint);
+    };
+  }, [mainMenu]);
+
   return (
     <aside className="sticky top-0 flex h-screen w-[248px] flex-shrink-0 flex-col bg-[#FCFBFA] px-3">
       {/* Logo */}
@@ -604,7 +623,10 @@ function Sidebar({
       </div>
 
       {/* Main Menu */}
-      <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain pb-7 [scrollbar-width:thin]">
+      <div ref={menuScrollRef} onScroll={() => {
+        const menu = menuScrollRef.current;
+        if (menu) setCanScrollMainMenu(menu.scrollTop + menu.clientHeight < menu.scrollHeight - 2);
+      }} className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain pb-2 [scrollbar-width:thin]">
         <p className="mb-1.5 px-2.5 text-[10px] font-medium uppercase tracking-[0.08em] text-[#A0A4A2]">Main Menu</p>
         <div className="flex flex-col gap-0.5">
           {mainMenu.map((item) => {
@@ -612,20 +634,23 @@ function Sidebar({
             return <NavItem key={item.label} item={item} isPinned={false} isActive={isActive} section="main" {...navItemProps} />;
           })}
         </div>
-        <div className="sticky bottom-0 mt-2 flex items-center justify-center gap-1 bg-gradient-to-t from-[#FCFBFA] via-[#FCFBFA] to-transparent pb-1 pt-5 text-[9px] font-medium text-[#8c948f] [@media(min-height:850px)]:hidden">
-          <ChevronDown size={11} /> Scroll for more
-        </div>
       </div>
 
-      <SidebarSupportVersion onNavigate={onNavigate} onLogout={onLogout} />
+      {canScrollMainMenu && (
+        <div className="flex h-6 shrink-0 items-center justify-center gap-1 border-t border-[#eceeec] text-[9px] font-medium text-[#8c948f]">
+          <ChevronDown size={11} /> Scroll for more
+        </div>
+      )}
+
+      <SidebarSupportVersion onNavigate={onNavigate} />
       <div className="shrink-0 pb-3 pt-4">
-        <UserChip onNavigate={onNavigate} appTheme={appTheme} setAppTheme={setAppTheme} extraVariants={extraVariants} setExtraVariants={setExtraVariants} oldCatalog={oldCatalog} setOldCatalog={setOldCatalog} pharmacyCatalog={pharmacyCatalog} setPharmacyCatalog={setPharmacyCatalog} />
+        <UserChip onNavigate={onNavigate} onLogout={onLogout} />
       </div>
     </aside>
   );
 }
 
-function SidebarSupportVersion({ onNavigate, onLogout }: { onNavigate: (p: Page) => void; onLogout: () => void }) {
+function SidebarSupportVersion({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const paymentNoticeActive = () => Number(window.sessionStorage.getItem("clinic-card-notice-until") ?? 0) > Date.now();
   const accounts = [
     { name: "Zee Pharmacy", location: "Bronx, NY" },
@@ -735,11 +760,6 @@ function SidebarSupportVersion({ onNavigate, onLogout }: { onNavigate: (p: Page)
             </button>
           </div>
       )}
-      <div className="mt-3 space-y-0.5 border-t border-[#ECEEEA] pt-3">
-        <button onClick={() => onNavigate("settings")} className="group flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12px] font-normal text-[#242424] transition-colors hover:bg-[var(--app-menu-bg)]"><Settings size={15} strokeWidth={1.6} className="text-[#303332] transition-transform duration-200 ease-out group-hover:-translate-y-px group-hover:translate-x-0.5 group-hover:rotate-6" /> Settings</button>
-        <button onClick={() => window.location.reload()} className="group flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12px] font-normal text-[#242424] transition-colors hover:bg-[var(--app-menu-bg)]"><RefreshCw size={15} strokeWidth={1.6} className="text-[#303332] transition-transform duration-200 ease-out group-hover:-translate-y-px group-hover:translate-x-0.5 group-hover:rotate-6" /> Hard Refresh</button>
-        <button onClick={onLogout} className="group flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12px] font-normal text-[#242424] transition-colors hover:bg-[var(--app-menu-bg)]"><LogOut size={15} strokeWidth={1.6} className="text-[#303332] transition-transform duration-200 ease-out group-hover:-translate-y-px group-hover:translate-x-0.5 group-hover:rotate-6" /> Log out</button>
-      </div>
     </div>
   );
 }
@@ -748,108 +768,73 @@ function SidebarSupportVersion({ onNavigate, onLogout }: { onNavigate: (p: Page)
 
 function UserChip({
   onNavigate,
-  appTheme,
-  setAppTheme,
-  extraVariants,
-  setExtraVariants,
-  oldCatalog,
-  setOldCatalog,
-  pharmacyCatalog,
-  setPharmacyCatalog,
+  onLogout,
 }: {
   onNavigate: (p: Page) => void;
-  appTheme: AppTheme;
-  setAppTheme: Dispatch<SetStateAction<AppTheme>>;
-  extraVariants: boolean;
-  setExtraVariants: Dispatch<SetStateAction<boolean>>;
-  oldCatalog: boolean;
-  setOldCatalog: Dispatch<SetStateAction<boolean>>;
-  pharmacyCatalog: boolean;
-  setPharmacyCatalog: Dispatch<SetStateAction<boolean>>;
+  onLogout: () => void;
 }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const themeOptions: Array<{ value: AppTheme; label: string }> = [
-    { value: "default", label: "Default" },
-    { value: "orange", label: "Orange" },
-  ];
+  const [menuHovered, setMenuHovered] = useState(false);
+  const [menuPinned, setMenuPinned] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
+  const hoverCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const menuOpen = menuHovered || menuPinned;
+
+  const keepMenuOpen = () => {
+    if (hoverCloseTimerRef.current) clearTimeout(hoverCloseTimerRef.current);
+    hoverCloseTimerRef.current = null;
+    setMenuHovered(true);
+  };
+
+  const scheduleMenuClose = () => {
+    if (hoverCloseTimerRef.current) clearTimeout(hoverCloseTimerRef.current);
+    hoverCloseTimerRef.current = setTimeout(() => setMenuHovered(false), 220);
+  };
+
+  useEffect(() => () => {
+    if (hoverCloseTimerRef.current) clearTimeout(hoverCloseTimerRef.current);
+  }, []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (!accountMenuRef.current?.contains(event.target as Node)) {
+        setMenuPinned(false);
+        setMenuHovered(false);
+      }
+    };
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    return () => document.removeEventListener("mousedown", closeOnOutsideClick);
+  }, [menuOpen]);
 
   return (
-    <div className="relative">
-      {menuOpen && <button className="fixed inset-0 z-30 cursor-default" onClick={() => setMenuOpen(false)} aria-label="Close account menu" />}
+    <div
+      ref={accountMenuRef}
+      className="relative"
+      onMouseEnter={keepMenuOpen}
+      onMouseLeave={scheduleMenuClose}
+    >
       {menuOpen && (
-        <div className="account-menu absolute bottom-[calc(100%+10px)] left-0 z-40 w-[214px] overflow-hidden rounded-[10px] border border-[#dddeda] bg-white shadow-[0_12px_35px_rgba(24,50,41,0.16)]">
-          <div className="border-b border-[#eceeea] px-3.5 py-3">
-            <p className="text-[12px] font-semibold text-[#1a1a1a]">Zee</p>
-            <p className="mt-0.5 text-[10px] text-[#7a837f]">Account menu</p>
-          </div>
-          <div className="p-1.5">
-            <div>
-              <p className="px-2.5 pb-1 text-[9px] font-semibold uppercase tracking-[0.11em] text-[#8c948f]">Theme</p>
-              {themeOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setAppTheme(option.value)}
-                  className={`flex h-8 w-full items-center justify-between rounded-[7px] px-2.5 text-[11px] font-medium transition-colors hover:bg-[var(--app-menu-bg)] ${appTheme === option.value ? "bg-[var(--app-menu-bg)] text-[#183229]" : "text-[#252525]"}`}
-                >
-                  <span>{option.label}</span>
-                  {appTheme === option.value && <CheckCircle2 size={13} className="text-[#00B33C]" />}
-                </button>
-              ))}
-            </div>
-            <div className="my-1.5 border-t border-[#eceeea] pt-1.5">
-              <p className="px-2.5 pb-1 text-[9px] font-semibold uppercase tracking-[0.11em] text-[#8c948f]">Variants</p>
-              <button
-                onClick={() => setExtraVariants(current => !current)}
-                className={`flex h-9 w-full items-center justify-between rounded-[7px] px-2.5 text-[11px] font-medium transition-colors hover:bg-[var(--app-menu-bg)] ${extraVariants ? "bg-[var(--app-menu-bg)] text-[#183229]" : "text-[#252525]"}`}
-              >
-                <span>Extra variants</span>
-                <span className={`relative h-5 w-9 shrink-0 rounded-full border transition-all ${extraVariants ? "border-[#0b7045] bg-[#183229] shadow-[inset_0_1px_2px_rgba(0,0,0,0.18)]" : "border-[#cfd4d1] bg-[#e7eae8]"}`}>
-                  <span className={`absolute left-[2px] top-[2px] size-[14px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.28)] transition-transform duration-200 ${extraVariants ? "translate-x-4" : "translate-x-0"}`} />
-                </span>
-              </button>
-              <button
-                onClick={() => setOldCatalog(current => { const next = !current; if (next) setPharmacyCatalog(false); return next; })}
-                className={`flex h-9 w-full items-center justify-between rounded-[7px] px-2.5 text-[11px] font-medium transition-colors hover:bg-[var(--app-menu-bg)] ${oldCatalog ? "bg-[var(--app-menu-bg)] text-[#183229]" : "text-[#252525]"}`}
-                role="switch"
-                aria-checked={oldCatalog}
-              >
-                <span>Old catalog</span>
-                <span className="flex items-center gap-2">
-                  <span className={`min-w-[18px] text-right text-[9px] font-semibold ${oldCatalog ? "text-[#31583f]" : "text-[#929894]"}`}>{oldCatalog ? "On" : "Off"}</span>
-                  <span className={`relative h-6 w-11 shrink-0 rounded-full border transition-all duration-200 ${oldCatalog ? "border-[#0b7045] bg-gradient-to-r from-[#183229] to-[#315f4e] shadow-[inset_0_1px_2px_rgba(0,0,0,0.18),0_0_0_2px_rgba(24,50,41,0.06)]" : "border-[#cfd4d1] bg-[#e7eae8]"}`}>
-                    <span className={`absolute left-[3px] top-[3px] size-4 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.3)] transition-transform duration-200 ease-out ${oldCatalog ? "translate-x-5" : "translate-x-0"}`} />
-                  </span>
-                </span>
-              </button>
-              <button
-                onClick={() => setPharmacyCatalog(current => { const next = !current; if (next) setOldCatalog(false); return next; })}
-                className={`flex h-9 w-full items-center justify-between rounded-[7px] px-2.5 text-[11px] font-medium transition-colors hover:bg-[var(--app-menu-bg)] ${pharmacyCatalog ? "bg-[var(--app-menu-bg)] text-[#183229]" : "text-[#252525]"}`}
-                role="switch"
-                aria-checked={pharmacyCatalog}
-              >
-                <span>Pharmacy cards</span>
-                <span className="flex items-center gap-2">
-                  <span className={`min-w-[18px] text-right text-[9px] font-semibold ${pharmacyCatalog ? "text-[#31583f]" : "text-[#929894]"}`}>{pharmacyCatalog ? "On" : "Off"}</span>
-                  <span className={`relative h-6 w-11 shrink-0 rounded-full border transition-all duration-200 ${pharmacyCatalog ? "border-[#0b7045] bg-gradient-to-r from-[#183229] to-[#315f4e] shadow-[inset_0_1px_2px_rgba(0,0,0,0.18),0_0_0_2px_rgba(24,50,41,0.06)]" : "border-[#cfd4d1] bg-[#e7eae8]"}`}>
-                    <span className={`absolute left-[3px] top-[3px] size-4 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.3)] transition-transform duration-200 ease-out ${pharmacyCatalog ? "translate-x-5" : "translate-x-0"}`} />
-                  </span>
-                </span>
-              </button>
-            </div>
-          </div>
+        <div className="account-menu absolute bottom-[calc(100%+8px)] left-0 z-40 w-[224px] rounded-[14px] border border-[#dedede] bg-white p-2 shadow-[0_10px_28px_rgba(16,24,40,0.12)] after:absolute after:-bottom-2 after:left-0 after:h-2 after:w-full after:content-['']">
+          <button onClick={() => { onNavigate("settings"); setMenuPinned(false); setMenuHovered(false); }} className="group flex h-10 w-full items-center gap-3 rounded-[9px] px-3 text-left text-[12px] font-normal text-black transition-colors hover:bg-[#f1f1f1]"><Settings size={16} strokeWidth={1.6} className="text-black transition-transform duration-200 ease-out group-hover:-translate-y-px group-hover:translate-x-0.5 group-hover:rotate-6" /> Settings</button>
+          <button onClick={() => window.location.reload()} className="group flex h-10 w-full items-center gap-3 rounded-[9px] px-3 text-left text-[12px] font-normal text-black transition-colors hover:bg-[#f1f1f1]"><RefreshCw size={16} strokeWidth={1.6} className="text-black transition-transform duration-200 ease-out group-hover:-translate-y-px group-hover:translate-x-0.5 group-hover:rotate-6" /> Hard Refresh</button>
+          <button onClick={onLogout} className="group flex h-10 w-full items-center gap-3 rounded-[9px] px-3 text-left text-[12px] font-normal text-black transition-colors hover:bg-[#f1f1f1]"><LogOut size={16} strokeWidth={1.6} className="text-black transition-transform duration-200 ease-out group-hover:-translate-y-px group-hover:translate-x-0.5 group-hover:rotate-6" /> Log out</button>
         </div>
       )}
-      <div className="flex h-9 items-center gap-2">
-        <button onClick={() => setMenuOpen(current => !current)} className="flex min-w-0 flex-1 items-center gap-2 text-left" aria-expanded={menuOpen} aria-label="Open account menu">
+      <div className="flex h-[50px] items-center gap-2">
+        <button onClick={() => setMenuPinned(current => !current)} className={`flex h-full min-w-0 flex-1 items-center gap-2 rounded-[10px] px-2 text-left transition-colors ${menuOpen ? "bg-[#f1f1f1]" : "hover:bg-[#f1f1f1]"}`} aria-expanded={menuOpen} aria-label="Open account menu">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#eeeeee] text-[12px] font-semibold text-black" aria-hidden="true">Z</span>
           <span className="min-w-0 flex-1">
             <span className="flex min-w-0 items-center gap-1.5">
-              <span className="truncate text-[12px] font-normal text-[#181a19]">Hi, Zee Rabushaj</span>
-              <img src={userVerifiedIcon} alt="Verified" className="size-3 shrink-0" />
-              <span className="shrink-0 rounded-[7px] bg-[var(--app-menu-bg)] px-1.5 py-0.5 text-[9px] font-normal text-[#5f6662]">User Verified</span>
+              <span className="truncate text-[12px] font-normal text-[#181a19]">Hi, Zee Rabushaj, NP</span>
             </span>
-            <span className="mt-0.5 flex items-center gap-1.5">
-              <span className="text-[10px] font-normal text-[#7f8783]">NP</span>
+            <span className="mt-1 flex items-center gap-1.5">
+              <img src={userVerifiedIcon} alt="Verified" className="size-[14px] shrink-0" />
+              <span className="shrink-0 rounded-[7px] bg-[var(--app-menu-bg)] px-2 py-0.5 text-[10px] font-normal text-[#5f6662]">User Verified</span>
             </span>
+          </span>
+          <span className="flex shrink-0 flex-col items-center gap-[3px] px-1" aria-hidden="true">
+            <span className="size-[3px] rounded-full bg-black" />
+            <span className="size-[3px] rounded-full bg-black" />
           </span>
         </button>
       </div>
@@ -2051,7 +2036,7 @@ function ProductsPage({
                       ? isShippingState
                         ? "border-[#9DBBFF] bg-[#F3F7FF] text-[#2563EB]"
                         : "border-[#cfd8d4] text-[#344054]"
-                      : "border-[#d8dee8] text-[#344054] hover:border-[#c7d0dc]"
+                      : "border-[#cfcfcf] text-[#344054] hover:border-[#aeb8c5]"
                   }`}
                 >
                   <span className="min-w-0 truncate">{buttonLabel}</span>
@@ -4911,16 +4896,14 @@ function OrderHistorySelect({ label, options, value, onChange }: { label: string
         <select
           value={value}
           onChange={event => onChange(event.target.value)}
-          className="h-[38px] w-full cursor-pointer appearance-none rounded-[9px] border border-[#cfcfcf] bg-white py-1 pl-3 pr-9 text-[12px] font-medium leading-5 text-[#121212] outline-none transition-all duration-200 focus:border-black focus:shadow-[0_0_0_2px_rgba(0,0,0,0.06)]"
+          className="h-[38px] w-full cursor-pointer appearance-none rounded-[9px] border border-[#cfcfcf] bg-white py-1 pl-3 pr-9 text-[12px] font-medium leading-5 text-[#344054] outline-none transition-colors hover:border-[#aeb8c5] focus:border-black"
         >
           {options.map(option => (
             <option key={option.value} value={option.value}>{option.label}</option>
           ))}
         </select>
-        <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fillRule="evenodd" clipRule="evenodd" d="M8.35355 10.3536C8.15829 10.5488 7.84171 10.5488 7.64645 10.3536L3.64645 6.35355C3.45118 6.15829 3.45118 5.84171 3.64645 5.64645C3.84171 5.45119 4.15829 5.45119 4.35355 5.64645L8 9.29289L11.6464 5.64645C11.8417 5.45118 12.1583 5.45118 12.3536 5.64645C12.5488 5.84171 12.5488 6.15829 12.3536 6.35355L8.35355 10.3536Z" fill="#A5A5A5" />
-          </svg>
+        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#344054]">
+          <ChevronsUpDown size={14} strokeWidth={1.8} />
         </div>
       </div>
     </div>
@@ -5870,6 +5853,235 @@ const PHARMACIES = [
   { name: "Northeast Compounding", location: "Boston, MA", turnaround: "2-4 Days", products: 22, rating: 4.3, status: "Inactive", phone: "+1 (617) 555-0167" },
 ];
 
+type PharmacyCheckoutStep = "birthday" | "details" | "payment" | "success";
+
+function PharmacyCheckout({ pharmacy, onClose, onGoToCatalog }: { pharmacy: typeof PHARMACIES[number]; onClose: () => void; onGoToCatalog: () => void }) {
+  const [step, setStep] = useState<PharmacyCheckoutStep>("birthday");
+  const [birthday, setBirthday] = useState("");
+  const [copyLabel, setCopyLabel] = useState("Copy link");
+  const [scheduleRefills, setScheduleRefills] = useState(false);
+  const [showAllSummaryItems, setShowAllSummaryItems] = useState(false);
+  const subtotal = 240.01;
+  const shipping = 40;
+  const total = subtotal + shipping;
+  const fieldClass = "mt-1.5 h-11 w-full rounded-[9px] border border-[#d4d4d4] bg-white px-3.5 text-[13px] outline-none transition-colors placeholder:text-[#a3a3a3] focus:border-black focus:ring-2 focus:ring-black/10";
+
+  const Brand = () => (
+    <button type="button" onClick={onClose} className="flex min-h-11 items-center gap-2.5" aria-label="Return to business selection">
+      <img src={scriptlinkrxLogo} alt="" className="h-8 w-8 object-contain" />
+      <span className="font-['Poppins',sans-serif] text-[17px] font-semibold tracking-[-0.02em] text-black">ScriptLinkRx</span>
+    </button>
+  );
+
+  const Progress = () => (
+    <div className="mb-7 flex items-center justify-center gap-2" aria-label="Checkout progress">
+      {["Verify", "Review", "Payment"].map((label, index) => {
+        const activeIndex = step === "birthday" ? 0 : step === "details" ? 1 : 2;
+        return <Fragment key={label}><div className={`flex items-center gap-2 text-[11px] font-semibold ${index <= activeIndex ? "text-black" : "text-[#a3a3a3]"}`}><span className={`flex size-6 items-center justify-center rounded-full ${index < activeIndex ? "bg-black text-white" : index === activeIndex ? "border-2 border-black bg-white" : "border border-[#d4d4d4] bg-white"}`}>{index < activeIndex ? <Check size={13} /> : index + 1}</span><span className="hidden sm:inline">{label}</span></div>{index < 2 && <span className={`h-px w-8 sm:w-16 ${index < activeIndex ? "bg-black" : "bg-[#d4d4d4]"}`} />}</Fragment>;
+      })}
+    </div>
+  );
+
+  const prescriptions = [
+    { label: "Prescription 1", name: "BPC-157", directions: "Inject 16 units (0.16mL) once daily", quantity: 1, days: 30, refills: 1, price: "$129.84" },
+    { label: "Prescription 2", name: "TB-500", directions: "Inject 60 units (0.6mL) twice weekly", quantity: 1, days: 30, refills: 1, price: "$107.41" },
+  ];
+
+  const OrderRows = ({ detailed = false }: { detailed?: boolean }) => detailed ? (
+    <div className="divide-y divide-[#e7ece9] text-[13px]">
+      {prescriptions.map((prescription, index) => (
+        <div key={prescription.name} className="py-5 first:pt-0 last:pb-0">
+          <div className="flex items-center justify-between gap-4">
+            <span className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.08em]"><span className="font-mono text-[#2563eb]">RX-0{index + 1}</span><span className="h-3 w-px bg-[#d6d6d6]" /><span className="text-[#777]">Prescription</span></span>
+            <span className="font-semibold tabular-nums">{prescription.price}</span>
+          </div>
+          <p className="mt-3 font-semibold">{prescription.name}</p>
+          <p className="mt-2 text-[12px] font-semibold leading-5">{prescription.directions}</p>
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[#5f6874]">
+            <span><strong className="font-semibold">Qty:</strong> {prescription.quantity}</span>
+            <span><strong className="font-semibold">Days:</strong> {prescription.days}</span>
+            <span><strong className="font-semibold">Refills allowed:</strong> {prescription.refills}</span>
+          </div>
+          <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] gap-4">
+            <div>
+              <p className="text-[12px] font-medium leading-5">S SQ supplies pack</p>
+              <p className="mt-0.5 text-[11px] leading-4 text-[#6f7782]">Suitable needles for the injection and dosage · suitable syringe · alcohol pads</p>
+              <div className="mt-1.5 flex flex-wrap gap-x-4 text-[10px] text-[#6f7782]"><span>Qty: 1</span><span>Size: Suitable amount</span></div>
+            </div>
+            <span className="pt-0.5 text-[12px] font-medium tabular-nums">$1.38</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div className="space-y-3 text-[13px]">
+      {prescriptions.map((prescription) => <div key={prescription.name} className="flex justify-between gap-4"><div><p className="font-semibold">{prescription.name}</p><p className="mt-1 text-[11px] leading-4 text-[#6f7782]">{prescription.directions} · {prescription.days} days</p></div><span className="font-semibold">{prescription.price}</span></div>)}
+      <div className="flex justify-between gap-4"><div><p className="font-semibold">S SQ supplies packs ×2</p><p className="mt-1 text-[11px] leading-4 text-[#6f7782]">Needles, syringes and alcohol pads</p></div><span className="font-semibold">$2.76</span></div>
+    </div>
+  );
+
+  return (
+    <div className={`business-checkout checkout-step-${step} fixed inset-0 z-[100] overflow-y-auto bg-[radial-gradient(circle_at_50%_0%,rgba(219,232,255,0.95),rgba(237,244,255,0.65)_36%,#f7f8fa_76%)] text-[#171717]`}>
+      <style>{`
+        .business-checkout h1::after {
+          display: block;
+          margin-top: 9px;
+          color: #2563eb;
+          font-size: 11px;
+          font-weight: 600;
+          line-height: 16px;
+          letter-spacing: .01em;
+        }
+        .business-checkout.checkout-step-birthday h1::after { content: "Step 1 of 5 · Identity verification"; }
+        .business-checkout.checkout-step-details h1::after { content: "Step 2 of 5 · Review prescription"; }
+        .business-checkout.checkout-step-payment h1::after { content: "Step 4 of 5 · Secure payment"; }
+        .business-checkout.checkout-step-success h1::after { display: none; }
+        .business-checkout.checkout-step-birthday main > section > span:first-child { display: none; }
+        .business-checkout [class*="bg-[#183229]"] { background-color: #000 !important; }
+        .business-checkout [class*="hover:bg-[#244438]"]:hover { background-color: #252525 !important; }
+        .business-checkout [class*="text-[#183229]"],
+        .business-checkout [class*="text-[#668073]"] { color: #000 !important; }
+        .business-checkout [class*="border-[#183229]"] { border-color: #000 !important; }
+        .business-checkout [class*="accent-[#183229]"] { accent-color: #000 !important; }
+        .business-checkout [class*="bg-[#edf5f0]"],
+        .business-checkout [class*="bg-[#edf3ef]"] { background-color: #eee !important; }
+        .business-checkout [class*="bg-[#f7f9f8]"] { background-color: #f7f7f7 !important; }
+        .business-checkout [class*="border-[#d8dfdc]"],
+        .business-checkout [class*="border-[#dfe5e1]"],
+        .business-checkout [class*="border-[#e1e7e3]"],
+        .business-checkout [class*="border-[#e7ece9]"] { border-color: #dedede !important; }
+        .business-checkout [class*="text-[#59635e]"],
+        .business-checkout [class*="text-[#66706b]"],
+        .business-checkout [class*="text-[#8a938e]"],
+        .business-checkout [class*="text-[#89918d]"] { color: #737373 !important; }
+        @media (max-width: 639px) {
+          .business-checkout main {
+            min-height: 100dvh;
+            justify-content: flex-start;
+            padding: 24px 8px 36px;
+          }
+          .business-checkout main > div:first-of-type { margin-bottom: 20px; }
+          .business-checkout main > section { width: 100%; }
+          .business-checkout input { font-size: 16px !important; }
+          .business-checkout input[type="radio"] { width: 18px; height: 18px; }
+          .business-checkout h1 { font-size: 25px !important; line-height: 1.15; }
+          .business-checkout.checkout-step-payment main > section { display: flex; flex-direction: column; }
+          .business-checkout.checkout-step-payment main > section > div,
+          .business-checkout.checkout-step-payment main > section > aside { width: 100%; }
+        }
+      `}</style>
+      <main className="mx-auto flex min-h-screen w-full max-w-[400px] flex-col justify-center px-4 py-8 sm:py-12">
+        <div className="mb-6 flex justify-center sm:mb-8"><Brand /></div>
+        {step === "birthday" && <section className="mx-auto max-w-[520px] rounded-[18px] border border-[#dedede] bg-white p-6 shadow-[0_18px_50px_rgba(0,0,0,0.07)] sm:p-9"><span className="flex size-11 items-center justify-center rounded-full bg-[#eeeeee] text-black"><Shield size={20} /></span><h1 className="mt-5 text-[28px] font-semibold tracking-[-0.04em]">Verify your birthday</h1><p className="mt-2 text-[13px] leading-5 text-[#6f7782]">Enter the patient date of birth to securely view the prescription from {pharmacy.name}.</p><form onSubmit={event => { event.preventDefault(); if (birthday) setStep("details"); }} className="mt-7"><label className="text-[12px] font-semibold">Date of birth<input required type="date" value={birthday} onChange={event => setBirthday(event.target.value)} className={fieldClass} /></label><button className="mt-5 h-12 w-full rounded-full bg-black text-[13px] font-semibold text-white transition-colors hover:bg-[#252525]">Continue securely</button></form><p className="mt-5 flex items-center justify-center gap-1.5 text-[10px] text-[#8a8a8a]"><Lock size={11} /> Your information is encrypted and protected.</p></section>}
+
+        {step === "details" && (
+          <section className="mx-auto w-full max-w-[540px] rounded-[18px] border border-[#dedede] bg-white px-5 py-7 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:px-9 sm:py-9">
+            <header className="max-w-[520px] text-left">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8a8a8a]">Prescription details</p>
+              <h1 className="mt-3 text-[27px] font-semibold tracking-[-0.04em]">Review your order</h1>
+              <p className="mt-3 text-[13px] font-medium text-[#292929]">Hi Robert,</p>
+              <p className="mt-2 text-[12px] leading-5 text-[#6f7782]">Please review your pharmacy, shipping, prescription, and pricing details below before continuing to payment.</p>
+            </header>
+
+            <div className="mt-8 grid gap-7 border-b border-[#e5e5e5] pb-7 sm:grid-cols-2">
+              <section>
+                <h2 className="text-[12px] font-semibold text-[#202020]">Pharmacy</h2>
+                <p className="mt-3 text-[12px] font-semibold text-[#505967]">{pharmacy.name}</p>
+                <p className="mt-1.5 text-[12px] leading-5 text-[#606a78]">{pharmacy.location}</p>
+                <p className="mt-1 text-[12px] text-[#606a78]">Phone: {pharmacy.phone}</p>
+              </section>
+              <section>
+                <h2 className="text-[12px] font-semibold text-[#202020]">Shipping information</h2>
+                <dl className="mt-3 space-y-2 text-[12px] text-[#606a78]">
+                  <div className="flex gap-1"><dt>Carrier:</dt><dd className="font-medium text-[#39404a]">FedEx</dd></div>
+                  <div className="flex gap-1"><dt>Method:</dt><dd className="font-medium text-[#39404a]">Standard Overnight</dd></div>
+                  <div className="flex gap-1"><dt>Price:</dt><dd className="font-medium text-[#39404a]">$40.00</dd></div>
+                </dl>
+              </section>
+            </div>
+
+            <div className="py-6"><OrderRows detailed /></div>
+
+            <div className="border-t border-[#e5e5e5] pt-5 text-[12px]">
+              <div className="flex justify-between py-1.5"><span className="font-medium text-[#515966]">Subtotal price</span><span className="font-medium tabular-nums">${subtotal.toFixed(2)}</span></div>
+              <div className="flex justify-between py-1.5"><span className="font-medium text-[#515966]">Total shipping</span><span className="font-medium tabular-nums">${shipping.toFixed(2)}</span></div>
+              <div className="mt-3 flex justify-between border-t border-[#e5e5e5] pt-4 text-[17px] font-semibold"><span>Total price</span><span className="tabular-nums">${total.toFixed(2)}</span></div>
+            </div>
+
+            <button onClick={() => setStep("payment")} className="mt-7 h-12 w-full rounded-full bg-black text-[12px] font-semibold text-white transition-colors hover:bg-[#252525]">Continue to payment</button>
+            <button onClick={onClose} className="mt-3 w-full py-1 text-[11px] font-medium text-[#777] transition-colors hover:text-black">Cancel</button>
+          </section>
+        )}
+
+        {step === "payment" && (
+          <section className="mx-auto flex w-full max-w-[540px] flex-col gap-5">
+            <div className="rounded-[18px] border border-[#dedede] bg-white p-5 sm:p-7">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#777]">Secure checkout</p>
+              <h1 className="mt-3 text-[27px] font-semibold tracking-[-0.04em]">Payment details</h1>
+
+              <div className="mt-7 space-y-4">
+                <label className="block text-[12px] font-semibold">Cardholder name *<input required placeholder="Robert Johnson" className={fieldClass} /></label>
+                <label className="block text-[12px] font-semibold">Card number *<div className="relative"><input required inputMode="numeric" placeholder="1234 5678 9012 3456" className={`${fieldClass} pr-11`} /><CreditCard className="absolute bottom-3.5 right-3.5 text-[#777]" size={16} /></div></label>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="text-[12px] font-semibold">Expiration *<input required placeholder="MM/YY" className={fieldClass} /></label>
+                  <label className="text-[12px] font-semibold">CVV *<input required inputMode="numeric" placeholder="123" className={fieldClass} /></label>
+                </div>
+              </div>
+
+              <div className="mt-7 border-t border-[#e5e5e5] pt-6">
+                <p className="text-[13px] font-semibold">Billing address</p>
+                <label className="mt-4 flex items-center gap-3 text-[12px]"><input type="radio" defaultChecked name="billing" className="accent-black" /> Same as shipping address</label>
+                <label className="mt-3 flex items-center gap-3 text-[12px]"><input type="radio" name="billing" className="accent-black" /> Use a different billing address</label>
+              </div>
+
+              <button type="button" onClick={() => setScheduleRefills(current => !current)} className={`mt-7 flex w-full items-start gap-3 rounded-[12px] p-4 text-left transition-all ${scheduleRefills ? "bg-[linear-gradient(135deg,#eaf2ff_0%,#f5f8ff_55%,#ffffff_100%)] shadow-[0_8px_24px_rgba(37,99,235,0.09)]" : "bg-[linear-gradient(135deg,#f2f6ff_0%,#fafcff_58%,#ffffff_100%)]"}`}>
+                <span className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-[4px] ${scheduleRefills ? "bg-black text-white" : "bg-white shadow-[0_1px_4px_rgba(0,0,0,0.12)]"}`}>{scheduleRefills && <Check size={11} />}</span>
+                <span><span className="flex items-center gap-2 text-[12px] font-semibold">Schedule refills automatically <CreditCard size={14} /></span><span className="mt-1 block text-[10px] leading-4 text-[#606875]">We will automatically charge this card for future refills. Check to enable.</span></span>
+              </button>
+            </div>
+
+            <aside className="h-fit rounded-[18px] border border-[#dedede] bg-white p-5">
+              <h2 className="text-[17px] font-semibold">Order summary</h2>
+              <div className="mt-6 space-y-4 text-[12px]">
+                {prescriptions.map(prescription => <div key={prescription.name} className="flex justify-between gap-4"><div><p className="font-semibold">{prescription.name}</p><p className="mt-1 leading-4 text-[#6f7782]">{prescription.directions} · {prescription.days} days</p></div><span className="font-semibold tabular-nums">{prescription.price}</span></div>)}
+                {showAllSummaryItems && prescriptions.map(prescription => <div key={`${prescription.name}-supplies`} className="flex justify-between gap-4"><div><p className="font-semibold">S SQ supplies pack</p><p className="mt-1 leading-4 text-[#6f7782]">Suitable needles, syringe and alcohol pads</p></div><span className="font-semibold tabular-nums">$1.38</span></div>)}
+              </div>
+              <button type="button" onClick={() => setShowAllSummaryItems(current => !current)} className="mt-4 text-[11px] font-semibold text-[#2563eb] transition-colors hover:text-[#1d4ed8] hover:underline underline-offset-4">{showAllSummaryItems ? "Show fewer items" : "Show 2 more items"}</button>
+              <div className="mt-6 space-y-3 border-t border-[#e5e5e5] pt-5 text-[12px]">
+                <div className="flex justify-between"><span className="font-medium text-[#515966]">Subtotal price</span><span className="font-medium tabular-nums">${subtotal.toFixed(2)}</span></div>
+                <div className="flex items-center justify-between gap-3"><span className="font-medium text-[#515966]">Total shipping</span><span className="flex items-center gap-2"><span className="rounded-full border border-[#b9b9b9] px-2 py-0.5 text-[8px] font-semibold whitespace-nowrap">FedEx Standard Overnight</span><span className="font-medium tabular-nums">${shipping.toFixed(2)}</span></span></div>
+                <div className="flex justify-between border-t border-[#e5e5e5] pt-4 text-[17px] font-semibold"><span>Total price</span><span className="tabular-nums">${total.toFixed(2)}</span></div>
+              </div>
+              <button onClick={() => setStep("success")} className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-black text-[12px] font-semibold text-white hover:bg-[#252525]"><Lock size={13} /> Pay ${total.toFixed(2)}</button>
+              <button onClick={() => setStep("details")} className="mt-3 w-full text-[11px] font-semibold text-[#666] underline underline-offset-4">Back to review</button>
+            </aside>
+          </section>
+        )}
+
+        {step === "success" && (
+          <section className="mx-auto w-full max-w-[540px] rounded-[20px] border border-[#dedede] bg-white px-6 py-8 shadow-[0_20px_60px_rgba(0,0,0,0.06)] sm:px-8 sm:py-9">
+            <div className="text-center">
+              <div className="relative mx-auto flex h-[92px] w-[124px] items-center justify-center overflow-hidden" aria-hidden="true"><img src={checkoutCelebration} alt="" className="absolute left-1/2 top-1/2 w-[280px] max-w-none -translate-x-1/2 -translate-y-1/2" /></div>
+              <h1 className="mt-5 text-[29px] font-semibold tracking-[-0.04em]">Payment authorized</h1>
+              <p className="mx-auto mt-3 max-w-[470px] text-[14px] leading-6 text-[#4f5661]">Your order has been submitted to the pharmacy for processing. You will receive updates via SMS and email.</p>
+            </div>
+
+            <div className="mt-9 border-t border-[#e5e5e5] pt-6 text-left">
+              <p className="text-[12px] font-semibold text-[#202020]">Your receipt</p>
+              <div className="mt-2.5 flex h-11 items-center gap-3 rounded-[9px] border border-[#dcdcdc] bg-[#fafafa] px-3.5 transition-colors focus-within:border-[#a7a7a7]">
+                <span className="min-w-0 flex-1 truncate text-[11px] text-[#333]">https://www.dev.scriptlinkrx.com/receipt/RFL4NI</span>
+                <button onClick={() => { navigator.clipboard?.writeText("https://www.dev.scriptlinkrx.com/receipt/RFL4NI"); setCopyLabel("Copied"); }} className="flex size-7 shrink-0 items-center justify-center rounded-[6px] text-[#777] transition-colors hover:bg-white hover:text-black" aria-label={copyLabel === "Copied" ? "Receipt link copied" : "Copy receipt link"}>{copyLabel === "Copied" ? <Check size={13} /> : <Copy size={13} />}</button>
+              </div>
+              <p className="mt-2.5 text-[11px] leading-5 text-[#697281]">Save this link — you can view your receipt anytime by verifying your date of birth.</p>
+            </div>
+            <button type="button" onClick={onGoToCatalog} className="mt-6 h-11 w-full rounded-full bg-black text-[12px] font-semibold text-white transition-colors hover:bg-[#252525]">Go to catalog page</button>
+          </section>
+        )}
+      </main>
+    </div>
+  );
+}
+
 function PharmaciesPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   return (
     <>
@@ -5930,10 +6142,10 @@ function PharmaciesPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 <span className="text-[11px] text-[#9d9d9d]">{ph.phone}</span>
               </div>
               <div className="flex gap-2">
-                <button className="p-1.5 rounded-[6px] border border-[#eaeaea] hover:bg-[#f7efe9] transition-colors">
+                <button onClick={event => event.stopPropagation()} className="p-1.5 rounded-[6px] border border-[#eaeaea] hover:bg-[#f7efe9] transition-colors">
                   <Edit3 size={12} className="text-[#9d9d9d]" />
                 </button>
-                <button className="p-1.5 rounded-[6px] border border-[#eaeaea] hover:bg-[#fee2e2] transition-colors">
+                <button onClick={event => event.stopPropagation()} className="p-1.5 rounded-[6px] border border-[#eaeaea] hover:bg-[#fee2e2] transition-colors">
                   <Trash2 size={12} className="text-[#9d9d9d]" />
                 </button>
               </div>
@@ -9975,13 +10187,18 @@ function CheckoutPrescriptionPage({ onNavigate }: { onNavigate: (p: Page) => voi
   );
 }
 
-function LoginPage({ onLogin, onRegister, onSingleSignOn }: { onLogin: (destination: "business" | "setup") => void; onRegister: () => void; onSingleSignOn: () => void }) {
+function LoginPage({ onLogin, onRegister, onSingleSignOn }: { onLogin: (destination: "business" | "setup" | "catalog") => void; onRegister: () => void; onSingleSignOn: () => void }) {
   const [loginRole, setLoginRole] = useState<"provider" | "pharmacy">("provider");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
   function submitLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!password.trim()) {
+      setLoginError("");
+      onLogin("catalog");
+      return;
+    }
     if (password !== "test123" && password !== "12345") {
       setLoginError("Incorrect password. Please try again.");
       return;
@@ -10032,7 +10249,7 @@ function LoginPage({ onLogin, onRegister, onSingleSignOn }: { onLogin: (destinat
               </div>
             </label>
             {loginError && <p className="mt-2 text-left text-[11px] font-medium text-[#c94f43]">{loginError}</p>}
-            <button type="submit" className="mt-3 flex h-[46px] w-full items-center justify-center rounded-[999px] bg-[#1a1a1a] text-[13px] font-semibold text-white transition-colors hover:bg-[#183229]">
+            <button type="submit" className="mt-3 flex h-[46px] w-full items-center justify-center rounded-[999px] bg-[#1a1a1a] text-[13px] font-semibold text-white transition-colors hover:bg-[#121212]">
               Continue to log in
             </button>
           </form>
@@ -10075,10 +10292,29 @@ function LoginPage({ onLogin, onRegister, onSingleSignOn }: { onLogin: (destinat
 }
 
 function BusinessSelectionPage({ onSelect, onBack }: { onSelect: (business: string) => void; onBack: () => void }) {
+  const [selectedBusiness, setSelectedBusiness] = useState<string | null>(null);
   const businesses = [
     { name: "Shpend Clinic", location: "Bronx, NY" },
     { name: "ScriptLinkRx Demo", location: "Bronx, NY" },
   ];
+
+  if (selectedBusiness) {
+    return (
+      <PharmacyCheckout
+        pharmacy={{
+          name: selectedBusiness,
+          location: "Bronx, NY",
+          turnaround: "1-2 Days",
+          products: 42,
+          rating: 4.9,
+          status: "Active",
+          phone: "+1 (718) 555-0124",
+        }}
+        onClose={() => setSelectedBusiness(null)}
+        onGoToCatalog={() => onSelect(selectedBusiness)}
+      />
+    );
+  }
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#fafafa] px-5 py-10 font-['Inter',sans-serif] text-[#171717]">
@@ -10095,7 +10331,7 @@ function BusinessSelectionPage({ onSelect, onBack }: { onSelect: (business: stri
         </div>
         <div className="space-y-3 p-6">
           {businesses.map(business => (
-            <button key={business.name} type="button" onClick={() => onSelect(business.name)} className="group flex w-full items-center gap-3 rounded-[10px] border border-[#e2e4e8] bg-white px-4 py-4 text-left transition-colors hover:border-[#c7d7f7] hover:bg-[#f5f8ff]">
+            <button key={business.name} type="button" onClick={() => setSelectedBusiness(business.name)} className="group flex w-full items-center gap-3 rounded-[10px] border border-[#e2e4e8] bg-white px-4 py-4 text-left transition-colors hover:border-[#c7d7f7] hover:bg-[#f5f8ff]">
               <span className="min-w-0 flex-1"><span className="block text-[14px] font-semibold text-[#171717]">{business.name}</span><span className="mt-1 block text-[11px] text-[#737b88]">{business.location}</span></span>
               <ChevronRight size={17} className="text-[#a2a8b1] transition-transform group-hover:translate-x-0.5 group-hover:text-[#2563EB]" />
             </button>
@@ -11643,6 +11879,11 @@ export default function App() {
           onRegister={() => setAuthView("register")}
           onSingleSignOn={() => setAuthView("single-sign-on")}
           onLogin={destination => {
+            if (destination === "catalog") {
+              setIsAuthenticated(true);
+              setPage("products");
+              return;
+            }
             setAuthView(destination === "business" ? "business-select" : "organization");
           }}
         />
