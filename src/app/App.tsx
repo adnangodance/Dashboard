@@ -3117,6 +3117,7 @@ function ProductDetailPage({
   cartMode,
   setCartMode,
   onAddToPatientCart,
+  onUpdatePatientCartQuantity,
   product,
   extraVariants,
 }: {
@@ -3124,6 +3125,7 @@ function ProductDetailPage({
   cartMode: CartMode;
   setCartMode: (mode: CartMode) => void;
   onAddToPatientCart: (entries: PatientCartEntry[]) => void;
+  onUpdatePatientCartQuantity: (productId: number, patientId: number, quantity: number) => void;
   product: CardDef;
   extraVariants: boolean;
 }) {
@@ -3144,6 +3146,7 @@ function ProductDetailPage({
   const [shippingChoice, setShippingChoice] = useState<"patient" | "clinic">("clinic");
   const [selectedPatientIds, setSelectedPatientIds] = useState<Set<number>>(new Set());
   const [patientQuantities, setPatientQuantities] = useState<Record<number, number>>({});
+  const [addedPatientQuantities, setAddedPatientQuantities] = useState<Record<number, number>>({});
   const [expandedPatientIds, setExpandedPatientIds] = useState<Set<number>>(new Set());
   const [addedItemCount, setAddedItemCount] = useState<number | null>(null);
   const [lastAddedItemCount, setLastAddedItemCount] = useState<number | null>(null);
@@ -3157,7 +3160,7 @@ function ProductDetailPage({
   const [discountApplying, setDiscountApplying] = useState(false);
   const configurationCardRef = useRef<HTMLDivElement>(null);
   const [productCardHeight, setProductCardHeight] = useState(825);
-  const { addCartItems } = useCartSummary();
+  const { addCartItems, updateCartItemQty } = useCartSummary();
   const { runWithAppLoader, showToast } = useAppLoading();
 
   useEffect(() => {
@@ -3170,6 +3173,7 @@ function ProductDetailPage({
     setShippingChoice("clinic");
     setSelectedPatientIds(new Set());
     setPatientQuantities({});
+    setAddedPatientQuantities({});
     setExpandedPatientIds(new Set());
     setAddedItemCount(null);
     setLastAddedItemCount(null);
@@ -3242,6 +3246,8 @@ function ProductDetailPage({
   const priceChangeKey = `${size}-${strength}-${pharmacy}`;
   const selectedPatientCount = selectedPatientIds.size;
   const selectedItemCount = [...selectedPatientIds].reduce((sum, id) => sum + (patientQuantities[id] ?? 1), 0);
+  const addedItemTotal = Object.values(addedPatientQuantities).reduce((sum, quantity) => sum + quantity, 0);
+  const visiblePatientIds = [...new Set([...Object.keys(addedPatientQuantities).map(Number), ...selectedPatientIds])];
   const isMultiPatientOrder = cartMode === "multi" && selectedPatientIds.size > 1;
   const patientMatches = PATIENTS
     .map((patient, id) => ({ patient, id }))
@@ -3292,6 +3298,21 @@ function ProductDetailPage({
     }));
   }
 
+  function updateAddedPatientQuantity(id: number, change: number) {
+    const currentQuantity = addedPatientQuantities[id] ?? 1;
+    const nextQuantity = Math.max(0, currentQuantity + change);
+    setAddedPatientQuantities(current => {
+      const next = { ...current };
+      if (nextQuantity === 0) delete next[id];
+      else next[id] = nextQuantity;
+      const nextTotal = Object.values(next).reduce((sum, quantity) => sum + quantity, 0);
+      setLastAddedItemCount(nextTotal || null);
+      return next;
+    });
+    updateCartItemQty(product.id, change);
+    onUpdatePatientCartQuantity(product.id, id, nextQuantity);
+  }
+
   function togglePatientDetails(id: number) {
     setExpandedPatientIds(current => {
       const next = new Set(current);
@@ -3324,6 +3345,13 @@ function ProductDetailPage({
         injectionType: injType,
         unitPrice: configuredPrice,
       })));
+      setAddedPatientQuantities(current => {
+        const next = { ...current };
+        selectedPatientIds.forEach(patientId => {
+          next[patientId] = (next[patientId] ?? 0) + (patientQuantities[patientId] ?? 1);
+        });
+        return next;
+      });
       setAddedItemCount(itemCount);
       setLastAddedItemCount(itemCount);
       setSize(defaultSize);
@@ -3526,19 +3554,60 @@ function ProductDetailPage({
             <p className="mt-2 text-[10px] text-[#7a837f]">{shippingChoice === "clinic" ? "You can select multiple patients for one clinic shipment." : "You can select one patient for this shipment."}</p>
           </div>
 
-          {lastAddedItemCount !== null && (
-            <div role="status" aria-live="polite" className="mt-5 rounded-[16px] border border-[#dce7fb] bg-[radial-gradient(circle_at_90%_0%,rgba(219,232,255,0.98),transparent_52%),linear-gradient(145deg,#f8fbff_0%,#edf4ff_100%)] px-4 py-3.5">
-              <div className="flex items-start gap-3">
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white text-[#2563eb] shadow-[0_2px_8px_rgba(37,99,235,0.10)]"><CheckCircle2 size={16} strokeWidth={2} /></span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[13px] font-semibold leading-[18px] text-[#171717]">Added to cart</span>
-                  <span className="mt-0.5 block text-[10px] leading-[15px] text-[#667085]">{lastAddedItemCount} prescription{lastAddedItemCount === 1 ? " is" : "s are"} ready. Add another patient or review your cart.</span>
-                </span>
+          {visiblePatientIds.length > 0 && (
+            <div role="status" aria-live="polite" className="mt-3 overflow-hidden rounded-[11px] border border-[#dbe5f5] bg-white shadow-[0_2px_8px_rgba(37,99,235,0.05)]">
+              <div className="flex items-center justify-between border-b border-[#dbe5f5] bg-[#f3f7ff] px-3.5 py-2.5">
+                <div>
+                  <p className="text-[11px] font-semibold text-[#1a1a1a]">Patients</p>
+                  <p className="mt-0.5 text-[9px] text-[#7a837f]">Manage quantities and see who is already in the cart.</p>
+                </div>
+                <span className="rounded-full bg-[#2563EB] px-2 py-1 text-[9px] font-semibold text-white">{addedItemTotal + selectedItemCount} item{addedItemTotal + selectedItemCount === 1 ? "" : "s"}</span>
+              </div>
+              <div className="divide-y divide-[#e8ebe9]">
+                {visiblePatientIds.map(id => {
+                  const patient = PATIENTS[id];
+                  const alreadyInCart = addedPatientQuantities[id] !== undefined;
+                  const patientQty = alreadyInCart ? addedPatientQuantities[id] : patientQuantities[id] ?? 1;
+                  const isExpanded = expandedPatientIds.has(id);
+                  const patientAddress = [patient.address1, patient.address2, `${patient.city}, ${patient.state} ${patient.zip}`].filter(Boolean).join(", ");
+                  return (
+                    <div key={id} className="bg-white px-3.5 py-3 transition-colors hover:bg-[#fcfdfc]">
+                      <div className="grid grid-cols-[minmax(0,1fr)_120px] items-center gap-3">
+                        <button onClick={() => togglePatientDetails(id)} className="flex min-w-0 items-center gap-2 text-left" aria-expanded={isExpanded}>
+                          <span className="min-w-0">
+                            <span className="flex items-center gap-2">
+                              <span className="block truncate text-[11px] font-semibold text-[#171917]">{patient.firstName} {patient.lastName}</span>
+                              {alreadyInCart && <span className="shrink-0 rounded-full bg-[#dbe8ff] px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.04em] text-[#2563eb]">In cart</span>}
+                              {!alreadyInCart && <span className="shrink-0 rounded-full bg-[#f1f1f1] px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.04em] text-[#555]">Selected</span>}
+                            </span>
+                            <span className="mt-0.5 block truncate text-[9px] text-[#7a837f]">DOB {patient.birthDate}</span>
+                          </span>
+                          <ChevronDown size={13} className={`shrink-0 text-[#777] transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                        </button>
+                        <div className="inline-flex h-10 w-fit items-center overflow-hidden rounded-full border border-[#e2e2e2] bg-white">
+                          {patientQty === 1 ? (
+                            <button onClick={() => alreadyInCart ? updateAddedPatientQuantity(id, -1) : togglePatient(id)} className="flex h-10 w-10 items-center justify-center text-[#202020] transition-colors hover:bg-[#f7f7f7]" aria-label={`Remove ${patient.firstName} ${patient.lastName}`}><Trash2 size={15} /></button>
+                          ) : (
+                            <button onClick={() => alreadyInCart ? updateAddedPatientQuantity(id, -1) : updatePatientQuantity(id, -1)} className="flex h-10 w-10 items-center justify-center text-[#202020] transition-colors hover:bg-[#f7f7f7]" aria-label={`Decrease quantity for ${patient.firstName}`}><Minus size={16} /></button>
+                          )}
+                          <span className="flex h-10 w-8 items-center justify-center text-[13px] font-medium text-[#171717]">{patientQty}</span>
+                          <button onClick={() => alreadyInCart ? updateAddedPatientQuantity(id, 1) : updatePatientQuantity(id, 1)} className="flex h-10 w-10 items-center justify-center text-[#202020] transition-colors hover:bg-[#f7f7f7]" aria-label={`Increase quantity for ${patient.firstName}`}><Plus size={16} /></button>
+                        </div>
+                      </div>
+                      {isExpanded && (
+                        <div className="mt-2 rounded-[8px] border border-[#e4e8e6] bg-[#f7f9f8] px-3 py-2.5 text-[10px] leading-relaxed text-[#666]">
+                          <div className="flex items-start gap-2"><MapPin size={12} className="mt-0.5 shrink-0 text-[#333]" /><span>{patientAddress}</span></div>
+                          <div className="mt-1.5 flex items-center gap-2"><Phone size={12} className="shrink-0 text-[#333]" /><span>{patient.primaryPhone}</span></div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
 
-          <div className={`relative ${lastAddedItemCount !== null ? "mt-3" : "mt-6"}`}>
+          <div className={`relative ${visiblePatientIds.length > 0 ? "mt-3" : "mt-6"}`}>
             {lastAddedItemCount !== null && selectedPatientCount === 0 ? (
               <>
                 <button onClick={() => onNavigate(cartMode === "multi" ? "cart-multi" : "cart-single")} className="flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[#d8dce3] bg-white text-[12px] font-medium text-[#111] transition-colors hover:bg-[#f1f1f1]">
@@ -3562,13 +3631,15 @@ function ProductDetailPage({
                 <div className="max-h-[220px] overflow-y-auto p-1.5">
                   {patientMatches.map(({ patient, id }) => {
                     const selected = selectedPatientIds.has(id);
+                    const alreadyInCart = addedPatientQuantities[id] !== undefined;
                     return (
-                      <button key={id} onClick={() => { togglePatient(id); setPatientPickerOpen(false); }} className={`w-full rounded-[7px] px-3 py-2.5 text-left transition-colors ${selected ? "bg-[#f3f5f4]" : "hover:bg-[#f8f7f5]"}`}>
+                      <button key={id} disabled={alreadyInCart} onClick={() => { togglePatient(id); setPatientPickerOpen(false); }} className={`w-full rounded-[7px] px-3 py-2.5 text-left transition-colors ${alreadyInCart ? "cursor-default bg-[#f3f7ff]" : selected ? "bg-[#f3f5f4]" : "hover:bg-[#f8f7f5]"}`}>
                         <span className="flex items-center gap-2">
-                          <span className={`block text-[12px] font-semibold ${selected ? "text-[#8a9390]" : "text-[#1a1a1a]"}`}>{patient.firstName} {patient.lastName}</span>
-                          {selected && <span className="rounded-full bg-[#dff8fb] px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.04em] text-[#0095a8]">In cart</span>}
+                          <span className={`block text-[12px] font-semibold ${alreadyInCart || selected ? "text-[#667085]" : "text-[#1a1a1a]"}`}>{patient.firstName} {patient.lastName}</span>
+                          {alreadyInCart && <span className="rounded-full bg-[#dbe8ff] px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.04em] text-[#2563eb]">In cart</span>}
+                          {selected && !alreadyInCart && <span className="rounded-full bg-[#f1f1f1] px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.04em] text-[#555]">Selected</span>}
                         </span>
-                        <span className={`mt-0.5 block text-[10px] ${selected ? "text-[#9ba3a0]" : "text-[#777]"}`}>{patient.birthDate} · {patient.gender}</span>
+                        <span className={`mt-0.5 block text-[10px] ${alreadyInCart || selected ? "text-[#98a2b3]" : "text-[#777]"}`}>{patient.birthDate} · {patient.gender}</span>
                       </button>
                     );
                   })}
@@ -3581,51 +3652,6 @@ function ProductDetailPage({
               </div>
             )}
           </div>
-
-          {selectedPatientCount > 0 && (
-            <div className="mt-3 overflow-hidden rounded-[11px] border border-[#dbe5f5] bg-white shadow-[0_2px_8px_rgba(37,99,235,0.05)]">
-              <div className="flex items-center justify-between border-b border-[#dbe5f5] bg-[#f3f7ff] px-3.5 py-2.5">
-                <div>
-                  <p className="text-[11px] font-semibold text-[#1a1a1a]">Selected patients</p>
-                  <p className="mt-0.5 text-[9px] text-[#7a837f]">Set the quantity for each prescription.</p>
-                </div>
-                <span className="rounded-full bg-[#2563EB] px-2 py-1 text-[9px] font-semibold text-white">{selectedItemCount} item{selectedItemCount === 1 ? "" : "s"}</span>
-              </div>
-              <div className="divide-y divide-[#e8ebe9]">
-                {[...selectedPatientIds].map(id => {
-                  const patient = PATIENTS[id];
-                  const patientQty = patientQuantities[id] ?? 1;
-                  const isExpanded = expandedPatientIds.has(id);
-                  const patientAddress = [patient.address1, patient.address2, `${patient.city}, ${patient.state} ${patient.zip}`].filter(Boolean).join(", ");
-                  return (
-                    <div key={id} className="bg-white px-3.5 py-3 transition-colors hover:bg-[#fcfdfc]">
-                      <div className="grid grid-cols-[minmax(0,1fr)_104px_28px] items-center gap-3">
-                        <button onClick={() => togglePatientDetails(id)} className="flex min-w-0 items-center gap-2 text-left" aria-expanded={isExpanded}>
-                          <span className="min-w-0">
-                            <span className="block truncate text-[11px] font-semibold text-[#171917]">{patient.firstName} {patient.lastName}</span>
-                            <span className="mt-0.5 block truncate text-[9px] text-[#7a837f]">DOB {patient.birthDate}</span>
-                          </span>
-                          <ChevronDown size={13} className={`shrink-0 text-[#777] transition-transform ${isExpanded ? "rotate-180" : ""}`} />
-                        </button>
-                        <div className="flex h-9 items-center justify-between rounded-[9px] border border-[#dedede] bg-white px-1">
-                          <button onClick={() => updatePatientQuantity(id, -1)} disabled={patientQty === 1} className="flex size-7 items-center justify-center rounded-[7px] text-[#68736d] transition-colors hover:bg-[#eeeeee] disabled:opacity-35" aria-label={`Decrease quantity for ${patient.firstName}`}><Minus size={13} /></button>
-                          <span className="min-w-5 text-center text-[12px] font-semibold text-[#1a1a1a]">{patientQty}</span>
-                          <button onClick={() => updatePatientQuantity(id, 1)} className="flex size-7 items-center justify-center rounded-[7px] text-[#111] transition-colors hover:bg-[#eeeeee]" aria-label={`Increase quantity for ${patient.firstName}`}><Plus size={13} /></button>
-                        </div>
-                        <button onClick={() => togglePatient(id)} className="flex size-7 items-center justify-center rounded-[7px] text-[#a35b56] transition-colors hover:bg-[#f4e7e6]" aria-label={`Remove ${patient.firstName} ${patient.lastName}`}><Trash2 size={14} /></button>
-                      </div>
-                      {isExpanded && (
-                        <div className="mt-2 rounded-[8px] border border-[#e4e8e6] bg-[#f7f9f8] px-3 py-2.5 text-[10px] leading-relaxed text-[#666]">
-                          <div className="flex items-start gap-2"><MapPin size={12} className="mt-0.5 shrink-0 text-[#333]" /><span>{patientAddress}</span></div>
-                          <div className="mt-1.5 flex items-center gap-2"><Phone size={12} className="shrink-0 text-[#333]" /><span>{patient.primaryPhone}</span></div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
           {!(lastAddedItemCount !== null && selectedPatientCount === 0) && (
             <button
@@ -5892,7 +5918,7 @@ const PHARMACIES = [
 
 type PharmacyCheckoutStep = "birthday" | "details" | "payment" | "success";
 
-function PharmacyCheckout({ pharmacy, onClose }: { pharmacy: typeof PHARMACIES[number]; onClose: () => void }) {
+function PharmacyCheckout({ pharmacy, onClose, onGoHome }: { pharmacy: typeof PHARMACIES[number]; onClose: () => void; onGoHome: () => void }) {
   const [step, setStep] = useState<PharmacyCheckoutStep>("birthday");
   const [birthday, setBirthday] = useState("");
   const [copyLabel, setCopyLabel] = useState("Copy link");
@@ -5902,6 +5928,12 @@ function PharmacyCheckout({ pharmacy, onClose }: { pharmacy: typeof PHARMACIES[n
   const shipping = 40;
   const total = subtotal + shipping;
   const fieldClass = "mt-1.5 h-11 w-full rounded-[9px] border border-[#d4d4d4] bg-white px-3.5 text-[13px] outline-none transition-colors placeholder:text-[#a3a3a3] focus:border-black focus:ring-2 focus:ring-black/10";
+
+  useEffect(() => {
+    if (step !== "success") return;
+    const redirectTimeout = window.setTimeout(onGoHome, 6000);
+    return () => window.clearTimeout(redirectTimeout);
+  }, [step, onGoHome]);
 
   const Brand = () => (
     <button type="button" onClick={onClose} className="flex min-h-11 items-center gap-2.5" aria-label="Return to business selection">
@@ -10423,6 +10455,7 @@ function BusinessSelectionPage({ onSelect, onBack }: { onSelect: (business: stri
           phone: "+1 (718) 555-0124",
         }}
         onClose={() => setSelectedBusiness(null)}
+        onGoHome={() => onSelect(selectedBusiness)}
       />
     );
   }
@@ -11906,6 +11939,21 @@ export default function App() {
     setMultiCartPatientIds(current => [...new Set([...current, ...entries.map(entry => entry.patientId)])]);
   }
 
+  function updatePatientCartQuantity(productId: number, patientId: number, quantity: number) {
+    setPatientCartEntries(current => {
+      const matching = current.filter(entry => entry.product.id === productId && entry.patientId === patientId);
+      if (quantity === 0) return current.filter(entry => !(entry.product.id === productId && entry.patientId === patientId));
+      if (matching.length === 0) return current;
+      const firstMatchingId = matching[0].id;
+      return current
+        .filter(entry => entry.id === firstMatchingId || entry.product.id !== productId || entry.patientId !== patientId)
+        .map(entry => entry.id === firstMatchingId ? { ...entry, qty: quantity } : entry);
+    });
+    if (quantity === 0) {
+      setMultiCartPatientIds(current => current.filter(id => id !== patientId || patientCartEntries.some(entry => entry.patientId === id && entry.product.id !== productId)));
+    }
+  }
+
   function runWithAppLoader(action: () => void, delayMs = 500) {
     if (appLoading) return;
     setAppLoading(true);
@@ -11946,7 +11994,7 @@ export default function App() {
       case "favorites":
         return <FavoritesPage onNavigate={setPage} cartPage={cartPage} onProductSelect={setSelectedProduct} />;
       case "product-detail":
-        return <ProductDetailPage onNavigate={setPage} cartMode={cartMode} setCartMode={setCartMode} onAddToPatientCart={addToPatientCart} product={selectedProduct} extraVariants={extraVariants} />;
+        return <ProductDetailPage onNavigate={setPage} cartMode={cartMode} setCartMode={setCartMode} onAddToPatientCart={addToPatientCart} onUpdatePatientCartQuantity={updatePatientCartQuantity} product={selectedProduct} extraVariants={extraVariants} />;
       case "pharmacies":
         return <PharmaciesPage onNavigate={setPage} />;
       case "orders":
