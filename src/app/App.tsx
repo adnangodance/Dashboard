@@ -7621,11 +7621,11 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             <button
               key={label}
               onClick={() => setActiveTab(label)}
-              className={`flex items-center gap-2.5 rounded-[9px] px-3 py-2.5 text-left text-[12px] font-medium transition-colors ${
-                activeTab === label ? "bg-[var(--app-menu-bg)] text-[#1a1a1a]" : "text-[#858b88] hover:bg-[var(--app-menu-bg)] hover:text-[#1a1a1a]"
+              className={`flex items-center gap-2.5 rounded-[9px] px-3 py-2.5 text-left text-[12px] font-normal text-black transition-colors ${
+                activeTab === label ? "bg-[var(--app-menu-bg)]" : "hover:bg-[var(--app-menu-bg)]"
               }`}
             >
-              <Icon size={15} strokeWidth={1.5} className="shrink-0" />
+              <Icon size={15} strokeWidth={1.5} className="shrink-0 text-black" />
               <span className="min-w-0 flex-1">{label}</span>
             </button>
           ))}
@@ -10331,7 +10331,7 @@ function CheckoutPrescriptionPage({ onNavigate }: { onNavigate: (p: Page) => voi
   );
 }
 
-function LoginPage({ onLogin, onRegister, onSingleSignOn }: { onLogin: (destination: "business" | "setup" | "catalog") => void; onRegister: () => void; onSingleSignOn: () => void }) {
+function LoginPage({ onLogin, onRegister, onSingleSignOn, onBackToLanding }: { onLogin: (destination: "business" | "setup" | "catalog") => void; onRegister: () => void; onSingleSignOn: () => void; onBackToLanding: () => void }) {
   const [loginRole, setLoginRole] = useState<"provider" | "pharmacy">("provider");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -10355,12 +10355,12 @@ function LoginPage({ onLogin, onRegister, onSingleSignOn }: { onLogin: (destinat
     <main className="relative min-h-screen overflow-hidden bg-white font-['Inter',sans-serif] text-[#1a1a1a]">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(circle_at_50%_0%,rgba(219,232,255,0.9),rgba(237,244,255,0.55)_38%,rgba(255,255,255,0)_76%)]" />
       <div className="relative mx-auto flex min-h-screen w-full max-w-[620px] flex-col items-center px-6 pt-7">
-        <div className="flex items-center gap-2.5">
+        <button type="button" onClick={onBackToLanding} className="flex cursor-pointer items-center gap-2.5 rounded-[8px] px-2 py-1 transition-opacity hover:opacity-70" aria-label="Return to landing page">
           <img src={scriptlinkrxLogo} alt="ScriptLinkRx" className="h-[30px] w-9 object-contain" />
           <span className="font-['Poppins',sans-serif] text-[18px] font-semibold uppercase tracking-wide text-[#183229]">
             S<span className="lowercase">CRIPTLINKrx</span>
           </span>
-        </div>
+        </button>
 
         <section className="mt-[110px] w-full max-w-[430px] text-center">
           <h1 className="text-[48px] font-semibold leading-none tracking-[-0.02em] text-[#1a1a1a]">
@@ -11118,22 +11118,28 @@ function ContactPage({ onBackToLanding }: { onBackToLanding: () => void }) {
                 </div>
 
                 <div className="mt-8 border-t border-white/70 pt-7">
-                  <p className="text-[11px] font-normal uppercase tracking-[0.16em] text-[#8c95a1]">Partner pharmacy</p>
-                  <h3 className="mt-2 text-[17px] font-semibold tracking-[-0.03em] text-[#1a1a1a]">Precision Compounding Pharmacy</h3>
-                  <div className="mt-5 rounded-[14px] border border-white/70 bg-white/40 p-4 text-[12px] leading-5 text-[#56615b] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
-                    <p>2657 Merrick Road, Bellmore, NY 11710</p>
-                    <div className="mt-3 space-y-2">
-                      <p>(516) 833-6262</p>
-                      <p>Text: 1-855-535-8333</p>
-                      <p>Fax: (516) 222-0605</p>
-                      <p>hello@mypcphealth.com</p>
-                    </div>
+                  <p className="text-[11px] font-normal uppercase tracking-[0.16em] text-[#8c95a1]">What happens next</p>
+                  <h3 className="mt-2 text-[17px] font-semibold tracking-[-0.03em] text-[#1a1a1a]">Support without the runaround</h3>
+                  <div className="relative mt-5 space-y-4 before:absolute before:bottom-5 before:left-[15px] before:top-5 before:w-px before:bg-[#cbdcff]">
+                    {[
+                      ["1", "Send your message", "Tell us what you need help with using the secure form."],
+                      ["2", "We route it correctly", "Your request goes to the team best equipped to help."],
+                      ["3", "Get a direct response", "We’ll follow up using the email or phone number you provide."],
+                    ].map(([number, title, text]) => (
+                      <div key={number} className="relative grid grid-cols-[30px_minmax(0,1fr)] gap-3">
+                        <span className="z-[1] flex size-[30px] items-center justify-center rounded-full bg-[#e7efff] text-[10px] font-bold text-[#2563eb] shadow-[0_0_0_4px_rgba(255,255,255,0.65)]">{number}</span>
+                        <div className="rounded-[12px] bg-white/50 px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                          <p className="text-[12px] font-semibold text-[#1a1a1a]">{title}</p>
+                          <p className="mt-1 text-[10px] leading-4 text-[#69736d]">{text}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
             </section>
 
-            <form onSubmit={submitContact} className="flex h-full flex-col rounded-[18px] border border-[#e7e4dd] bg-white p-7">
+            <form id="contact-form" onSubmit={submitContact} className="flex h-full scroll-mt-8 flex-col rounded-[18px] border border-[#e7e4dd] bg-white p-7">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8c95a1]">Send a message</p>
               <div className="mt-5 grid flex-1 gap-4 sm:grid-cols-2">
                 <label className="block">
@@ -12035,6 +12041,7 @@ export default function App() {
     if (authView === "login") {
       return (
         <LoginPage
+          onBackToLanding={() => setAuthView("landing")}
           onRegister={() => setAuthView("register")}
           onSingleSignOn={() => setAuthView("single-sign-on")}
           onLogin={destination => {
