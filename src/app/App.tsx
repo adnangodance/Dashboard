@@ -85,7 +85,6 @@ import landingTriMix from "@/assets/landing-tri-mix.png";
 import imgProduct452 from "@/imports/ScriptlinkrxProductPage/a7404d4186f9383142485474193c8c2ca1b2259c.png";
 import scriptlinkrxLogo from "@/assets/scriptlinkrx-logo.svg";
 import scriptlinkrxLandingLogo from "@/assets/scriptlinkrx-landing-logo.png";
-import checkoutCelebration from "@/assets/checkout-celebration.png";
 import supportShayne from "@/assets/support-shayne.png";
 import supportZee from "@/assets/support-zee.png";
 import userVerifiedIcon from "@/assets/user-verified.svg";
@@ -143,12 +142,18 @@ function CheckoutSubmissionFooter({
   if (state === "submitted") {
     return (
       <div className="w-full">
-        <div className="mb-4 rounded-[14px] border border-[#dedede] bg-[#f5f5f5] px-4 py-5 text-center">
-          <span className="mx-auto flex size-10 items-center justify-center rounded-full bg-[#e5e5e5] text-[#555555]">
-            <CheckCircle2 size={20} strokeWidth={1.9} />
+        <div className="relative mb-4 flex items-center gap-3.5 rounded-[14px] bg-[linear-gradient(135deg,#f1f1f1_0%,#fafafa_100%)] px-4 py-4 text-left">
+          <div className="checkout-celebration" aria-hidden="true">
+            <span>🎉</span><span>✨</span><span>🎊</span><span>⭐</span><span>🎉</span><span>✨</span><span>🎊</span>
+            <span>🥳</span><span>✨</span><span>🎉</span><span>⭐</span><span>🎊</span><span>✨</span><span>🎉</span>
+          </div>
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-[#242424] shadow-[0_1px_4px_rgba(0,0,0,0.08)]">
+            <CheckCircle2 size={19} strokeWidth={1.9} />
           </span>
-          <p className="mt-3 text-[17px] font-semibold tracking-[-0.02em] text-[#171717]">Your order has been submitted!</p>
-          <p className="mt-1 text-[11px] leading-[17px] text-[#6f7782]">We&apos;ll follow up with status updates once it&apos;s shipped.</p>
+          <div className="min-w-0">
+            <p className="text-[15px] font-semibold tracking-[-0.02em] text-[#171717]">Order submitted</p>
+            <p className="mt-1 text-[11px] leading-[16px] text-[#6f7782]">We&apos;ll send status updates as your order moves forward.</p>
+          </div>
         </div>
         <button onClick={onGoToOrders} className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#111] text-[13px] font-semibold text-white transition-colors hover:bg-[#121212]">
           Go to orders
@@ -453,7 +458,8 @@ function NavItem({
   const isHovered = hoveredItem === label;
   const menuOpen = openMenu === label;
   const [isDragOver, setIsDragOver] = useState(false);
-  const badgeCount = label === "Orders" ? 5 : label === "Cart" ? 100 : null;
+  const { cartItemCount } = useCartSummary();
+  const badgeCount = label === "Orders" ? ORDERS.length : label === "Cart" ? cartItemCount : null;
 
   return (
     <div
@@ -486,7 +492,7 @@ function NavItem({
       >
         <Icon size={16} strokeWidth={1.65} className="flex-shrink-0 text-[#303332] transition-transform duration-200 ease-out group-hover:-translate-y-px group-hover:translate-x-0.5 group-hover:rotate-6" />
         <span className="flex-1">{label}</span>
-        {badgeCount !== null ? <span className="inline-flex h-5 min-w-5 flex-shrink-0 items-center justify-center rounded-full bg-[#e9eaec] px-1.5 text-[10px] font-semibold tabular-nums text-[#35383a]">{badgeCount}</span> : <span className="size-6 flex-shrink-0" />}
+        {badgeCount !== null && badgeCount > 0 ? <span className="inline-flex h-5 min-w-5 flex-shrink-0 items-center justify-center rounded-full bg-[#e9eaec] px-1.5 text-[10px] font-semibold tabular-nums text-[#35383a]">{badgeCount}</span> : <span className="size-6 flex-shrink-0" />}
       </div>
     </div>
   );
@@ -659,7 +665,8 @@ function SidebarSupportVersion({ onNavigate }: { onNavigate: (p: Page) => void }
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(accounts[0]);
   const [clinicPaymentEnabled, setClinicPaymentEnabled] = useState(() => window.sessionStorage.getItem("clinic-card-saved") === "true");
-  const [clinicPaymentNoticeVisible, setClinicPaymentNoticeVisible] = useState(() => paymentNoticeActive());
+  const [clinicPaymentNoticeVisible, setClinicPaymentNoticeVisible] = useState(true);
+  const [clinicPaymentUpdated, setClinicPaymentUpdated] = useState(() => paymentNoticeActive());
   const supportContacts = [
     { name: "Shayne", role: "Head Operator", phone: "917-274-7648", avatar: supportShayne },
     { name: "Zee", role: "CEO", phone: "(646)-617-9881", avatar: supportZee },
@@ -669,20 +676,22 @@ function SidebarSupportVersion({ onNavigate }: { onNavigate: (p: Page) => void }
     const updateClinicPayment = () => {
       setClinicPaymentEnabled(window.sessionStorage.getItem("clinic-card-saved") === "true");
       setClinicPaymentNoticeVisible(paymentNoticeActive());
+      setClinicPaymentUpdated(paymentNoticeActive());
     };
     window.addEventListener("clinic-payment-updated", updateClinicPayment);
     return () => window.removeEventListener("clinic-payment-updated", updateClinicPayment);
   }, []);
 
   useEffect(() => {
-    if (!clinicPaymentNoticeVisible) return;
+    if (!clinicPaymentNoticeVisible || !clinicPaymentUpdated) return;
     const remainingMs = Number(window.sessionStorage.getItem("clinic-card-notice-until") ?? 0) - Date.now();
     const timeout = window.setTimeout(() => {
       window.sessionStorage.removeItem("clinic-card-notice-until");
       setClinicPaymentNoticeVisible(false);
+      setClinicPaymentUpdated(false);
     }, Math.max(0, remainingMs));
     return () => window.clearTimeout(timeout);
-  }, [clinicPaymentNoticeVisible]);
+  }, [clinicPaymentNoticeVisible, clinicPaymentUpdated]);
 
   return (
     <div className="shrink-0 border-y border-[#ECEEEA] py-4">
@@ -741,10 +750,10 @@ function SidebarSupportVersion({ onNavigate }: { onNavigate: (p: Page) => void }
           </div>
         )}
       </div>
-      {(!clinicPaymentEnabled || clinicPaymentNoticeVisible) && (
-        <div className={`mt-2 rounded-[18px] border border-white/70 p-3 shadow-[0_10px_28px_rgba(38,54,45,0.08)] ${clinicPaymentEnabled ? "bg-[radial-gradient(circle_at_90%_0%,rgba(219,232,255,0.98),transparent_52%),linear-gradient(145deg,#f8fbff_0%,#edf4ff_100%)]" : "bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)]"}`}>
-            <h3 className="text-[15px] font-semibold leading-[19px] tracking-[-0.01em] text-[#171A18]">{clinicPaymentEnabled ? "Pay by Clinic enabled" : "Enable Pay by Clinic"}</h3>
-            <p className="mt-1.5 text-[11px] leading-[16px] text-[#737A75]">{clinicPaymentEnabled ? "Your card and ACH account are ready for patient purchases." : "Use your clinic’s card or ACH account for patient purchases."}</p>
+      {clinicPaymentNoticeVisible && (
+        <div className={`mt-2 rounded-[18px] border border-white/70 p-3 shadow-[0_10px_28px_rgba(38,54,45,0.08)] ${clinicPaymentUpdated ? "bg-[radial-gradient(circle_at_90%_0%,rgba(191,219,254,0.98),transparent_52%),linear-gradient(145deg,#eff6ff_0%,#dbeafe_100%)]" : "bg-[radial-gradient(circle_at_90%_0%,rgba(223,244,238,0.95),transparent_48%),linear-gradient(145deg,#fbfff3_0%,#f8f3e9_100%)]"}`}>
+            <h3 className="text-[15px] font-semibold leading-[19px] tracking-[-0.01em] text-[#171A18]">{clinicPaymentUpdated ? "Card updated" : "Update payment card"}</h3>
+            <p className="mt-1.5 text-[11px] leading-[16px] text-[#737A75]">{clinicPaymentUpdated ? "Your new payment card is ready to use." : "Please review your saved card before placing your next order."}</p>
             <button
               type="button"
               onClick={() => {
@@ -755,7 +764,7 @@ function SidebarSupportVersion({ onNavigate }: { onNavigate: (p: Page) => void }
               }}
               className="group mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-white px-3 py-2.5 text-[11px] font-semibold text-[#171A18] shadow-[0_3px_12px_rgba(34,46,39,0.06)] transition-transform hover:-translate-y-0.5"
             >
-              {clinicPaymentEnabled ? "Manage payment" : "Set up payment"}
+              {clinicPaymentUpdated ? "Manage payment" : "Update card"}
               <ArrowUpRight size={13} strokeWidth={2} className="transition-transform group-hover:translate-x-0.5" />
             </button>
           </div>
@@ -3137,6 +3146,7 @@ function ProductDetailPage({
   const [patientQuantities, setPatientQuantities] = useState<Record<number, number>>({});
   const [expandedPatientIds, setExpandedPatientIds] = useState<Set<number>>(new Set());
   const [addedItemCount, setAddedItemCount] = useState<number | null>(null);
+  const [lastAddedItemCount, setLastAddedItemCount] = useState<number | null>(null);
   const [deliveryState, setDeliveryState] = useState("Florida");
   const [locationMenuOpen, setLocationMenuOpen] = useState(false);
   const [activeInfoTab, setActiveInfoTab] = useState<"overview" | "formula" | "dosage" | "safety">("overview");
@@ -3162,6 +3172,7 @@ function ProductDetailPage({
     setPatientQuantities({});
     setExpandedPatientIds(new Set());
     setAddedItemCount(null);
+    setLastAddedItemCount(null);
     setQuestionModalOpen(false);
     setQuestionText("");
     setDiscountApplied(false);
@@ -3314,6 +3325,7 @@ function ProductDetailPage({
         unitPrice: configuredPrice,
       })));
       setAddedItemCount(itemCount);
+      setLastAddedItemCount(itemCount);
       setSize(defaultSize);
       setStrength(defaultStrength);
       setInjType(product.dosage === "Injection" ? "Intramuscular" : product.dosage);
@@ -3326,6 +3338,7 @@ function ProductDetailPage({
       setPatientQuantities({});
       setExpandedPatientIds(new Set());
       showToast("Product added to cart");
+      window.setTimeout(() => setAddedItemCount(null), 1600);
     });
   }
 
@@ -3513,12 +3526,35 @@ function ProductDetailPage({
             <p className="mt-2 text-[10px] text-[#7a837f]">{shippingChoice === "clinic" ? "You can select multiple patients for one clinic shipment." : "You can select one patient for this shipment."}</p>
           </div>
 
-          <div className="relative mt-6">
-            <button onClick={() => setPatientPickerOpen(current => !current)} className="flex h-11 w-full items-center justify-center rounded-full border border-[#111] bg-white text-[12px] font-medium text-[#111] transition-colors hover:bg-[#fafafa]">
-              {selectedPatientCount === 0 ? "Choose patient" : shippingChoice === "clinic" ? "Add another patient" : "Change patient"}
-            </button>
+          {lastAddedItemCount !== null && (
+            <div role="status" aria-live="polite" className="mt-5 rounded-[16px] border border-[#dce7fb] bg-[radial-gradient(circle_at_90%_0%,rgba(219,232,255,0.98),transparent_52%),linear-gradient(145deg,#f8fbff_0%,#edf4ff_100%)] px-4 py-3.5">
+              <div className="flex items-start gap-3">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white text-[#2563eb] shadow-[0_2px_8px_rgba(37,99,235,0.10)]"><CheckCircle2 size={16} strokeWidth={2} /></span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[13px] font-semibold leading-[18px] text-[#171717]">Added to cart</span>
+                  <span className="mt-0.5 block text-[10px] leading-[15px] text-[#667085]">{lastAddedItemCount} prescription{lastAddedItemCount === 1 ? " is" : "s are"} ready. Add another patient or review your cart.</span>
+                </span>
+              </div>
+            </div>
+          )}
+
+          <div className={`relative ${lastAddedItemCount !== null ? "mt-3" : "mt-6"}`}>
+            {lastAddedItemCount !== null && selectedPatientCount === 0 ? (
+              <>
+                <button onClick={() => onNavigate(cartMode === "multi" ? "cart-multi" : "cart-single")} className="flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[#d8dce3] bg-white text-[12px] font-medium text-[#111] transition-colors hover:bg-[#f1f1f1]">
+                  View cart <ShoppingCart size={14} strokeWidth={1.5} />
+                </button>
+                <button onClick={() => setPatientPickerOpen(current => !current)} className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[#111] bg-[#111] text-[12px] font-medium text-white transition-colors hover:bg-[#121212]">
+                  <Plus size={14} strokeWidth={2} /> Add for another patient
+                </button>
+              </>
+            ) : (
+              <button onClick={() => setPatientPickerOpen(current => !current)} className="flex h-11 w-full items-center justify-center rounded-full border border-[#111] bg-white text-[12px] font-medium text-[#111] transition-colors hover:bg-[#fafafa]">
+                {selectedPatientCount === 0 ? "Choose patient" : shippingChoice === "clinic" ? "Add another patient" : "Change patient"}
+              </button>
+            )}
             {patientPickerOpen && (
-              <div className="absolute inset-x-0 top-12 z-30 overflow-hidden rounded-[10px] border border-[#d8dfdc] bg-white shadow-xl">
+              <div className={`absolute inset-x-0 z-30 overflow-hidden rounded-[10px] border border-[#d8dfdc] bg-white shadow-xl ${lastAddedItemCount !== null && selectedPatientCount === 0 ? "top-[96px]" : "top-12"}`}>
                 <div className="flex h-10 items-center gap-2 border-b border-[#e8e3df] px-3">
                   <Search size={14} className="text-[#7b8580]" />
                   <input autoFocus value={patientSearch} onChange={event => setPatientSearch(event.target.value)} placeholder="Search patients" className="min-w-0 flex-1 bg-transparent text-[12px] outline-none" />
@@ -3538,7 +3574,7 @@ function ProductDetailPage({
                   })}
                 </div>
                 <div className="border-t border-[#e8e3df] p-2">
-                  <button onClick={() => { setPatientPickerOpen(false); setCreatePatientOpen(true); }} className="flex h-9 w-full items-center justify-center gap-1.5 rounded-[7px] border border-dashed border-[#b7c2bd] bg-[#fafcfb] text-[11px] font-semibold text-[#183229] transition-colors hover:border-[#183229] hover:bg-[#eef5f1]">
+                  <button onClick={() => { setPatientPickerOpen(false); setCreatePatientOpen(true); }} className="flex h-9 w-full items-center justify-center gap-1.5 rounded-[7px] border border-dashed border-[#9dbbff] bg-[#f3f7ff] text-[11px] font-semibold text-[#2563eb] transition-colors hover:border-[#2563eb] hover:bg-[#eaf1ff]">
                     <Plus size={13} /> Create new patient
                   </button>
                 </div>
@@ -3591,16 +3627,17 @@ function ProductDetailPage({
             </div>
           )}
 
-          {addedItemCount !== null && (
-            <div className="mt-3 flex items-center justify-center gap-2 rounded-[9px] bg-[#edf5f0] px-3 py-2.5 text-[11px] font-semibold text-[#315a47]">
-              <CheckCircle2 size={15} strokeWidth={2} />
-              {addedItemCount} {addedItemCount === 1 ? "product" : "products"} added to cart
-            </div>
+          {!(lastAddedItemCount !== null && selectedPatientCount === 0) && (
+            <button
+              onClick={addToCart}
+              disabled={selectedPatientCount === 0}
+              className={`mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-full text-[12px] font-medium text-white transition-colors ${addedItemCount !== null ? "bg-[#111] disabled:bg-[#111]" : "bg-[#111] hover:bg-[#121212] disabled:cursor-not-allowed disabled:bg-[#b8b8b8]"}`}
+            >
+              {addedItemCount !== null
+                ? <>Added <Check size={14} strokeWidth={2.2} /></>
+                : <>{selectedItemCount > 1 ? `Add ${selectedItemCount} items to cart` : "Add to cart"} <ShoppingCart size={14} strokeWidth={1.5} /></>}
+            </button>
           )}
-
-          <button onClick={addToCart} disabled={selectedPatientCount === 0} className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#111] text-[12px] font-medium text-white transition-colors hover:bg-[#28312d] disabled:cursor-not-allowed disabled:bg-[#b8b8b8]">
-            {selectedItemCount > 1 ? `Add ${selectedItemCount} items to cart` : "Add to cart"} <ShoppingCart size={14} strokeWidth={1.5} />
-          </button>
 
           <div className="mt-3 overflow-hidden rounded-[9px] bg-[#f7f7f7]">
             <div className="flex h-12 items-center px-4">
@@ -5855,7 +5892,7 @@ const PHARMACIES = [
 
 type PharmacyCheckoutStep = "birthday" | "details" | "payment" | "success";
 
-function PharmacyCheckout({ pharmacy, onClose, onGoToCatalog }: { pharmacy: typeof PHARMACIES[number]; onClose: () => void; onGoToCatalog: () => void }) {
+function PharmacyCheckout({ pharmacy, onClose }: { pharmacy: typeof PHARMACIES[number]; onClose: () => void }) {
   const [step, setStep] = useState<PharmacyCheckoutStep>("birthday");
   const [birthday, setBirthday] = useState("");
   const [copyLabel, setCopyLabel] = useState("Copy link");
@@ -5932,11 +5969,39 @@ function PharmacyCheckout({ pharmacy, onClose, onGoToCatalog }: { pharmacy: type
           line-height: 16px;
           letter-spacing: .01em;
         }
-        .business-checkout.checkout-step-birthday h1::after { content: "Step 1 of 5 · Identity verification"; }
-        .business-checkout.checkout-step-details h1::after { content: "Step 2 of 5 · Review prescription"; }
-        .business-checkout.checkout-step-payment h1::after { content: "Step 4 of 5 · Secure payment"; }
+        .business-checkout.checkout-step-birthday h1::after { content: "Step 1 of 4 · Identity verification"; }
+        .business-checkout.checkout-step-details h1::after { content: "Step 2 of 4 · Review prescription"; }
+        .business-checkout.checkout-step-payment h1::after { content: "Step 3 of 4 · Secure payment"; }
         .business-checkout.checkout-step-success h1::after { display: none; }
         .business-checkout.checkout-step-birthday main > section > span:first-child { display: none; }
+        @keyframes checkout-celebration-pop {
+          0% { opacity: 0; transform: scale(.25) rotate(-20deg) translateY(8px); }
+          45% { opacity: 1; transform: scale(1.3) rotate(12deg) translateY(-4px); }
+          70% { transform: scale(.92) rotate(-6deg) translateY(1px); }
+          100% { opacity: 1; transform: scale(1) rotate(0) translateY(0); }
+        }
+        .checkout-celebration-emoji {
+          display: inline-block;
+          animation: checkout-celebration-pop .85s cubic-bezier(.2,.8,.2,1) both;
+          transform-origin: 50% 70%;
+        }
+        @keyframes checkout-emoji-rain {
+          0% { opacity: 0; transform: translate3d(0,-70px,0) scale(.35) rotate(-20deg); }
+          15% { opacity: 1; transform: translate3d(0,0,0) scale(1.18) rotate(10deg); }
+          72% { opacity: 1; }
+          100% { opacity: 0; transform: translate3d(var(--emoji-drift),78vh,0) scale(.8) rotate(var(--emoji-rotate)); }
+        }
+        .checkout-emoji-rain-item {
+          position: absolute;
+          top: 0;
+          animation: checkout-emoji-rain var(--emoji-duration) cubic-bezier(.2,.7,.25,1) both;
+          animation-delay: var(--emoji-delay);
+          will-change: transform, opacity;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .checkout-celebration-emoji { animation: none; }
+          .checkout-emoji-rain { display: none; }
+        }
         .business-checkout [class*="bg-[#183229]"] { background-color: #000 !important; }
         .business-checkout [class*="hover:bg-[#244438]"]:hover { background-color: #252525 !important; }
         .business-checkout [class*="text-[#183229]"],
@@ -6058,10 +6123,15 @@ function PharmacyCheckout({ pharmacy, onClose, onGoToCatalog }: { pharmacy: type
           </section>
         )}
 
-        {step === "success" && (
+        {step === "success" && (<>
+          <div className="checkout-emoji-rain pointer-events-none fixed inset-0 z-[110] overflow-hidden" aria-hidden="true">
+            {["🎉", "✨", "🎊", "🎉", "✨", "🎊", "🎉", "🎊", "✨", "🎉", "✨", "🎊"].map((emoji, index) => (
+              <span key={index} className="checkout-emoji-rain-item text-[24px] sm:text-[28px]" style={{ left: `${5 + index * 8}%`, "--emoji-delay": `${(index % 5) * 0.11}s`, "--emoji-duration": `${2.2 + (index % 4) * 0.22}s`, "--emoji-drift": `${(index % 2 === 0 ? 1 : -1) * (18 + index * 2)}px`, "--emoji-rotate": `${index % 2 === 0 ? 180 : -210}deg` } as CSSProperties}>{emoji}</span>
+            ))}
+          </div>
           <section className="mx-auto w-full max-w-[540px] rounded-[20px] border border-[#dedede] bg-white px-6 py-8 shadow-[0_20px_60px_rgba(0,0,0,0.06)] sm:px-8 sm:py-9">
             <div className="text-center">
-              <div className="relative mx-auto flex h-[92px] w-[124px] items-center justify-center overflow-hidden" aria-hidden="true"><img src={checkoutCelebration} alt="" className="absolute left-1/2 top-1/2 w-[280px] max-w-none -translate-x-1/2 -translate-y-1/2" /></div>
+              <div className="mx-auto flex h-[92px] items-center justify-center" aria-hidden="true"><span className="checkout-celebration-emoji text-[64px] leading-none">🎉</span></div>
               <h1 className="mt-5 text-[29px] font-semibold tracking-[-0.04em]">Payment authorized</h1>
               <p className="mx-auto mt-3 max-w-[470px] text-[14px] leading-6 text-[#4f5661]">Your order has been submitted to the pharmacy for processing. You will receive updates via SMS and email.</p>
             </div>
@@ -6074,9 +6144,8 @@ function PharmacyCheckout({ pharmacy, onClose, onGoToCatalog }: { pharmacy: type
               </div>
               <p className="mt-2.5 text-[11px] leading-5 text-[#697281]">Save this link — you can view your receipt anytime by verifying your date of birth.</p>
             </div>
-            <button type="button" onClick={onGoToCatalog} className="mt-6 h-11 w-full rounded-full bg-black text-[12px] font-semibold text-white transition-colors hover:bg-[#252525]">Go to catalog page</button>
           </section>
-        )}
+        </>)}
       </main>
     </div>
   );
@@ -7361,7 +7430,7 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       setCardSaving(false);
       setSavedClinicCard(true);
       window.sessionStorage.setItem("clinic-card-saved", "true");
-      window.sessionStorage.setItem("clinic-card-notice-until", String(Date.now() + 20000));
+      window.sessionStorage.setItem("clinic-card-notice-until", String(Date.now() + 8000));
       window.dispatchEvent(new Event("clinic-payment-updated"));
       setCreditCardOpen(false);
     }, 1100);
@@ -8464,7 +8533,30 @@ function SinglePatientCartPage({
             </section>
 
             <section className="rounded-[18px] bg-white p-4 shadow-[0_18px_50px_rgba(24,24,24,0.07)]">
-              <div>
+              {previewSubmitted && (
+                <div className="px-1 py-1">
+                  <div className="text-left">
+                    <p className="text-[13px] font-semibold text-[#1a1a1a]">Order summary</p>
+                    <p className="mt-0.5 text-[10px] text-[#8c8c8c]">Payment, delivery, and totals</p>
+                  </div>
+                  <div className="my-4 border-t border-dashed border-[#cfcfcf]" />
+                  <div className="space-y-2.5 text-[12px]">
+                    <div className="flex justify-between gap-5"><span className="text-[#737373]">Payment</span><span className="font-medium text-[#202020]">{paymentMethod === "patient" ? "Pay by Patient" : "Pay by Clinic"}</span></div>
+                    <div className="flex justify-between gap-5"><span className="text-[#737373]">Shipping to</span><span className="font-medium text-[#202020]">{shipTo === "patient" ? "Patient" : "Clinic"}</span></div>
+                  </div>
+                  <div className="my-4 border-t border-dashed border-[#cfcfcf]" />
+                  <div className="space-y-2.5 text-[12px]">
+                    <div className="flex justify-between"><span className="text-[#737373]">Subtotal</span><span className="text-[#202020]">${subtotal.toFixed(2)}</span></div>
+                    <div className="flex justify-between"><span className="text-[#737373]">Shipping &amp; handling</span><span className="text-[#202020]">{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span></div>
+                    <div className="flex justify-between"><span className="text-[#737373]">Estimated tax</span><span className="text-[#202020]">—</span></div>
+                  </div>
+                  <div className="my-4 border-t border-dashed border-[#cfcfcf]" />
+                  <div className="flex items-center justify-between text-[15px] font-semibold text-[#171717]">
+                    <span>Total</span><span>${total.toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
+              <div className={previewSubmitted ? "hidden" : ""}>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#667085]">Payment</p>
                 <p className="mt-1 text-[13px] text-[#1a1a1a]">{previewSubmitted ? "Payment method used for this order" : "Select the payment method for the prescription"}</p>
                 {previewSubmitted ? (
@@ -8500,7 +8592,7 @@ function SinglePatientCartPage({
                 )}
               </div>
 
-              <div className="mt-5 border-t border-[#eee8e3] pt-5">
+              <div className={previewSubmitted ? "hidden" : "mt-5 border-t border-[#eee8e3] pt-5"}>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#667085]">Shipping</p>
                 <p className="mt-1 text-[13px] text-[#1a1a1a]">{previewSubmitted ? "Shipping destination for this order" : "Choose where to ship the prescription"}</p>
                 {previewSubmitted ? (
@@ -8534,7 +8626,7 @@ function SinglePatientCartPage({
               </div>
             </section>
 
-            <section className="rounded-[18px] bg-white p-4 shadow-[0_18px_50px_rgba(24,24,24,0.07)]">
+            <section className={previewSubmitted ? "hidden" : "rounded-[18px] bg-white p-4 shadow-[0_18px_50px_rgba(24,24,24,0.07)]"}>
               <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Summary</h3>
               <div className="mt-4 space-y-3 text-[14px]">
                 <div className="flex justify-between text-[#6f7782]"><span>Items subtotal</span><span className="font-semibold text-[#1a1a1a]">${subtotal.toFixed(2)}</span></div>
@@ -9763,7 +9855,27 @@ function MultiPatientCartPage({
             </section>
 
             <section className="rounded-[18px] bg-white p-4 shadow-[0_18px_50px_rgba(24,24,24,0.07)]">
-              <div>
+              {previewSubmitted && (
+                <div>
+                  <div className="px-1 py-1">
+                    <div className="text-left"><p className="text-[13px] font-semibold text-[#1a1a1a]">Order summary</p><p className="mt-0.5 text-[10px] text-[#8c8c8c]">Payment, delivery, and totals</p></div>
+                    <div className="my-4 border-t border-dashed border-[#cfcfcf]" />
+                    <div className="space-y-2.5 text-[12px]">
+                      <div className="flex justify-between gap-5"><span className="text-[#737373]">Payment</span><span className="font-medium text-[#202020]">{paymentMethod === "patient" ? "Pay by Patient" : "Pay by Clinic"}</span></div>
+                      <div className="flex justify-between gap-5"><span className="text-[#737373]">Shipping to</span><span className="font-medium text-[#202020]">{shipTo === "patient" ? "Patient" : "Clinic"}</span></div>
+                    </div>
+                    <div className="my-4 border-t border-dashed border-[#cfcfcf]" />
+                    <div className="space-y-2.5 text-[12px]">
+                      <div className="flex justify-between"><span className="text-[#737373]">Subtotal</span><span className="text-[#202020]">${subtotal.toFixed(2)}</span></div>
+                      <div className="flex justify-between"><span className="text-[#737373]">Shipping &amp; handling</span><span className="text-[#202020]">{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span></div>
+                      <div className="flex justify-between"><span className="text-[#737373]">Estimated tax</span><span className="text-[#202020]">—</span></div>
+                    </div>
+                    <div className="my-4 border-t border-dashed border-[#cfcfcf]" />
+                    <div className="flex items-center justify-between text-[15px] font-semibold text-[#171717]"><span>Total</span><span>${total.toFixed(2)}</span></div>
+                  </div>
+                </div>
+              )}
+              <div className={previewSubmitted ? "hidden" : ""}>
                 <div className="rounded-[12px] bg-[#fbfaf8] px-4 py-3">
                   <p className="text-[13px] font-semibold text-[#171717]">Payment</p>
                   <p className="mt-0.5 text-[10px] text-[#8c8c8c]">{previewSubmitted ? "Payment method used for this order" : "Select the payment method for the prescription"}</p>
@@ -9801,7 +9913,7 @@ function MultiPatientCartPage({
                 )}
               </div>
 
-              <div className="mt-5 border-t border-[#eee8e3] pt-5">
+              <div className={previewSubmitted ? "hidden" : "mt-5 border-t border-[#eee8e3] pt-5"}>
                 <div className="rounded-[12px] bg-[#fbfaf8] px-4 py-3">
                   <p className="text-[13px] font-semibold text-[#171717]">Shipping</p>
                   <p className="mt-0.5 text-[10px] text-[#8c8c8c]">{previewSubmitted ? "Shipping destination for this order" : "Choose where to ship the prescription"}</p>
@@ -9837,7 +9949,7 @@ function MultiPatientCartPage({
               </div>
             </section>
 
-            <section className="rounded-[18px] bg-white p-4 shadow-[0_18px_50px_rgba(24,24,24,0.07)]">
+            <section className={previewSubmitted ? "hidden" : "rounded-[18px] bg-white p-4 shadow-[0_18px_50px_rgba(24,24,24,0.07)]"}>
               <div className="space-y-3 text-[13px]">
                 <div className="flex justify-between text-[#222]"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
                 <div className="flex justify-between text-[#222]"><span>Estimated Shipping &amp; Handling</span><span>{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span></div>
@@ -10311,7 +10423,6 @@ function BusinessSelectionPage({ onSelect, onBack }: { onSelect: (business: stri
           phone: "+1 (718) 555-0124",
         }}
         onClose={() => setSelectedBusiness(null)}
-        onGoToCatalog={() => onSelect(selectedBusiness)}
       />
     );
   }
