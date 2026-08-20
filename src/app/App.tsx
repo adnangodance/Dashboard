@@ -7715,7 +7715,12 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                   <h3 className="text-[14px] font-semibold text-[#1a1a1a]">Credit Card</h3>
                   <p className="mt-1 text-[11px] text-[#7b827e]">Manage the credit card used for clinic purchases.</p>
                 </div>
-                <button onClick={() => setCreditCardOpen(true)} className="flex h-10 items-center gap-1.5 rounded-[8px] bg-black px-3 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Credit Card</button>
+                <div className="flex items-center gap-2">
+                  {savedClinicCard && primaryClinicPayment !== "credit" && (
+                    <button type="button" onClick={() => setPrimaryClinicPayment("credit")} className="h-10 rounded-full border border-[#d8d8d2] bg-white px-4 text-[11px] font-medium text-black transition-colors hover:border-black hover:bg-[#f1f1f1]">Set as primary</button>
+                  )}
+                  <button onClick={() => setCreditCardOpen(true)} className="flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Credit Card</button>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
                 {savedClinicCard ? (
@@ -7729,14 +7734,13 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                     </div>
                     <div className="py-4 text-[11px]"><p className="text-[#888]">Cardholder</p><p className="mt-1 font-semibold text-[#222]">ScriptLinkRx Clinic</p></div>
                     <div className="flex items-center gap-2">
-                      {primaryClinicPayment !== "credit" && <button type="button" onClick={() => setPrimaryClinicPayment("credit")} className="h-8 rounded-full border border-[#d8d8d2] bg-white px-3 text-[11px] font-medium text-black transition-colors hover:border-black hover:bg-[#f1f1f1]">Set as primary</button>}
                       <button type="button" onClick={() => setCreditCardOpen(true)} className="h-9 rounded-full border border-[#d8d8d8] bg-white px-5 text-[11px] font-medium text-[#1f1f1f] transition-colors hover:border-[#b8b8b8] hover:bg-[#f7f7f7]">Update card</button>
                     </div>
                   </div>
                 ) : (
                   <div className="flex min-h-[190px] flex-col items-center justify-center rounded-[10px] border border-[#eaeaea] bg-white p-6 text-center">
                     <Package size={28} strokeWidth={1.5} className="mb-3 text-[#9d9d9d]" /><p className="text-[14px] font-semibold text-[#1a1a1a]">No credit card found</p><p className="mt-2 text-[12px] text-[#8c8c8c]">Add a credit card to enable Pay by Clinic.</p>
-                    <button onClick={() => setCreditCardOpen(true)} className="mt-4 flex h-10 items-center gap-1.5 rounded-[8px] bg-black px-3 text-[11px] font-medium text-white"><Plus size={14} /> Add Credit Card</button>
+                    <button onClick={() => setCreditCardOpen(true)} className="mt-4 flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-[11px] font-medium text-white"><Plus size={14} /> Add Credit Card</button>
                   </div>
                 )}
                 <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-5"><AlertCircle size={17} className="mb-3 text-[#667085]" /><p className="text-[12px] leading-relaxed text-[#667085]">The card on file is charged when a new prescription is submitted using Pay by Clinic.</p></div>
@@ -7753,15 +7757,15 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                     </div>
                     <div className="flex items-center gap-2">
                       {primaryClinicPayment !== "ach" && (
-                        <button type="button" onClick={() => setPrimaryClinicPayment("ach")} className="rounded-full border border-[#d8d8d2] bg-white px-3 py-2 text-[11px] font-medium text-black transition-colors hover:border-black hover:bg-[#f1f1f1]">Set as primary</button>
+                        <button type="button" onClick={() => setPrimaryClinicPayment("ach")} className="h-10 rounded-full border border-[#d8d8d2] bg-white px-4 text-[11px] font-medium text-black transition-colors hover:border-black hover:bg-[#f1f1f1]">Set as primary</button>
                       )}
-                      <button className="flex items-center gap-1.5 rounded-[8px] bg-black px-3 py-2 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Bank Account</button>
+                      <button className="flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Bank Account</button>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
                     <div className="overflow-hidden rounded-[10px] border border-[#eaeaea] bg-white">
                       <div className="grid grid-cols-[56px_minmax(0,1fr)_100px_82px] border-b border-[#eee8e3] bg-[#fbfaf8] px-4 py-3">{["", "Bank Accounts", "Status", ""].map((h, index) => <span key={`${h}-${index}`} className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8c8c8c]">{h}</span>)}</div>
-                      <div className="grid grid-cols-[56px_minmax(0,1fr)_100px_82px] items-center px-4 py-4 text-[12px] text-[#1a1a1a]"><span className="flex h-9 w-12 items-center justify-center rounded-[5px] border border-[#dedede] bg-white px-1.5"><img src={chaseLogo} alt="Chase" className="h-auto w-full object-contain" /></span><div className="min-w-0"><p className="truncate text-[13px] font-semibold">Chase Bank</p><p className="mt-1 text-[11px] text-[#8c8c8c]">**** **** **** 2826</p><p className="mt-1 text-[11px] text-[#667085]">Checking</p></div><span className="w-fit rounded-full bg-black px-2.5 py-1 text-[9px] font-medium text-white">Active</span><button className="rounded-[7px] border border-[#D9DEDB] px-2.5 py-2 text-[11px] font-medium hover:bg-[#F7F8F7]">Update</button></div>
+                      <div className="grid grid-cols-[56px_minmax(0,1fr)_100px_82px] items-center px-4 py-4 text-[12px] text-[#1a1a1a]"><span className="flex h-9 w-12 items-center justify-center rounded-[5px] border border-[#dedede] bg-white px-1.5"><img src={chaseLogo} alt="Chase" className="h-auto w-full object-contain" /></span><div className="min-w-0"><p className="truncate text-[13px] font-semibold">Chase Bank</p><p className="mt-1 text-[11px] text-[#8c8c8c]">**** **** **** 2826</p></div><span className="w-fit rounded-full bg-black px-2.5 py-1 text-[9px] font-medium text-white">Active</span><button className="rounded-[7px] border border-[#D9DEDB] px-2.5 py-2 text-[11px] font-medium hover:bg-[#F7F8F7]">Update</button></div>
                     </div>
                     <div className="rounded-[10px] border border-[#eaeaea] bg-[#FAFAFA] p-5"><AlertCircle size={17} className="mb-3 text-[#667085]" /><p className="text-[12px] leading-relaxed text-[#667085]">When this is your primary method, eligible Pay by Clinic orders will be charged to this bank account.</p></div>
                   </div>
@@ -10502,8 +10506,8 @@ function OrganizationSetupPage({ onCreate }: { onCreate: () => void }) {
       setPasswordError("Current password is incorrect.");
       return;
     }
-    if (newPassword.length < 8) {
-      setPasswordError("New password must be at least 8 characters long.");
+    if (newPassword.length < 2) {
+      setPasswordError("New password must be at least 2 characters long.");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -10514,7 +10518,7 @@ function OrganizationSetupPage({ onCreate }: { onCreate: () => void }) {
     setCurrentStep(2);
   }
 
-  const canContinue = currentPassword.length > 0 && newPassword.length >= 8 && confirmPassword.length > 0;
+  const canContinue = currentPassword.length > 0 && newPassword.length >= 2 && confirmPassword.length > 0;
   const stepContent: Record<typeof currentStep, { title: string; subtitle: string }> = {
     1: {
       title: "Set Your Password",
@@ -10572,7 +10576,7 @@ function OrganizationSetupPage({ onCreate }: { onCreate: () => void }) {
                     <input type={visiblePassword === field.id ? "text" : "password"} value={field.value} onChange={event => { field.setValue(event.target.value); if (passwordError) setPasswordError(""); }} placeholder={field.placeholder} className="min-w-0 flex-1 bg-transparent text-[12px] outline-none placeholder:text-[#a3aaa6]" />
                     <button type="button" onClick={() => setVisiblePassword(current => current === field.id ? null : field.id)} className="text-[#7d8581]" aria-label={`Show ${field.label.toLowerCase()}`}><Eye size={14} /></button>
                   </div>
-                  {field.id === "new" && <span className="mt-1 block text-[9px] text-[#818985]">Password must be at least 8 characters long</span>}
+                  {field.id === "new" && <span className="mt-1 block text-[9px] text-[#818985]">Password must be at least 2 characters long</span>}
                 </label>
               ))}
 
@@ -10581,21 +10585,23 @@ function OrganizationSetupPage({ onCreate }: { onCreate: () => void }) {
               </form>
             </> : currentStep === 2 ? <>
               <form onSubmit={event => { event.preventDefault(); setCurrentStep(3); }} className="space-y-3.5">
+                <ProfileField label="Title" defaultValue="Mr" required />
                 <div className="grid grid-cols-2 gap-3">
                   <ProfileField label="First Name" defaultValue="Adnan" required />
                   <ProfileField label="Last Name" defaultValue="Godanci" required />
                 </div>
-                <ProfileField label="Phone Number" defaultValue="(646)-617-9881" required />
-                <div className="h-px bg-[#eceeec]" />
                 <div className="grid grid-cols-2 gap-3">
-                  <ProfileField label="Address Line 1" defaultValue="123 Main Street" required />
-                  <ProfileField label="Address Line 2" placeholder="Apt, Suite, Floor (optional)" />
+                  <ProfileField label="Phone Number" defaultValue="(646)-617-9881" required />
+                  <ProfileField label="Fax Number" placeholder="Enter fax (optional)" />
                 </div>
+                <div className="h-px bg-[#eceeec]" />
+                <ProfileField label="Address Line 1" defaultValue="123 Main Street" required />
+                <ProfileField label="Address Line 2" placeholder="Apt, Suite, Floor (optional)" />
                 <div className="grid grid-cols-[1fr_1fr_.8fr] gap-3">
                   <ProfileField label="City" defaultValue="Bronx" required />
                   <label className="block">
                     <span className="mb-1.5 block text-[11px] font-medium">State <span className="text-[#b4473d]">*</span></span>
-                    <select defaultValue="New York" className="h-10 w-full rounded-[8px] border border-[#d7dcda] bg-white px-3 text-[11px] outline-none focus:border-[1.5px] focus:border-[#183229]">
+                    <select defaultValue="New York" className="h-10 w-full rounded-[8px] border border-[#d7dcda] bg-white pl-3 pr-9 text-[11px] outline-none focus:border-[1.5px] focus:border-[#183229]">
                       <option>New York</option>
                       <option>Florida</option>
                       <option>Texas</option>
@@ -10603,7 +10609,6 @@ function OrganizationSetupPage({ onCreate }: { onCreate: () => void }) {
                   </label>
                   <ProfileField label="Zipcode" defaultValue="11710" required />
                 </div>
-                <ProfileField label="Fax Number" placeholder="Enter fax (optional)" />
                 <div className="space-y-2 pt-1">
                   <button type="submit" className="h-10 w-full rounded-[8px] bg-[#111] px-6 text-[11px] font-semibold text-white hover:bg-[#183229]">Continue</button>
                   <button type="button" onClick={() => setCurrentStep(1)} className="h-9 w-full rounded-[8px] text-[11px] font-semibold text-[#4f5753] hover:bg-white/70 hover:text-[#183229]">Back</button>
@@ -10648,16 +10653,17 @@ function ProfileField({ label, defaultValue, placeholder, required = false }: { 
 
 function PaymentMethodOnboardingStep({ onBack, onComplete }: { onBack: () => void; onComplete: () => void }) {
   const [authorized, setAuthorized] = useState(true);
+  const [authorizationSigned, setAuthorizationSigned] = useState(false);
   const inputClass = "h-10 w-full rounded-[8px] border border-[#d7dcda] bg-white px-3 text-[11px] outline-none placeholder:text-[#a3aaa6] focus:border-[1.5px] focus:border-[#183229]";
-  const selectClass = `${inputClass} appearance-auto`;
+  const selectClass = `${inputClass} appearance-auto !pl-3 !pr-9`;
 
   return (
     <form onSubmit={(event) => { event.preventDefault(); onComplete(); }} className="space-y-4">
       <div className="px-0 py-1">
         <div className="flex items-center justify-between gap-3">
           <p className="text-[10px] leading-[14px] text-[#6f7782]">You can add a payment method later from settings.</p>
-          <button type="button" onClick={onComplete} className="shrink-0 text-[10px] font-semibold text-[#3974d8] underline-offset-4 transition-colors hover:text-[#1f5fc5] hover:underline">
-            Skip
+          <button type="button" onClick={onComplete} className="shrink-0 rounded-full bg-[#eaf2ff] px-3.5 py-2 text-[10px] font-semibold text-[#2563eb] shadow-[inset_0_0_0_1px_rgba(37,99,235,0.08)] transition-colors hover:bg-[#dce9ff] hover:text-[#1d4ed8]">
+            Skip for now
           </button>
         </div>
       </div>
@@ -10738,23 +10744,17 @@ function PaymentMethodOnboardingStep({ onBack, onComplete }: { onBack: () => voi
         <span>I authorize SCRIPTLINKRX.COM LLC to charge the credit card account listed. If this credit card needs to be updated, a new Credit Card Authorization form will be required to be filled out.</span>
       </label>
 
-      <div>
-        <div className="mb-2 flex items-center justify-between">
-          <p className="text-[11px] text-[#4f5753]">Sign your authorization:</p>
-          <button type="button" className="h-8 rounded-[7px] border border-[#d7dcda] bg-white px-4 text-[11px] font-medium text-[#333] hover:bg-[#f8f8f8]">Clear</button>
-        </div>
-        <div className="h-[118px] rounded-[9px] border border-[#d7dcda] bg-white" />
-      </div>
+      <SignaturePad label="Sign your authorization:" onSignatureChange={setAuthorizationSigned} />
 
       <div className="space-y-2 pt-1">
-        <button type="submit" disabled={!authorized} className="h-10 w-full rounded-[8px] bg-[#111] px-6 text-[11px] font-semibold text-white hover:bg-[#183229] disabled:cursor-not-allowed disabled:bg-[#d5d8d6] disabled:text-[#8b918e]">Complete Setup</button>
+        <button type="submit" disabled={!authorized || !authorizationSigned} className="h-10 w-full rounded-[8px] bg-[#111] px-6 text-[11px] font-semibold text-white hover:bg-[#2a2a2a] disabled:cursor-not-allowed disabled:bg-[#d5d8d6] disabled:text-[#8b918e]">Complete Setup</button>
         <button type="button" onClick={onBack} className="h-9 w-full rounded-[8px] text-[11px] font-semibold text-[#4f5753] hover:bg-white/70 hover:text-[#183229]">Back</button>
       </div>
     </form>
   );
 }
 
-function SignaturePad() {
+function SignaturePad({ label = "Sign your signature:", onSignatureChange }: { label?: string; onSignatureChange?: (signed: boolean) => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingRef = useRef(false);
 
@@ -10775,6 +10775,7 @@ function SignaturePad() {
     event.currentTarget.setPointerCapture(event.pointerId);
     context.beginPath();
     context.moveTo(point.x, point.y);
+    onSignatureChange?.(true);
   }
 
   function draw(event: ReactPointerEvent<HTMLCanvasElement>) {
@@ -10793,12 +10794,13 @@ function SignaturePad() {
   function clearSignature() {
     const canvas = canvasRef.current;
     canvas?.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
+    onSignatureChange?.(false);
   }
 
   return (
     <div className="mt-5">
       <div className="mb-1.5 flex items-center justify-between">
-        <span className="text-[11px] font-medium">Sign your signature:</span>
+        <span className="text-[11px] font-medium">{label}</span>
         <button type="button" onClick={clearSignature} className="rounded-[7px] border border-[#d7dcda] bg-white px-3 py-1 text-[10px] font-medium text-[#4f5753] hover:bg-[#f6f7f6]">Clear</button>
       </div>
       <canvas
@@ -11118,22 +11120,19 @@ function ContactPage({ onBackToLanding }: { onBackToLanding: () => void }) {
                 </div>
 
                 <div className="mt-8 border-t border-white/70 pt-7">
-                  <p className="text-[11px] font-normal uppercase tracking-[0.16em] text-[#8c95a1]">What happens next</p>
-                  <h3 className="mt-2 text-[17px] font-semibold tracking-[-0.03em] text-[#1a1a1a]">Support without the runaround</h3>
-                  <div className="relative mt-5 space-y-4 before:absolute before:bottom-5 before:left-[15px] before:top-5 before:w-px before:bg-[#cbdcff]">
-                    {[
-                      ["1", "Send your message", "Tell us what you need help with using the secure form."],
-                      ["2", "We route it correctly", "Your request goes to the team best equipped to help."],
-                      ["3", "Get a direct response", "We’ll follow up using the email or phone number you provide."],
-                    ].map(([number, title, text]) => (
-                      <div key={number} className="relative grid grid-cols-[30px_minmax(0,1fr)] gap-3">
-                        <span className="z-[1] flex size-[30px] items-center justify-center rounded-full bg-[#e7efff] text-[10px] font-bold text-[#2563eb] shadow-[0_0_0_4px_rgba(255,255,255,0.65)]">{number}</span>
-                        <div className="rounded-[12px] bg-white/50 px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                          <p className="text-[12px] font-semibold text-[#1a1a1a]">{title}</p>
-                          <p className="mt-1 text-[10px] leading-4 text-[#69736d]">{text}</p>
-                        </div>
-                      </div>
-                    ))}
+                  <p className="text-[11px] font-normal uppercase tracking-[0.16em] text-[#8c95a1]">Get help faster</p>
+                  <h3 className="mt-2 text-[17px] font-semibold tracking-[-0.03em] text-[#1a1a1a]">A few details go a long way</h3>
+                  <p className="mt-2 text-[11px] leading-5 text-[#69736d]">When sending a message, include anything that helps us identify your request:</p>
+                  <div className="mt-4 rounded-[14px] bg-white/50 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {["Order or receipt number", "Patient initials", "Product or prescription", "A short description"].map(item => (
+                        <div key={item} className="flex items-center gap-2.5 text-[11px] font-medium text-[#343b37]"><span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#e7efff] text-[#2563eb]"><Check size={11} strokeWidth={2.5} /></span>{item}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-start gap-2.5 rounded-[12px] bg-[#f2f6ff]/75 px-3.5 py-3 text-[10px] leading-4 text-[#596575]">
+                    <Shield size={14} className="mt-0.5 shrink-0 text-[#2563eb]" />
+                    <p>Please don’t include sensitive medical details beyond what is necessary for support.</p>
                   </div>
                 </div>
               </div>
