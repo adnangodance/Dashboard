@@ -4207,6 +4207,14 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
     return lower.charAt(0).toUpperCase() + lower.slice(1);
   }
 
+  function orderHistoryStatusKey(status: string): OrderHistoryEntry["order_status"] {
+    if (status === "Pending Payment" || status === "Pending Approval") return "pending_payment";
+    if (status === "Shipped") return "shipped";
+    if (status === "Delivered") return "delivered";
+    if (status === "Cancelled" || status === "Cancellation Requested" || status === "Flagged") return "cancelled";
+    return "processing";
+  }
+
   return (
     <>
       <div className="max-w-[1400px]">
@@ -4331,27 +4339,33 @@ function OrdersPage({ onNavigate, onOrderSelect, extraVariants }: { onNavigate: 
                     })}
                   </div>
                   <div className="mt-4 flex flex-wrap items-center gap-3 px-1">
-                    <span className="mr-1 text-[15px] font-bold text-[#161a18]">{order.id}</span>
-                    <span className="inline-flex h-[26px] items-center gap-2 rounded-full bg-[#F1F0EF] pl-3 pr-1 text-[12px] font-semibold text-[#183229]">
+                    <span className="mr-1 text-[15px] font-medium text-[#161a18]">{order.id}</span>
+                    <span className="inline-flex h-[26px] items-center gap-2 rounded-full bg-[#F1F0EF] pl-3 pr-1 text-[12px] font-medium text-[#183229]">
                       Order Type
-                      <span className="inline-flex h-5 items-center rounded-full bg-white px-2.5 text-[11px] font-semibold text-[#111]">{labelCase(order.orderType)}</span>
+                      <span className="inline-flex h-5 items-center rounded-full bg-white px-2.5 text-[11px] font-normal text-[#111]">{labelCase(order.orderType)}</span>
                     </span>
-                    <span className="inline-flex h-[26px] items-center gap-2 rounded-full bg-[#F1F0EF] pl-3 pr-1 text-[12px] font-semibold text-[#183229]">
+                    <span className="inline-flex h-[26px] items-center gap-2 rounded-full bg-[#F1F0EF] pl-3 pr-1 text-[12px] font-medium text-[#183229]">
                       Order Timestamp
-                      <span className="inline-flex h-5 items-center rounded-full bg-white px-2.5 text-[11px] font-semibold text-[#111]">{order.timestamp}</span>
+                      <span className="inline-flex h-5 items-center rounded-full bg-white px-2.5 text-[11px] font-normal text-[#111]">{order.timestamp}</span>
                     </span>
-                    <span className={`inline-flex h-[26px] items-center gap-2 rounded-full pl-3 pr-1 text-[11px] font-semibold ${order.payMethod === "Pay by Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
-                      {order.payMethod.replace("by", "By")}
-                      {order.payMethod === "Pay by Clinic" ? <Building2 size={13} /> : <User size={13} />}
-                      <span className={`rounded-full px-2 py-1 text-[8px] font-bold ${order.payStatus === "PAID" ? "bg-white text-[#173d25]" : "bg-[#FF4A87] text-white"}`}>{order.payStatus}</span>
+                    <span className="inline-flex h-8 items-center gap-2 rounded-full bg-[#f1f1f1] py-1 pl-1 pr-1.5">
+                      <span className={`flex size-6 items-center justify-center rounded-full text-white ${order.payMethod === "Pay by Clinic" ? "bg-[#20cbd0]" : "bg-[#79cf91]"}`}>
+                        {order.payMethod === "Pay by Clinic" ? <Building2 size={13} /> : <User size={13} />}
+                      </span>
+                      <span className="whitespace-nowrap text-[11px] font-medium text-[#222]">{order.payMethod}</span>
+                      <span className={`rounded-full px-2.5 py-1 text-[9px] font-medium text-white ${order.payStatus === "PAID" ? "bg-[#2f7a43]" : "bg-[#9f1239]"}`}>{labelCase(order.payStatus)}</span>
                     </span>
-                    <span className={`inline-flex h-[26px] items-center gap-1.5 rounded-full px-3 text-[11px] font-semibold ${silverStatusPillStyle[order.status] ?? "bg-[#FFC55B] text-[#151515]"}`}>{labelCase(order.status)} {silverStatusIcon(order.status)}</span>
-                    <span className={`inline-flex h-[26px] items-center gap-1.5 rounded-full px-3 text-[11px] font-semibold ${order.shipMethod === "Ship to Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
-                      {order.shipMethod.replace("to", "To")} {order.shipMethod === "Ship to Clinic" ? <Building2 size={13} /> : <User size={13} />}
+                    <OrderHistoryV2Status status={orderHistoryStatusKey(order.status)} label={labelCase(order.status)} large />
+                    <span className="inline-flex h-8 items-center gap-2 rounded-full bg-[#f1f1f1] py-1 pl-1 pr-1.5">
+                      <span className={`flex size-6 items-center justify-center rounded-full text-white ${order.shipMethod === "Ship to Clinic" ? "bg-[#20cbd0]" : "bg-[#79cf91]"}`}>
+                        {order.shipMethod === "Ship to Clinic" ? <Building2 size={13} /> : <User size={13} />}
+                      </span>
+                      <span className="whitespace-nowrap text-[11px] font-medium text-[#222]">{order.shipMethod}</span>
+                      <span className="whitespace-nowrap rounded-full bg-white px-2.5 py-1 text-[9px] font-medium text-[#222]">{order.items.length} {order.items.length === 1 ? "item" : "items"}</span>
                     </span>
-                    <span className="ml-auto inline-flex h-[26px] items-center gap-2 rounded-full bg-[#F1F0EF] pl-3 pr-1 text-[12px] font-semibold text-[#183229]">
+                    <span className="ml-auto inline-flex h-[26px] items-center gap-2 rounded-full bg-[#F1F0EF] pl-3 pr-1 text-[12px] font-medium text-[#183229]">
                       Total
-                      <strong className="inline-flex h-5 items-center rounded-full bg-white px-2.5 text-[11px] font-semibold text-[#111]">{order.total}</strong>
+                      <strong className="inline-flex h-5 items-center rounded-full bg-white px-2.5 text-[11px] font-medium text-[#111]">{order.total}</strong>
                     </span>
                   </div>
 	                </section>
@@ -4938,12 +4952,12 @@ function OrderHistoryStatusChip({ status }: { status: OrderHistoryEntry["order_s
   );
 }
 
-function OrderHistoryV2Status({ status }: { status: OrderHistoryEntry["order_status"] }) {
+function OrderHistoryV2Status({ status, label, large = false }: { status: OrderHistoryEntry["order_status"]; label?: string; large?: boolean }) {
   const config = ORDER_HISTORY_STATUS_CONFIG[status];
   return (
-    <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-[#f1f1f1] pl-1 pr-3 text-[11px] font-normal text-[#333]">
-      <span className="flex size-5 items-center justify-center rounded-full [&_svg]:size-3" style={{ backgroundColor: config.bgColor }}><OrderHistoryStatusIcon status={status} /></span>
-      {config.label}
+    <span className={`inline-flex items-center rounded-full bg-[#f1f1f1] pl-1 pr-3 text-[11px] font-normal text-[#333] ${large ? "h-8 gap-2" : "h-7 gap-1.5"}`}>
+      <span className={`flex items-center justify-center rounded-full ${large ? "size-6 [&_svg]:size-[13px]" : "size-5 [&_svg]:size-3"}`} style={{ backgroundColor: config.bgColor }}><OrderHistoryStatusIcon status={status} /></span>
+      {label ?? config.label}
     </span>
   );
 }
@@ -5126,10 +5140,6 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           <h1 className="flex h-[38px] items-center text-[28px] font-semibold leading-tight text-[#1a1a1a]">
             Order History <span className="text-[16px] font-normal text-[#9d9d9d]">({orders.length})</span>
           </h1>
-          <div className="inline-flex h-10 items-center rounded-full bg-[#f1f1f1] p-1" role="tablist" aria-label="Order history version">
-            <button type="button" role="tab" aria-selected={historyVersion === "current"} onClick={() => setHistoryVersion("current")} className={`h-8 rounded-full px-4 text-[11px] font-medium transition-colors ${historyVersion === "current" ? "bg-white text-black shadow-sm" : "text-[#777] hover:text-black"}`}>Current</button>
-            <button type="button" role="tab" aria-selected={historyVersion === "v2"} onClick={() => setHistoryVersion("v2")} className={`h-8 rounded-full px-4 text-[11px] font-medium transition-colors ${historyVersion === "v2" ? "bg-black text-white" : "text-[#777] hover:text-black"}`}>V2</button>
-          </div>
         </div>
         <div className="flex w-full flex-wrap items-end gap-4 border-b border-[#eeeeec] pb-4">
           <div className={`group mt-[17px] flex h-[38px] w-full items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 focus-within:border-black ${historyVersion === "v2" ? "sm:w-[280px]" : "transition-all duration-300 ease-out sm:w-[220px] sm:focus-within:w-[310px]"}`}>
@@ -5215,7 +5225,7 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                           <td className="px-4 py-3"><OrderHistoryV2Status status={order.order_status} /></td>
                           <td className="px-4 py-3"><OrderHistoryV2PayBy payBy={order.payment_method} paid={!order.is_cancelled && order.is_paid} /></td>
                           <td className="px-4 py-3">
-                            <span className="block text-[12px] font-semibold text-[#121212]">{orderHistoryMoney(order.total_price)}</span>
+                            <span className="block text-[12px] font-medium text-[#121212]">{orderHistoryMoney(order.total_price)}</span>
                             {order.refunded_amount > 0 && <span className="mt-0.5 block text-[10px] font-normal text-[#777]">{orderHistoryMoney(order.refunded_amount)} refunded</span>}
                           </td>
                           <td className="px-4 py-3 text-right">
@@ -5887,10 +5897,6 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
             <h1 className="flex h-[38px] items-center text-[28px] font-medium leading-tight text-[#1a1a1a]">
               Pending Approvals <span className="text-[16px] font-normal text-[#9d9d9d]">({approvals.length})</span>
             </h1>
-            <div className="inline-flex h-10 items-center rounded-full bg-[#f1f1f1] p-1" role="tablist" aria-label="Pending approvals version">
-              <button type="button" role="tab" aria-selected={approvalsVersion === "current"} onClick={() => setApprovalsVersion("current")} className={`h-8 rounded-full px-4 text-[11px] font-medium transition-colors ${approvalsVersion === "current" ? "bg-white text-black shadow-sm" : "text-[#777] hover:text-black"}`}>Current</button>
-              <button type="button" role="tab" aria-selected={approvalsVersion === "v2"} onClick={() => setApprovalsVersion("v2")} className={`h-8 rounded-full px-4 text-[11px] font-medium transition-colors ${approvalsVersion === "v2" ? "bg-black text-white" : "text-[#777] hover:text-black"}`}>V2</button>
-            </div>
           </div>
           <div className="mt-[17px] flex w-full flex-wrap items-end justify-between gap-3">
             <label className={`group flex h-[38px] w-full items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 focus-within:border-black ${approvalsVersion !== "current" ? "transition-colors sm:w-[310px]" : "transition-all duration-300 ease-out sm:w-[220px] sm:focus-within:w-[310px]"}`}>
@@ -5989,7 +5995,7 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
                       {approvalsVersion === "v2" ? (
                         <td className={tdClass}>
                           <div className="inline-flex min-w-0 flex-col items-start gap-0.5">
-                            <div className="flex min-w-0 items-center gap-2 whitespace-nowrap text-[12px] font-semibold text-[#121212]"><span className="truncate">{approval.patient.firstName} {approval.patient.lastName}</span></div>
+                            <div className="flex min-w-0 items-center gap-2 whitespace-nowrap text-[12px] font-medium text-[#121212]"><span className="truncate">{approval.patient.firstName} {approval.patient.lastName}</span></div>
                             <span className="text-[10px] font-normal leading-[13px] text-[#686868]">Order #{approval.id.slice(-8)}</span>
                           </div>
                         </td>
