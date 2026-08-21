@@ -4948,6 +4948,27 @@ function OrderHistoryV2Status({ status }: { status: OrderHistoryEntry["order_sta
   );
 }
 
+function OrderHistoryV2PayBy({ payBy, paid }: { payBy: OrderHistoryEntry["payment_method"]; paid?: boolean }) {
+  const isPatient = payBy === "patient";
+  return (
+    <span className={`inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full bg-[#f1f1f1] pl-1 text-[11px] font-normal text-[#333] ${paid === undefined ? "pr-3" : "pr-1"}`}>
+      <span className={`flex size-5 items-center justify-center rounded-full text-white ${isPatient ? "bg-[#35B467]" : "bg-[#20C9D2]"}`}>
+        {isPatient ? <User size={12} strokeWidth={2} /> : <Building2 size={12} strokeWidth={2} />}
+      </span>
+      {isPatient ? "Pay by Patient" : "Pay by Clinic"}
+      {paid !== undefined && <PaymentStateLabel paid={paid} />}
+    </span>
+  );
+}
+
+function PaymentStateLabel({ paid }: { paid: boolean }) {
+  return (
+    <span className={`inline-flex h-5 items-center rounded-full px-2 text-[9px] font-semibold text-white ${paid ? "bg-[#246B3C]" : "bg-[#8F1D2C]"}`}>
+      {paid ? "Paid" : "Unpaid"}
+    </span>
+  );
+}
+
 function OrderHistoryPayByChip({ payBy, showStatus = false, neutral = false, isPaid }: { payBy: OrderHistoryEntry["payment_method"]; showStatus?: boolean; neutral?: boolean; isPaid?: boolean }) {
   const isPatient = payBy === "patient";
   const paymentIsPaid = isPaid ?? payBy === "clinic_ach";
@@ -5167,7 +5188,7 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               <table className={`w-full min-w-max text-left text-sm ${historyVersion === "v2" ? "border-separate border-spacing-0" : "border-collapse"}`}>
                 <thead>
                   <tr>
-                    {(historyVersion === "v2" ? ["Patient", "Date", "Type", "Status", "Paid By", "Paid", "Total", ""] : ["Date", "Order", "Patient", "Type", "Status", "Paid By", "Total", "Refunded", "Paid", ""]).map((header, index) => (
+                    {(historyVersion === "v2" ? ["Patient", "Date", "Type", "Status", "Paid By", "Total", ""] : ["Date", "Order", "Patient", "Type", "Status", "Paid By", "Total", "Refunded", "Paid", ""]).map((header, index) => (
                       <th key={index} className={`whitespace-nowrap px-4 py-2 text-[12px] leading-5 text-[#999999] ${historyVersion === "v2" ? "bg-[#f5f5f5] font-normal normal-case first:rounded-l-[10px] last:rounded-r-[10px]" : "border-b border-[#e5e7eb] bg-[#fbfbfb] font-bold uppercase"}`}>
                         {header}
                       </th>
@@ -5192,14 +5213,7 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                           <td className="px-4 py-3 text-[12px] font-normal text-[#121212]">{formatDate(order.created_at)}</td>
                           <td className="px-4 py-3 text-[12px] font-normal text-[#555]">{order.is_custom ? "Custom" : order.order_type === "refill" ? "Refill" : "Order"}</td>
                           <td className="px-4 py-3"><OrderHistoryV2Status status={order.order_status} /></td>
-                          <td className="px-4 py-3">
-                            <span className={`text-[11px] font-medium ${order.payment_method === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>
-                              {order.payment_method === "patient" ? "Pay by Patient" : "Pay by Clinic"}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            {order.is_cancelled ? <span className="text-[11px] font-normal text-[#888]">—</span> : order.is_paid ? <span className="flex flex-col gap-0.5"><span className="text-[11px] font-medium text-[#2f7a43]">Paid</span>{order.payment_timestamp && <span className="text-[10px] font-normal text-[#8b8b8b]">{formatDate(order.payment_timestamp)}</span>}</span> : <span className="text-[11px] font-medium text-[#7f1d1d]">Unpaid</span>}
-                          </td>
+                          <td className="px-4 py-3"><OrderHistoryV2PayBy payBy={order.payment_method} paid={!order.is_cancelled && order.is_paid} /></td>
                           <td className="px-4 py-3">
                             <span className="block text-[12px] font-semibold text-[#121212]">{orderHistoryMoney(order.total_price)}</span>
                             {order.refunded_amount > 0 && <span className="mt-0.5 block text-[10px] font-normal text-[#777]">{orderHistoryMoney(order.refunded_amount)} refunded</span>}
@@ -5423,6 +5437,21 @@ function PendingShipToChip({ shipTo }: { shipTo: "patient" | "clinic" }) {
         ) : (
           <svg width="14" height="14" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.125 10.5H10.875M1.875 1.5V10.5M7.125 1.5V10.5M10.125 3.75V10.5M3.375 3.375H3.75M3.375 4.875H3.75M3.375 6.375H3.75M5.25 3.375H5.625M5.25 4.875H5.625M5.25 6.375H5.625M3.375 10.5V8.8125C3.375 8.50184 3.62684 8.25 3.9375 8.25H5.0625C5.37316 8.25 5.625 8.50184 5.625 8.8125V10.5M1.5 1.5H7.5M7.125 3.75H10.5M8.625 5.625H8.62875V5.62875H8.625V5.625ZM8.625 7.125H8.62875V7.12875H8.625V7.125ZM8.625 8.625H8.62875V8.62875H8.625V8.625Z" stroke="#020202" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
         )}
+      </span>
+    </span>
+  );
+}
+
+function PendingV2ShipToChip({ shipTo, items }: { shipTo: "patient" | "clinic"; items: number }) {
+  const isPatient = shipTo === "patient";
+  return (
+    <span className="inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full bg-[#f1f1f1] pl-1 pr-1 text-[11px] font-normal text-[#333]">
+      <span className={`flex size-5 items-center justify-center rounded-full text-white ${isPatient ? "bg-[#35B467]" : "bg-[#20C9D2]"}`}>
+        {isPatient ? <User size={12} strokeWidth={2} /> : <Building2 size={12} strokeWidth={2} />}
+      </span>
+      {isPatient ? "Ship to Patient" : "Ship to Clinic"}
+      <span className="inline-flex h-5 items-center rounded-full bg-white px-2 text-[9px] font-semibold text-black">
+        {items} {items === 1 ? "item" : "items"}
       </span>
     </span>
   );
@@ -5926,10 +5955,9 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
                       <p className="mt-0.5 whitespace-nowrap text-[9px] text-[#888]">{created.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })} · {created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</p>
                     </div>
                     <div>
-                      <p className={`text-[11px] font-semibold ${approval.paymentMethod === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>{approval.paymentMethod === "patient" ? "Pay by Patient" : "Pay by Clinic"}</p>
-                      <p className={`mt-0.5 text-[9px] font-semibold ${isPaid ? "text-[#2f7a43]" : "text-[#9f1239]"}`}>{isPaid ? "Paid" : "Unpaid"}</p>
+                      <OrderHistoryV2PayBy payBy={approval.paymentMethod} paid={isPaid} />
                     </div>
-                    <div><p className={`text-[11px] font-medium ${approval.shipTo === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>{approval.shipTo === "patient" ? "Ship to Patient" : "Ship to Clinic"}</p><p className="mt-0.5 text-[9px] text-[#888]">{pendingApprovalRxCount(approval)} {pendingApprovalRxCount(approval) === 1 ? "item" : "items"}</p></div>
+                    <div><PendingV2ShipToChip shipTo={approval.shipTo} items={pendingApprovalRxCount(approval)} /></div>
                     <div className="flex items-center justify-between gap-3 md:justify-end"><span className="text-[12px] font-semibold text-[#171717]">${pendingApprovalTotal(approval).toFixed(2)}</span><button type="button" onClick={event => { event.stopPropagation(); setSelectedId(approval.id); }} className="inline-flex h-[30px] items-center justify-center rounded-full bg-black px-4 text-[11px] font-medium text-white transition-colors hover:bg-[#242424]">Review</button></div>
                   </article>
                 );
@@ -5939,10 +5967,10 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
         ) : (
           <div className="w-full max-w-[1400px] overflow-x-auto bg-white">
             <table className={`w-full min-w-max text-left text-sm ${approvalsVersion === "v2" ? "table-fixed border-separate border-spacing-0" : "border-collapse"}`}>
-              {approvalsVersion === "v2" && <colgroup><col className="w-[25%]" /><col className="w-[13%]" /><col className="w-[8%]" /><col className="w-[20%]" /><col className="w-[14%]" /><col className="w-[10%]" /><col className="w-[10%]" /></colgroup>}
+              {approvalsVersion === "v2" && <colgroup><col className="w-[18%]" /><col className="w-[17%]" /><col className="w-[18%]" /><col className="w-[21%]" /><col className="w-[12%]" /><col className="w-[7%]" /><col className="w-[7%]" /></colgroup>}
               <thead>
                 <tr>
-                  {(approvalsVersion === "v2" ? ["Patient", "Pay by", "Paid", "Created by", "Ship to", "Total", ""] : ["ORDER ID", "PATIENT", "CREATED BY", "CREATED AT", "PAY BY", "SHIP TO", "ITEMS", "STATUS", "TOTAL", "ACTION"]).map((header, index) => (
+                  {(approvalsVersion === "v2" ? ["Patient", "Pay by", "Created by", "Ship to", "Status", "Total", ""] : ["ORDER ID", "PATIENT", "CREATED BY", "CREATED AT", "PAY BY", "SHIP TO", "ITEMS", "STATUS", "TOTAL", "ACTION"]).map((header, index) => (
                     <th key={index} className={`whitespace-nowrap py-2 text-[12px] leading-5 text-[#999999] ${approvalsVersion === "v2" ? "bg-[#f5f5f5] px-4 font-normal first:rounded-l-[10px] last:rounded-r-[10px]" : `border-b border-[#e5e7eb] bg-[#fbfbfb] font-medium uppercase ${index === 4 || index === 5 ? "w-px px-2" : "px-4"}`}`}>
                       {header}
                     </th>
@@ -5956,15 +5984,12 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
                     <tr
                       key={approval.id}
                       onClick={() => setSelectedId(approval.id)}
-                      className={`cursor-pointer transition-colors hover:bg-[#f1f1f1] even:hover:bg-[#f1f1f1] ${approvalsVersion === "v2" ? "even:bg-[#fafafa]" : "even:bg-[#fbfbfb]"}`}
+                      className={`cursor-pointer align-middle transition-colors hover:bg-[#f1f1f1] even:hover:bg-[#f1f1f1] ${approvalsVersion === "v2" ? "h-[64px] even:bg-[#fafafa]" : "even:bg-[#fbfbfb]"}`}
                     >
                       {approvalsVersion === "v2" ? (
                         <td className={tdClass}>
                           <div className="inline-flex min-w-0 flex-col items-start gap-0.5">
-                            <div className="flex min-w-0 items-center gap-2 whitespace-nowrap text-[12px] font-semibold text-[#121212]">
-                              <span className="truncate">{approval.patient.firstName} {approval.patient.lastName}</span>
-                              <span className="shrink-0 rounded-full bg-[#f1f1f1] px-2 py-0.5 text-[9px] font-medium text-[#7f1d1d]">Pending Approval</span>
-                            </div>
+                            <div className="flex min-w-0 items-center gap-2 whitespace-nowrap text-[12px] font-semibold text-[#121212]"><span className="truncate">{approval.patient.firstName} {approval.patient.lastName}</span></div>
                             <span className="text-[10px] font-normal leading-[13px] text-[#686868]">Order #{approval.id.slice(-8)}</span>
                           </div>
                         </td>
@@ -5973,10 +5998,7 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
                         <td className={tdClass}><span className="text-[14px] font-medium text-[#121212]">{approval.patient.firstName} {approval.patient.lastName}</span></td>
                       </>}
                       {approvalsVersion === "v2" ? <>
-                        <td className="w-px whitespace-nowrap px-4 py-3 text-[12px] font-normal leading-5 text-[#121212]">
-                          <span className={`whitespace-nowrap text-[11px] font-semibold ${approval.paymentMethod === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>{approval.paymentMethod === "patient" ? "Pay by Patient" : "Pay by Clinic"}</span>
-                        </td>
-                        <td className="whitespace-nowrap px-4 py-3"><span className={`text-[10px] font-semibold ${approval.paymentMethod === "clinic_ach" ? "text-[#2f7a43]" : "text-[#9f1239]"}`}>{approval.paymentMethod === "clinic_ach" ? "Paid" : "Unpaid"}</span></td>
+                        <td className="w-px whitespace-nowrap px-4 py-3 text-[12px] font-normal leading-5 text-[#121212]"><OrderHistoryV2PayBy payBy={approval.paymentMethod} paid={approval.paymentMethod === "clinic_ach"} /></td>
                         <td className={`${tdClass} whitespace-nowrap`}><span className="inline-flex flex-col items-start gap-[5px] leading-[13px]"><span>{approval.submittedBy}</span><span className="text-[10px] font-normal leading-[12px] text-[#777]">{created.getMonth() + 1}/{created.getDate()}/{created.getFullYear()} · {created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span></span></td>
                       </> : <>
                         <td className={tdClass}>{approval.submittedBy}</td>
@@ -5984,10 +6006,11 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
                         <td className="w-px whitespace-nowrap px-2 py-2 text-[12px] font-normal leading-5 text-[#121212]"><OrderHistoryPayByChip payBy={approval.paymentMethod} showStatus neutral /></td>
                       </>}
                       <td className={`w-px whitespace-nowrap text-[12px] font-normal leading-5 text-[#121212] ${approvalsVersion === "v2" ? "px-4 py-3" : "px-2 py-2"}`}>
-                        {approvalsVersion === "v2" ? <span className="inline-flex flex-col items-start gap-1 whitespace-nowrap leading-[13px]"><span className={`text-[11px] font-medium ${approval.shipTo === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>{approval.shipTo === "patient" ? "Ship to Patient" : "Ship to Clinic"}</span><span className="whitespace-nowrap rounded-full bg-[#f1f1f1] px-2 py-0.5 text-[9px] font-normal leading-[11px] text-[#666]">{pendingApprovalRxCount(approval)} {pendingApprovalRxCount(approval) === 1 ? "item" : "items"}</span></span> : <PendingShipToChip shipTo={approval.shipTo} />}
+                        {approvalsVersion === "v2" ? <PendingV2ShipToChip shipTo={approval.shipTo} items={pendingApprovalRxCount(approval)} /> : <PendingShipToChip shipTo={approval.shipTo} />}
                       </td>
                       {approvalsVersion === "current" && <td className={tdClass}>{pendingApprovalRxCount(approval)}</td>}
                       {approvalsVersion === "current" && <td className={tdClass}><span className="whitespace-nowrap text-[11px] font-semibold text-[#B25327]">Pending Approval</span></td>}
+                      {approvalsVersion === "v2" && <td className={tdClass}><span className="whitespace-nowrap rounded-full bg-[#f1f1f1] px-2.5 py-1 text-[10px] font-medium text-[#7f1d1d]">Pending Approval</span></td>}
                       <td className={tdClass}>${pendingApprovalTotal(approval).toFixed(2)}</td>
                       <td className={tdClass}>
                         <div className="flex items-center gap-1.5">
