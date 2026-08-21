@@ -9067,6 +9067,7 @@ function MultiPatientCartPage({
   const [prescriptionDetails, setPrescriptionDetails] = useState<Record<number, { days: string; refills: string; directions: string; reason: string }>>({});
   const [prescriptionValidationAttempted, setPrescriptionValidationAttempted] = useState(false);
   const [addedPrescriptionIds, setAddedPrescriptionIds] = useState<Set<number>>(new Set());
+  const [addingPrescriptionId, setAddingPrescriptionId] = useState<number | null>(null);
   const [openPrescriptionNoteIds, setOpenPrescriptionNoteIds] = useState<Set<number>>(new Set());
   const [expandedPrescriptionIds, setExpandedPrescriptionIds] = useState<Set<number>>(() => {
     const firstPrescription = cartData.patients.flatMap(patient => patient.items).find(item => item.kind !== "supply");
@@ -9193,6 +9194,23 @@ function MultiPatientCartPage({
       : Boolean(details?.days.trim() && details?.refills.trim() && details?.directions.trim() && details?.reason.trim());
   }
 
+  function addPrescriptionOrder(id: number) {
+    if (!isPrescriptionComplete(id) || addingPrescriptionId !== null) return;
+    setAddingPrescriptionId(id);
+    window.setTimeout(() => {
+      setAddedPrescriptionIds(current => new Set([...current, id]));
+      setExpandedPrescriptionIds(current => {
+        const next = new Set(current);
+        next.delete(id);
+        const currentIndex = cartRows.findIndex(row => row.item.id === id);
+        const nextPrescription = cartRows[currentIndex + 1];
+        if (nextPrescription) next.add(nextPrescription.item.id);
+        return next;
+      });
+      setAddingPrescriptionId(null);
+    }, 300);
+  }
+
   function requiredFieldClass(value: string | undefined) {
     if (!value?.trim()) {
       return "border-[#7F9EE3] bg-white focus:border-[#7F9EE3]";
@@ -9296,8 +9314,8 @@ function MultiPatientCartPage({
                       cartCardVariant === 3
                         ? `${isExpanded ? "border-l-2 border-l-[#183229] bg-[#FCFCFC] px-5" : "px-3"} border-b py-7 ${isBoomDimmed ? "opacity-45 hover:opacity-75" : ""}`
                         : isAdnanStyleVariant
-                          ? `px-5 border-x-[12px] border-b-[12px] ${isExpanded ? "pb-5 pt-5" : "py-7"} ${isCompactActive ? "z-10 rounded-[12px] shadow-[0_18px_42px_rgba(24,50,41,0.12)] ring-1 ring-[#DDE8E2]" : ""} ${isCompactDimmed ? "opacity-55 hover:opacity-85" : ""}`
-                          : `px-5 border-x-[12px] border-b-[12px] ${isExpanded ? "pb-5 pt-5" : "py-7"}`
+                          ? `border-x-[12px] border-b-[12px] px-5 py-5 ${isCompactActive ? "z-10 rounded-[12px] shadow-[0_18px_42px_rgba(24,50,41,0.12)] ring-1 ring-[#DDE8E2]" : ""} ${isCompactDimmed ? "opacity-55 hover:opacity-85" : ""}`
+                          : "border-x-[12px] border-b-[12px] px-5 py-5"
                     }`}
                   >
                     {cartCardVariant === 5 && !showBoomCompletedCard && (
@@ -9313,8 +9331,11 @@ function MultiPatientCartPage({
                       <div className="flex min-w-0 gap-4">
                         <CartItemImage item={item} />
                         <div className="min-w-0">
-                          <p className="whitespace-nowrap text-[14px] font-semibold leading-tight text-[#191919]">{item.name}</p>
+                          <div className="flex min-w-0 items-center gap-2">
+                            <p className="whitespace-nowrap text-[14px] font-semibold leading-tight text-[#191919]">{item.name}</p>
+                          </div>
                           <p className="mt-1 whitespace-nowrap text-[13px] text-[#858585]">{item.detail}</p>
+                          {addedPrescriptionIds.has(item.id) && <p className="mt-1.5 whitespace-nowrap text-[12px] font-medium text-[#2f7a43]">Prescription complete</p>}
                           {includedSupplies.length > 0 && (
                             <button onClick={() => toggleSupplies(item.id)} className="mt-2 inline-flex whitespace-nowrap items-center gap-1 text-[12px] text-[#666] underline underline-offset-4">
                               Included Supplies
@@ -9397,13 +9418,9 @@ function MultiPatientCartPage({
                             </div>
                           ) : (
                             isCompactCompleted ? (
-                              <div className="ml-16 flex max-w-[520px] items-center justify-between gap-4 rounded-[8px] bg-[#F6FAF7] px-4 py-3">
-                                <span className="inline-flex items-center gap-2 text-[11px] font-semibold text-[#315f49]">
-                                  <CheckCircle2 size={14} />
-                                  Prescription complete
-                                </span>
-                                <button onClick={() => setExpandedPrescriptionIds(current => cartCardVariant === 3 || cartCardVariant === 4 || cartCardVariant === 5 || cartCardVariant === 6 ? new Set([item.id]) : new Set([...current, item.id]))} className="text-[11px] font-semibold text-[#202020] hover:underline hover:underline-offset-4">
-                                  Show Details
+                              <div className="ml-16 flex flex-wrap items-center">
+                                <button onClick={() => setExpandedPrescriptionIds(current => cartCardVariant === 3 || cartCardVariant === 4 || cartCardVariant === 5 || cartCardVariant === 6 ? new Set([item.id]) : new Set([...current, item.id]))} className="inline-flex h-8 items-center text-[11px] font-medium text-[#202020] underline decoration-[#8a8a8a] underline-offset-4 transition-colors hover:text-black hover:decoration-black">
+                                  Show details
                                 </button>
                               </div>
                             ) : (
@@ -9437,20 +9454,20 @@ function MultiPatientCartPage({
                           </div>
                           <div className="ml-16 mt-3 grid gap-5 rounded-[7px] bg-[var(--app-soft)] px-5 py-4 md:grid-cols-[2fr_1.8fr_0.42fr_0.58fr]">
                             <div>
-                              <p className="text-[10px] font-medium text-[#343434]">Directions of Use</p>
-                              <p className="mt-1 text-[11px] leading-[16px] text-[#777]">{details?.directions}</p>
+                              <p className="text-[11px] font-medium text-[#343434]">Directions of Use</p>
+                              <p className="mt-1.5 flex min-h-10 cursor-default items-center rounded-[8px] border border-[#e5e5e2] bg-[#f0f0ee] px-3 py-2 text-[12px] leading-[17px] text-[#777]">{details?.directions}</p>
                             </div>
                             <div>
-                              <p className="text-[10px] font-medium text-[#343434]">Reason to Compound</p>
-                              <p className="mt-1 text-[11px] leading-[16px] text-[#777]">{details?.reason}</p>
+                              <p className="text-[11px] font-medium text-[#343434]">Reason to Compound</p>
+                              <p className="mt-1.5 flex min-h-10 cursor-default items-center rounded-[8px] border border-[#e5e5e2] bg-[#f0f0ee] px-3 py-2 text-[12px] leading-[17px] text-[#777]">{details?.reason}</p>
                             </div>
                             <div>
-                              <p className="text-[10px] font-medium text-[#343434]">Days Supply</p>
-                              <p className="mt-1 text-[11px] text-[#777]">{details?.days}</p>
+                              <p className="text-[11px] font-medium text-[#343434]">Days Supply</p>
+                              <p className="mt-1.5 flex h-10 cursor-default items-center rounded-[8px] border border-[#e5e5e2] bg-[#f0f0ee] px-3 text-[12px] text-[#777]">{details?.days}</p>
                             </div>
                             <div>
-                              <p className="text-[10px] font-medium text-[#343434]">Authorized Refills</p>
-                              <p className="mt-1 text-[11px] text-[#777]">{details?.refills}</p>
+                              <p className="text-[11px] font-medium text-[#343434]">Authorized Refills</p>
+                              <p className="mt-1.5 flex h-10 cursor-default items-center rounded-[8px] border border-[#e5e5e2] bg-[#f0f0ee] px-3 text-[12px] text-[#777]">{details?.refills}</p>
                             </div>
                           </div>
                         </div>
@@ -9754,22 +9771,11 @@ function MultiPatientCartPage({
                                 </button>
                                 <div className="flex items-center gap-4">
                                   <button
-                                    onClick={() => {
-                                      if (!isPrescriptionComplete(item.id)) return;
-                                      setAddedPrescriptionIds(current => new Set([...current, item.id]));
-                                      setExpandedPrescriptionIds(current => {
-                                        const next = new Set(current);
-                                        next.delete(item.id);
-                                        const currentIndex = cartRows.findIndex(row => row.item.id === item.id);
-                                        const nextPrescription = cartRows[currentIndex + 1];
-                                        if (nextPrescription) next.add(nextPrescription.item.id);
-                                        return next;
-                                      });
-                                    }}
-                                    disabled={!isPrescriptionComplete(item.id)}
-                                    className="h-8 min-w-[86px] rounded-full bg-[#111] px-4 text-[12px] font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-[#dfdfdc] disabled:text-[#92928f]"
+                                    onClick={() => addPrescriptionOrder(item.id)}
+                                    disabled={!isPrescriptionComplete(item.id) || addingPrescriptionId !== null}
+                                    className="inline-flex h-8 min-w-[98px] items-center justify-center gap-1.5 rounded-full bg-[#111] px-4 text-[12px] font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-[#dfdfdc] disabled:text-[#92928f]"
                                   >
-                                    Add Order
+                                    {addingPrescriptionId === item.id ? <><Loader2 size={13} className="animate-spin" /> Adding</> : "Add Order"}
                                   </button>
                                   <button
                                     onClick={() => setExpandedPrescriptionIds(current => {
