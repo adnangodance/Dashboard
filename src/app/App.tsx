@@ -5167,7 +5167,7 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               <table className={`w-full min-w-max text-left text-sm ${historyVersion === "v2" ? "border-separate border-spacing-0" : "border-collapse"}`}>
                 <thead>
                   <tr>
-                    {(historyVersion === "v2" ? ["Date", "Order", "Patient", "Type", "Status", "Paid By", "Paid", "Total", ""] : ["Date", "Order", "Patient", "Type", "Status", "Paid By", "Total", "Refunded", "Paid", ""]).map((header, index) => (
+                    {(historyVersion === "v2" ? ["Patient", "Date", "Type", "Status", "Paid By", "Paid", "Total", ""] : ["Date", "Order", "Patient", "Type", "Status", "Paid By", "Total", "Refunded", "Paid", ""]).map((header, index) => (
                       <th key={index} className={`whitespace-nowrap px-4 py-2 text-[12px] leading-5 text-[#999999] ${historyVersion === "v2" ? "bg-[#f5f5f5] font-normal normal-case first:rounded-l-[10px] last:rounded-r-[10px]" : "border-b border-[#e5e7eb] bg-[#fbfbfb] font-bold uppercase"}`}>
                         {header}
                       </th>
@@ -5183,9 +5183,13 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                     >
                       {historyVersion === "v2" ? (
                         <>
+                          <td className="px-4 py-3 text-[12px] font-normal text-[#121212]">
+                            <span className="inline-flex flex-col items-start gap-0.5">
+                              {order.is_multi_patient ? <span className="inline-flex items-center gap-1.5">Multiple patients <span className="rounded-full bg-[#f1f1f1] px-2 py-0.5 text-[9px] text-[#666]">Group</span></span> : <span>{order.patient_name || "—"}</span>}
+                              <span className="text-[10px] font-normal leading-[13px] text-[#686868]">Order #{order.order_id.slice(-8).toUpperCase()}</span>
+                            </span>
+                          </td>
                           <td className="px-4 py-3 text-[12px] font-normal text-[#121212]">{formatDate(order.created_at)}</td>
-                          <td className="px-4 py-3 text-[12px] font-medium text-[#121212]">#{order.order_id.slice(-8).toUpperCase()}</td>
-                          <td className="px-4 py-3 text-[12px] font-normal text-[#121212]">{order.is_multi_patient ? <span className="inline-flex items-center gap-1.5">Multiple patients <span className="rounded-full bg-[#f1f1f1] px-2 py-0.5 text-[9px] text-[#666]">Group</span></span> : order.patient_name || "—"}</td>
                           <td className="px-4 py-3 text-[12px] font-normal text-[#555]">{order.is_custom ? "Custom" : order.order_type === "refill" ? "Refill" : "Order"}</td>
                           <td className="px-4 py-3"><OrderHistoryV2Status status={order.order_status} /></td>
                           <td className="px-4 py-3">
@@ -5801,7 +5805,7 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
 function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Page) => void }) {
   const [approvals, setApprovals] = useState<PendingApproval[]>(PENDING_APPROVALS_MOCK);
   const [searchQuery, setSearchQuery] = useState("");
-  const [approvalsVersion, setApprovalsVersion] = useState<"current" | "v2" | "v3">("v3");
+  const [approvalsVersion, setApprovalsVersion] = useState<"current" | "v2" | "v3">("v2");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // ⌘F / Ctrl+F focuses the search box instead of the browser find bar
@@ -5857,7 +5861,6 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
             <div className="inline-flex h-10 items-center rounded-full bg-[#f1f1f1] p-1" role="tablist" aria-label="Pending approvals version">
               <button type="button" role="tab" aria-selected={approvalsVersion === "current"} onClick={() => setApprovalsVersion("current")} className={`h-8 rounded-full px-4 text-[11px] font-medium transition-colors ${approvalsVersion === "current" ? "bg-white text-black shadow-sm" : "text-[#777] hover:text-black"}`}>Current</button>
               <button type="button" role="tab" aria-selected={approvalsVersion === "v2"} onClick={() => setApprovalsVersion("v2")} className={`h-8 rounded-full px-4 text-[11px] font-medium transition-colors ${approvalsVersion === "v2" ? "bg-black text-white" : "text-[#777] hover:text-black"}`}>V2</button>
-              <button type="button" role="tab" aria-selected={approvalsVersion === "v3"} onClick={() => setApprovalsVersion("v3")} className={`h-8 rounded-full px-4 text-[11px] font-medium transition-colors ${approvalsVersion === "v3" ? "bg-black text-white" : "text-[#777] hover:text-black"}`}>V3</button>
             </div>
           </div>
           <div className="mt-[17px] flex w-full flex-wrap items-end justify-between gap-3">
@@ -5897,33 +5900,37 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
             </p>
           </div>
         ) : approvalsVersion === "v3" ? (
-          <div className="overflow-hidden rounded-[12px] border border-[#e8e8e8] bg-white">
-            <div className="flex items-center justify-between border-b border-[#ececec] bg-[#fafafa] px-5 py-3">
-              <div><h2 className="text-[13px] font-semibold text-[#171717]">Review queue</h2><p className="mt-0.5 text-[10px] text-[#777]">Orders waiting for a clinical decision</p></div>
-              <span className="text-[11px] font-medium text-[#B25327]">{filteredApprovals.length} requiring review</span>
+          <div className="overflow-hidden rounded-[12px] bg-white">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[10px] bg-[#f5f5f5] px-4 py-3">
+              <div className="flex items-center gap-3">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-[12px] font-semibold text-[#7f1d1d]">{filteredApprovals.length}</span>
+                <div><h2 className="text-[12px] font-semibold text-[#171717]">Orders requiring review</h2><p className="mt-0.5 text-[9px] text-[#777]">Review patient, payment, and delivery details before deciding</p></div>
+              </div>
+              <span className="text-[10px] font-medium text-[#777]">Oldest submissions first</span>
             </div>
-            <div className="divide-y divide-[#eeeeee]">
+            <div className="mt-3 hidden grid-cols-[minmax(250px,1.25fr)_minmax(150px,.75fr)_minmax(170px,.8fr)_minmax(150px,.75fr)_150px] gap-4 px-4 py-2 text-[10px] font-normal text-[#999] md:grid">
+              <span>Order and patient</span><span>Created by</span><span>Payment</span><span>Shipping</span><span className="text-right">Total</span>
+            </div>
+            <div className="space-y-1">
               {filteredApprovals.map(approval => {
                 const created = new Date(approval.createdAt);
                 const isPaid = approval.paymentMethod === "clinic_ach";
                 return (
-                  <article key={approval.id} onClick={() => setSelectedId(approval.id)} className="group grid cursor-pointer gap-4 px-5 py-4 transition-colors hover:bg-[#fafafa] md:grid-cols-[minmax(220px,1.25fr)_minmax(170px,.9fr)_minmax(150px,.8fr)_110px_90px] md:items-center">
+                  <article key={approval.id} onClick={() => setSelectedId(approval.id)} className="group grid cursor-pointer gap-4 rounded-[10px] px-4 py-3.5 transition-colors odd:bg-white even:bg-[#fafafa] hover:bg-[#f1f1f1] md:grid-cols-[minmax(250px,1.25fr)_minmax(150px,.75fr)_minmax(170px,.8fr)_minmax(150px,.75fr)_150px] md:items-center">
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2"><h3 className="truncate text-[13px] font-semibold text-[#161616]">{approval.patient.firstName} {approval.patient.lastName}</h3><span className="whitespace-nowrap text-[10px] font-semibold text-[#B25327]">Pending Approval</span></div>
-                      <p className="mt-1 text-[10px] text-[#777]">#{approval.id.slice(-8)} · Submitted by <span className="font-medium text-[#444]">{approval.submittedBy}</span></p>
-                      <p className="mt-0.5 text-[10px] text-[#999]">{created.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })} at {created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</p>
+                      <div className="flex min-w-0 items-center gap-2"><h3 className="truncate text-[12px] font-semibold text-[#161616]">{approval.patient.firstName} {approval.patient.lastName}</h3><span className="shrink-0 text-[10px] font-semibold text-[#B25327]">Pending Approval</span></div>
+                      <p className="mt-1 text-[10px] text-[#777]">Order #{approval.id.slice(-8)}</p>
                     </div>
                     <div>
-                      <p className="text-[9px] font-medium uppercase tracking-[0.08em] text-[#999]">Payment</p>
-                      <div className="mt-1 flex items-center gap-2"><span className={`text-[11px] font-semibold ${approval.paymentMethod === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>{approval.paymentMethod === "patient" ? "Pay by Patient" : "Pay by Clinic"}</span><span className={`text-[9px] font-bold ${isPaid ? "text-[#2f7a43]" : "text-[#9f1239]"}`}>{isPaid ? "PAID" : "UNPAID"}</span></div>
+                      <p className="text-[11px] text-[#333]">{approval.submittedBy}</p>
+                      <p className="mt-0.5 whitespace-nowrap text-[9px] text-[#888]">{created.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })} · {created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</p>
                     </div>
                     <div>
-                      <p className="text-[9px] font-medium uppercase tracking-[0.08em] text-[#999]">Fulfillment</p>
-                      <p className={`mt-1 text-[11px] font-medium ${approval.shipTo === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>{approval.shipTo === "patient" ? "Ship to Patient" : "Ship to Clinic"}</p>
-                      <p className="mt-0.5 text-[10px] text-[#888]">{pendingApprovalRxCount(approval)} {pendingApprovalRxCount(approval) === 1 ? "item" : "items"}</p>
+                      <p className={`text-[11px] font-semibold ${approval.paymentMethod === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>{approval.paymentMethod === "patient" ? "Pay by Patient" : "Pay by Clinic"}</p>
+                      <p className={`mt-0.5 text-[9px] font-semibold ${isPaid ? "text-[#2f7a43]" : "text-[#9f1239]"}`}>{isPaid ? "Paid" : "Unpaid"}</p>
                     </div>
-                    <div className="md:text-right"><p className="text-[9px] font-medium uppercase tracking-[0.08em] text-[#999]">Total</p><p className="mt-1 text-[13px] font-semibold text-[#171717]">${pendingApprovalTotal(approval).toFixed(2)}</p></div>
-                    <div className="md:text-right"><button type="button" onClick={event => { event.stopPropagation(); setSelectedId(approval.id); }} className="inline-flex h-[30px] items-center justify-center rounded-full bg-black px-4 text-[11px] font-medium text-white transition-colors hover:bg-[#242424]">Review</button></div>
+                    <div><p className={`text-[11px] font-medium ${approval.shipTo === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>{approval.shipTo === "patient" ? "Ship to Patient" : "Ship to Clinic"}</p><p className="mt-0.5 text-[9px] text-[#888]">{pendingApprovalRxCount(approval)} {pendingApprovalRxCount(approval) === 1 ? "item" : "items"}</p></div>
+                    <div className="flex items-center justify-between gap-3 md:justify-end"><span className="text-[12px] font-semibold text-[#171717]">${pendingApprovalTotal(approval).toFixed(2)}</span><button type="button" onClick={event => { event.stopPropagation(); setSelectedId(approval.id); }} className="inline-flex h-[30px] items-center justify-center rounded-full bg-black px-4 text-[11px] font-medium text-white transition-colors hover:bg-[#242424]">Review</button></div>
                   </article>
                 );
               })}
@@ -5932,10 +5939,10 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
         ) : (
           <div className="w-full max-w-[1400px] overflow-x-auto bg-white">
             <table className={`w-full min-w-max text-left text-sm ${approvalsVersion === "v2" ? "table-fixed border-separate border-spacing-0" : "border-collapse"}`}>
-              {approvalsVersion === "v2" && <colgroup><col className="w-[9%]" /><col className="w-[18%]" /><col className="w-[17%]" /><col className="w-[21%]" /><col className="w-[16%]" /><col className="w-[9%]" /><col className="w-[10%]" /></colgroup>}
+              {approvalsVersion === "v2" && <colgroup><col className="w-[25%]" /><col className="w-[13%]" /><col className="w-[8%]" /><col className="w-[20%]" /><col className="w-[14%]" /><col className="w-[10%]" /><col className="w-[10%]" /></colgroup>}
               <thead>
                 <tr>
-                  {(approvalsVersion === "v2" ? ["Order", "Patient", "Pay by", "Created by", "Ship to", "Total", ""] : ["ORDER ID", "PATIENT", "CREATED BY", "CREATED AT", "PAY BY", "SHIP TO", "ITEMS", "STATUS", "TOTAL", "ACTION"]).map((header, index) => (
+                  {(approvalsVersion === "v2" ? ["Patient", "Pay by", "Paid", "Created by", "Ship to", "Total", ""] : ["ORDER ID", "PATIENT", "CREATED BY", "CREATED AT", "PAY BY", "SHIP TO", "ITEMS", "STATUS", "TOTAL", "ACTION"]).map((header, index) => (
                     <th key={index} className={`whitespace-nowrap py-2 text-[12px] leading-5 text-[#999999] ${approvalsVersion === "v2" ? "bg-[#f5f5f5] px-4 font-normal first:rounded-l-[10px] last:rounded-r-[10px]" : `border-b border-[#e5e7eb] bg-[#fbfbfb] font-medium uppercase ${index === 4 || index === 5 ? "w-px px-2" : "px-4"}`}`}>
                       {header}
                     </th>
@@ -5951,25 +5958,33 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
                       onClick={() => setSelectedId(approval.id)}
                       className={`cursor-pointer transition-colors hover:bg-[#f1f1f1] even:hover:bg-[#f1f1f1] ${approvalsVersion === "v2" ? "even:bg-[#fafafa]" : "even:bg-[#fbfbfb]"}`}
                     >
-                      <td className={tdClass}>#{approval.id.slice(-8)}</td>
-                      <td className={tdClass}>
-                        {approvalsVersion === "v2" ? <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[12px] font-semibold text-[#121212]"><span className="inline-block w-[104px] truncate">{approval.patient.firstName} {approval.patient.lastName}</span><span className="whitespace-nowrap rounded-full bg-[#f1f1f1] px-2 py-0.5 text-[9px] font-medium text-[#7f1d1d]">Pending Approval</span></span> : <span className="text-[14px] font-medium text-[#121212]">{approval.patient.firstName} {approval.patient.lastName}</span>}
-                      </td>
+                      {approvalsVersion === "v2" ? (
+                        <td className={tdClass}>
+                          <div className="inline-flex min-w-0 flex-col items-start gap-0.5">
+                            <div className="flex min-w-0 items-center gap-2 whitespace-nowrap text-[12px] font-semibold text-[#121212]">
+                              <span className="truncate">{approval.patient.firstName} {approval.patient.lastName}</span>
+                              <span className="shrink-0 rounded-full bg-[#f1f1f1] px-2 py-0.5 text-[9px] font-medium text-[#7f1d1d]">Pending Approval</span>
+                            </div>
+                            <span className="text-[10px] font-normal leading-[13px] text-[#686868]">Order #{approval.id.slice(-8)}</span>
+                          </div>
+                        </td>
+                      ) : <>
+                        <td className={tdClass}>#{approval.id.slice(-8)}</td>
+                        <td className={tdClass}><span className="text-[14px] font-medium text-[#121212]">{approval.patient.firstName} {approval.patient.lastName}</span></td>
+                      </>}
                       {approvalsVersion === "v2" ? <>
                         <td className="w-px whitespace-nowrap px-4 py-3 text-[12px] font-normal leading-5 text-[#121212]">
-                          <span className="inline-flex items-center gap-2 whitespace-nowrap">
-                            <span className={`inline-block w-[88px] text-[11px] font-semibold ${approval.paymentMethod === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>{approval.paymentMethod === "patient" ? "Pay by Patient" : "Pay by Clinic"}</span>
-                            <span className={`inline-flex h-5 items-center rounded-full px-2 text-[8px] font-bold ${approval.paymentMethod === "clinic_ach" ? "bg-[#f1f1f1] text-[#2f7a43]" : "bg-[#fff0f2] text-[#9f1239]"}`}>{approval.paymentMethod === "clinic_ach" ? "PAID" : "UNPAID"}</span>
-                          </span>
+                          <span className={`whitespace-nowrap text-[11px] font-semibold ${approval.paymentMethod === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>{approval.paymentMethod === "patient" ? "Pay by Patient" : "Pay by Clinic"}</span>
                         </td>
-                        <td className={`${tdClass} whitespace-nowrap`}><span className="inline-flex flex-col items-start gap-0.5 leading-[13px]"><span>{approval.submittedBy}</span><span className="text-[9px] font-normal leading-[11px] text-[#777]">{created.getMonth() + 1}/{created.getDate()}/{created.getFullYear()} · {created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span></span></td>
+                        <td className="whitespace-nowrap px-4 py-3"><span className={`text-[10px] font-semibold ${approval.paymentMethod === "clinic_ach" ? "text-[#2f7a43]" : "text-[#9f1239]"}`}>{approval.paymentMethod === "clinic_ach" ? "Paid" : "Unpaid"}</span></td>
+                        <td className={`${tdClass} whitespace-nowrap`}><span className="inline-flex flex-col items-start gap-[5px] leading-[13px]"><span>{approval.submittedBy}</span><span className="text-[10px] font-normal leading-[12px] text-[#777]">{created.getMonth() + 1}/{created.getDate()}/{created.getFullYear()} · {created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span></span></td>
                       </> : <>
                         <td className={tdClass}>{approval.submittedBy}</td>
                         <td className={tdClass}><div className="inline-flex items-center gap-2 whitespace-nowrap text-[11px] font-normal text-[#282828]"><span>{created.getMonth() + 1}/{created.getDate()}/{created.getFullYear()}</span><span className="text-[10px] text-[#686868]">{created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span></div></td>
                         <td className="w-px whitespace-nowrap px-2 py-2 text-[12px] font-normal leading-5 text-[#121212]"><OrderHistoryPayByChip payBy={approval.paymentMethod} showStatus neutral /></td>
                       </>}
                       <td className={`w-px whitespace-nowrap text-[12px] font-normal leading-5 text-[#121212] ${approvalsVersion === "v2" ? "px-4 py-3" : "px-2 py-2"}`}>
-                        {approvalsVersion === "v2" ? <span className="inline-flex flex-col items-start gap-0.5 whitespace-nowrap leading-[13px]"><span className={`text-[11px] font-medium ${approval.shipTo === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>{approval.shipTo === "patient" ? "Ship to Patient" : "Ship to Clinic"}</span><span className="whitespace-nowrap text-[9px] font-normal leading-[11px] text-[#777]">{pendingApprovalRxCount(approval)} {pendingApprovalRxCount(approval) === 1 ? "item" : "items"}</span></span> : <PendingShipToChip shipTo={approval.shipTo} />}
+                        {approvalsVersion === "v2" ? <span className="inline-flex flex-col items-start gap-1 whitespace-nowrap leading-[13px]"><span className={`text-[11px] font-medium ${approval.shipTo === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>{approval.shipTo === "patient" ? "Ship to Patient" : "Ship to Clinic"}</span><span className="whitespace-nowrap rounded-full bg-[#f1f1f1] px-2 py-0.5 text-[9px] font-normal leading-[11px] text-[#666]">{pendingApprovalRxCount(approval)} {pendingApprovalRxCount(approval) === 1 ? "item" : "items"}</span></span> : <PendingShipToChip shipTo={approval.shipTo} />}
                       </td>
                       {approvalsVersion === "current" && <td className={tdClass}>{pendingApprovalRxCount(approval)}</td>}
                       {approvalsVersion === "current" && <td className={tdClass}><span className="whitespace-nowrap text-[11px] font-semibold text-[#B25327]">Pending Approval</span></td>}
@@ -10676,8 +10691,8 @@ function OrganizationSetupPage({ onCreate }: { onCreate: () => void }) {
               </form>
             </> : currentStep === 2 ? <>
               <form onSubmit={event => { event.preventDefault(); setCurrentStep(3); }} className="space-y-3.5">
-                <ProfileField label="Title" defaultValue="Mr" required />
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-[76px_minmax(0,1fr)_minmax(0,1fr)]">
+                  <ProfileField label="Title" defaultValue="Mr" required />
                   <ProfileField label="First Name" defaultValue="Adnan" required />
                   <ProfileField label="Last Name" defaultValue="Godanci" required />
                 </div>
@@ -10753,8 +10768,8 @@ function PaymentMethodOnboardingStep({ onBack, onComplete }: { onBack: () => voi
       <div className="px-0 py-1">
         <div className="flex items-center justify-between gap-3">
           <p className="text-[10px] leading-[14px] text-[#6f7782]">You can add a payment method later from settings.</p>
-          <button type="button" onClick={onComplete} className="shrink-0 rounded-full bg-[#eaf2ff] px-3.5 py-2 text-[10px] font-semibold text-[#2563eb] shadow-[inset_0_0_0_1px_rgba(37,99,235,0.08)] transition-colors hover:bg-[#dce9ff] hover:text-[#1d4ed8]">
-            Skip for now
+          <button type="button" onClick={onComplete} className="flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-[#8db5ff] bg-[#eaf2ff] px-4 text-[11px] font-semibold text-[#1d4ed8] transition-colors hover:border-[#2563eb] hover:bg-[#dce9ff]">
+            Skip for now <ArrowUpRight size={13} strokeWidth={2.25} />
           </button>
         </div>
       </div>
