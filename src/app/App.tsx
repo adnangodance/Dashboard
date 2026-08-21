@@ -9101,6 +9101,7 @@ function MultiPatientCartPage({
   const [prescriptionValidationAttempted, setPrescriptionValidationAttempted] = useState(false);
   const [addedPrescriptionIds, setAddedPrescriptionIds] = useState<Set<number>>(new Set());
   const [addingPrescriptionId, setAddingPrescriptionId] = useState<number | null>(null);
+  const [editingPrescription, setEditingPrescription] = useState<{ id: number; original: { days: string; refills: string; directions: string; reason: string } } | null>(null);
   const [openPrescriptionNoteIds, setOpenPrescriptionNoteIds] = useState<Set<number>>(new Set());
   const [expandedPrescriptionIds, setExpandedPrescriptionIds] = useState<Set<number>>(() => {
     const firstPrescription = cartData.patients.flatMap(patient => patient.items).find(item => item.kind !== "supply");
@@ -9228,7 +9229,9 @@ function MultiPatientCartPage({
   }
 
   function addPrescriptionOrder(id: number) {
-    if (!isPrescriptionComplete(id) || addingPrescriptionId !== null) return;
+    const isEditing = editingPrescription?.id === id;
+    const hasChanges = isEditing && JSON.stringify(prescriptionDetails[id]) !== JSON.stringify(editingPrescription.original);
+    if (!isPrescriptionComplete(id) || addingPrescriptionId !== null || (isEditing && !hasChanges)) return;
     setAddingPrescriptionId(id);
     window.setTimeout(() => {
       setAddedPrescriptionIds(current => new Set([...current, id]));
@@ -9241,7 +9244,24 @@ function MultiPatientCartPage({
         return next;
       });
       setAddingPrescriptionId(null);
+      setEditingPrescription(null);
     }, 300);
+  }
+
+  function startEditingPrescription(id: number) {
+    const original = prescriptionDetails[id] ?? { days: "", refills: "", directions: "", reason: "" };
+    setEditingPrescription({ id, original: { ...original } });
+    setAddedPrescriptionIds(current => { const next = new Set(current); next.delete(id); return next; });
+    setExpandedPrescriptionIds(new Set([id]));
+  }
+
+  function cancelPrescriptionEdit(id: number) {
+    if (editingPrescription?.id === id) {
+      setPrescriptionDetails(current => ({ ...current, [id]: { ...editingPrescription.original } }));
+      setAddedPrescriptionIds(current => new Set([...current, id]));
+      setEditingPrescription(null);
+    }
+    setExpandedPrescriptionIds(current => { const next = new Set(current); next.delete(id); return next; });
   }
 
   function requiredFieldClass(value: string | undefined) {
@@ -9452,7 +9472,7 @@ function MultiPatientCartPage({
                           ) : (
                             isCompactCompleted ? (
                               <div className="ml-16 flex flex-wrap items-center">
-                                <button onClick={() => setExpandedPrescriptionIds(current => cartCardVariant === 3 || cartCardVariant === 4 || cartCardVariant === 5 || cartCardVariant === 6 ? new Set([item.id]) : new Set([...current, item.id]))} className="inline-flex h-8 items-center text-[11px] font-medium text-[#202020] underline decoration-[#8a8a8a] underline-offset-4 transition-colors hover:text-black hover:decoration-black">
+                                <button onClick={() => startEditingPrescription(item.id)} className="inline-flex h-8 items-center text-[11px] font-medium text-[#202020] underline decoration-[#8a8a8a] underline-offset-4 transition-colors hover:text-black hover:decoration-black">
                                   Show details
                                 </button>
                               </div>
@@ -9805,17 +9825,13 @@ function MultiPatientCartPage({
                                 <div className="flex items-center gap-4">
                                   <button
                                     onClick={() => addPrescriptionOrder(item.id)}
-                                    disabled={!isPrescriptionComplete(item.id) || addingPrescriptionId !== null}
+                                    disabled={!isPrescriptionComplete(item.id) || addingPrescriptionId !== null || (editingPrescription?.id === item.id && JSON.stringify(prescriptionDetails[item.id]) === JSON.stringify(editingPrescription.original))}
                                     className="inline-flex h-8 min-w-[98px] items-center justify-center gap-1.5 rounded-full bg-[#111] px-4 text-[12px] font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-[#dfdfdc] disabled:text-[#92928f]"
                                   >
-                                    {addingPrescriptionId === item.id ? <><Loader2 size={13} className="animate-spin" /> Adding</> : "Add Order"}
+                                    {addingPrescriptionId === item.id ? <><Loader2 size={13} className="animate-spin" /> {editingPrescription?.id === item.id ? "Saving" : "Adding"}</> : editingPrescription?.id === item.id ? "Save changes" : "Add Order"}
                                   </button>
                                   <button
-                                    onClick={() => setExpandedPrescriptionIds(current => {
-                                      const next = new Set(current);
-                                      next.delete(item.id);
-                                      return next;
-                                    })}
+                                    onClick={() => cancelPrescriptionEdit(item.id)}
                                     className="text-[12px] font-medium text-[#202020]"
                                   >
                                     Cancel
