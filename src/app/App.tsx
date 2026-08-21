@@ -7198,7 +7198,14 @@ function UsersPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
     }).length;
   }
 
-  const COLS = ["Patient", "Phone", "Address", "Orders", ""];
+  function patientBmi(index: number) {
+    const values = [23.4, 24.8, 27.1, 22.6, 25.3, 29.2, 24.1, 26.7, 21.9, 30.4, 23.8, 28.1];
+    const value = values[index % values.length];
+    const classification = value < 18.5 ? "Underweight" : value < 25 ? "Normal" : value < 30 ? "Overweight" : "Obesity";
+    return { value, classification };
+  }
+
+  const COLS = ["Patient", "Phone", "Address", "BMI", "Orders", ""];
 
   if (selectedPatientIndex !== null && patients[selectedPatientIndex]) {
     return <><PatientDetailsView patient={patients[selectedPatientIndex]} onBack={() => setSelectedPatientIndex(null)} onEdit={() => setCreatePatientOpen(true)} /><PatientCreateModal open={createPatientOpen} onClose={() => setCreatePatientOpen(false)} /></>;
@@ -7236,7 +7243,7 @@ function UsersPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
         {/* Table */}
         <div className="overflow-x-auto rounded-[12px] bg-[var(--app-soft)] p-2">
-          <table className="w-full min-w-[860px] overflow-hidden rounded-[9px] bg-white">
+          <table className="w-full min-w-[940px] overflow-hidden rounded-[9px] bg-white">
             <thead>
               <tr className="bg-[#FBFBFB]">
                 {COLS.map((h) => (
@@ -7267,10 +7274,13 @@ function UsersPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                   <td className="whitespace-nowrap px-5 py-3.5 text-[12px] font-normal text-[#4b4b4b]">{p.primaryPhone}</td>
                   <td className="px-5 py-3.5">
                     <div className="max-w-[360px] text-[12px] leading-[17px] text-[#4b4b4b]">
-                      <p className="font-normal">{p.address1}</p>
-                      {p.address2 && <p className="text-[#6f7780]">{p.address2}</p>}
+                      <p className="truncate font-normal">{p.address1}{p.address2 ? `, ${p.address2}` : ""}</p>
                       <p className="text-[#6f7780]">{p.city}, {p.state} {p.zip}</p>
                     </div>
+                  </td>
+                  <td className="whitespace-nowrap px-5 py-3.5">
+                    <span className="block text-[12px] font-medium text-[#333]">{patientBmi(patientIndex).value.toFixed(1)}</span>
+                    <span className="mt-0.5 block text-[10px] font-normal text-[#858b88]">{patientBmi(patientIndex).classification}</span>
                   </td>
                   <td className="whitespace-nowrap px-5 py-3.5 text-[12px] font-normal text-[#4b4b4b]">{patientOrderCount(p)}</td>
                   <td onClick={event => event.stopPropagation()} className="relative px-4 py-3.5 text-right">
