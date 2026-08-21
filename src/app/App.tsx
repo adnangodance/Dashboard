@@ -4819,6 +4819,15 @@ const ORDER_HISTORY_PAYER_OPTIONS = [
   { value: "patient", label: "Paid by Patient" },
 ];
 
+const ORDER_HISTORY_STATUS_OPTIONS = [
+  { value: "all", label: "All statuses" },
+  { value: "pending_payment", label: "Pending payment" },
+  { value: "processing", label: "Processing" },
+  { value: "shipped", label: "Shipped" },
+  { value: "delivered", label: "Delivered" },
+  { value: "cancelled", label: "Cancelled" },
+];
+
 interface OrderHistoryEntry {
   order_id: string;
   created_at: string;
@@ -4929,6 +4938,16 @@ function OrderHistoryStatusChip({ status }: { status: OrderHistoryEntry["order_s
   );
 }
 
+function OrderHistoryV2Status({ status }: { status: OrderHistoryEntry["order_status"] }) {
+  const config = ORDER_HISTORY_STATUS_CONFIG[status];
+  return (
+    <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-[#f1f1f1] pl-1 pr-3 text-[11px] font-normal text-[#333]">
+      <span className="flex size-5 items-center justify-center rounded-full [&_svg]:size-3" style={{ backgroundColor: config.bgColor }}><OrderHistoryStatusIcon status={status} /></span>
+      {config.label}
+    </span>
+  );
+}
+
 function OrderHistoryPayByChip({ payBy, showStatus = false, neutral = false, isPaid }: { payBy: OrderHistoryEntry["payment_method"]; showStatus?: boolean; neutral?: boolean; isPaid?: boolean }) {
   const isPatient = payBy === "patient";
   const paymentIsPaid = isPaid ?? payBy === "clinic_ach";
@@ -5032,10 +5051,12 @@ function OrderHistoryDateInput({ label, value, onChange, min, max }: { label: st
 
 function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const { showToast } = useAppLoading();
+  const [historyVersion, setHistoryVersion] = useState<"current" | "v2">("v2");
   const [rangePreset, setRangePreset] = useState("this_month");
   const [customStart, setCustomStart] = useState("");
   const [customEnd, setCustomEnd] = useState("");
   const [payer, setPayer] = useState("all");
+  const [status, setStatus] = useState("all");
   const [search, setSearch] = useState("");
   const [downloadingOrderId, setDownloadingOrderId] = useState<string | null>(null);
 
@@ -5051,6 +5072,7 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       if (startDate && dateKey < startDate) return false;
       if (endDate && dateKey > endDate) return false;
       if (payer !== "all" && order.payment_method !== payer) return false;
+      if (historyVersion === "v2" && status !== "all" && order.order_status !== status) return false;
       const query = search.trim().toLowerCase();
       if (query && ![
         order.order_id,
@@ -5061,9 +5083,9 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       ].some(value => value.toLowerCase().includes(query))) return false;
       return true;
     });
-  }, [startDate, endDate, payer, search]);
+  }, [startDate, endDate, payer, search, status, historyVersion]);
 
-  const hasActiveFilters = rangePreset !== "all" || payer !== "all";
+  const hasActiveFilters = rangePreset !== "all" || payer !== "all" || (historyVersion === "v2" && status !== "all");
 
   function handleDownloadInvoice(orderId: string) {
     if (downloadingOrderId) return;
@@ -5079,12 +5101,18 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   return (
     <>
       <div className="mb-5 flex flex-col items-start gap-3">
-        <h1 className="flex h-[38px] items-center text-[28px] font-semibold leading-tight text-[#1a1a1a]">
-          Order History <span className="text-[16px] font-normal text-[#9d9d9d]">({orders.length})</span>
-        </h1>
+        <div className="flex w-full items-center justify-between gap-4">
+          <h1 className="flex h-[38px] items-center text-[28px] font-semibold leading-tight text-[#1a1a1a]">
+            Order History <span className="text-[16px] font-normal text-[#9d9d9d]">({orders.length})</span>
+          </h1>
+          <div className="inline-flex h-10 items-center rounded-full bg-[#f1f1f1] p-1" role="tablist" aria-label="Order history version">
+            <button type="button" role="tab" aria-selected={historyVersion === "current"} onClick={() => setHistoryVersion("current")} className={`h-8 rounded-full px-4 text-[11px] font-medium transition-colors ${historyVersion === "current" ? "bg-white text-black shadow-sm" : "text-[#777] hover:text-black"}`}>Current</button>
+            <button type="button" role="tab" aria-selected={historyVersion === "v2"} onClick={() => setHistoryVersion("v2")} className={`h-8 rounded-full px-4 text-[11px] font-medium transition-colors ${historyVersion === "v2" ? "bg-black text-white" : "text-[#777] hover:text-black"}`}>V2</button>
+          </div>
+        </div>
         <div className="flex w-full flex-wrap items-end gap-4 border-b border-[#eeeeec] pb-4">
-          <div className="group mt-[17px] flex h-[38px] w-full items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:border-2 focus-within:border-black sm:w-[220px] sm:focus-within:w-[310px]">
-            <Search size={14} strokeWidth={1.8} className="shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110" />
+          <div className={`group mt-[17px] flex h-[38px] w-full items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 focus-within:border-black ${historyVersion === "v2" ? "sm:w-[280px]" : "transition-all duration-300 ease-out sm:w-[220px] sm:focus-within:w-[310px]"}`}>
+            <Search size={14} strokeWidth={1.8} className={`shrink-0 text-[#686868] ${historyVersion === "current" ? "transition-transform duration-300 group-focus-within:scale-110" : ""}`} />
             <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Search order history" className="min-w-0 flex-1 bg-transparent text-[11px] font-medium text-[#1a1a1a] outline-none placeholder:font-medium placeholder:text-[#686868]" />
             {search ? <button type="button" onClick={() => setSearch("")} className="text-[14px] text-[#777] hover:text-black" aria-label="Clear search">×</button> : <span className="shrink-0 text-[10px] text-[#686868]">⌘ F</span>}
           </div>
@@ -5105,6 +5133,11 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             <div className="w-[180px]">
               <OrderHistorySelect label="Paid by" options={ORDER_HISTORY_PAYER_OPTIONS} value={payer} onChange={setPayer} />
             </div>
+            {historyVersion === "v2" && (
+              <div className="w-[180px]">
+                <OrderHistorySelect label="Status" options={ORDER_HISTORY_STATUS_OPTIONS} value={status} onChange={setStatus} />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -5131,11 +5164,11 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
         ) : (
           <div className="rounded-xl bg-white">
             <div className="w-full max-w-[1400px] overflow-x-auto bg-white">
-              <table className="w-full min-w-max border-collapse text-left text-sm">
+              <table className={`w-full min-w-max text-left text-sm ${historyVersion === "v2" ? "border-separate border-spacing-0" : "border-collapse"}`}>
                 <thead>
                   <tr>
-                    {["Date", "Order", "Patient", "Type", "Status", "Paid By", "Total", "Refunded", "Paid", ""].map((header, index) => (
-                      <th key={index} className="whitespace-nowrap border-b border-[#e5e7eb] bg-[#fbfbfb] px-4 py-2 text-[12px] font-bold uppercase leading-5 text-[#999999]">
+                    {(historyVersion === "v2" ? ["Date", "Order", "Patient", "Type", "Status", "Paid By", "Paid", "Total", ""] : ["Date", "Order", "Patient", "Type", "Status", "Paid By", "Total", "Refunded", "Paid", ""]).map((header, index) => (
+                      <th key={index} className={`whitespace-nowrap px-4 py-2 text-[12px] leading-5 text-[#999999] ${historyVersion === "v2" ? "bg-[#f5f5f5] font-normal normal-case first:rounded-l-[10px] last:rounded-r-[10px]" : "border-b border-[#e5e7eb] bg-[#fbfbfb] font-bold uppercase"}`}>
                         {header}
                       </th>
                     ))}
@@ -5146,47 +5179,47 @@ function OrderHistoryPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                     <tr
                       key={order.order_id}
                       onClick={() => onNavigate("orders")}
-                      className="cursor-pointer transition-colors even:bg-[#fbfbfb] hover:bg-[#f1f1f1] even:hover:bg-[#f1f1f1]"
+                      className={`cursor-pointer transition-colors hover:bg-[#f1f1f1] ${historyVersion === "current" ? "even:bg-[#fbfbfb] even:hover:bg-[#f1f1f1]" : "even:bg-[#fafafa] even:hover:bg-[#f1f1f1]"}`}
                     >
-                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">{formatDate(order.created_at)}</td>
-                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">#{order.order_id.slice(-8).toUpperCase()}</td>
-                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">{order.is_multi_patient ? "Multiple Patients" : order.patient_name || "—"}</td>
-                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">{order.is_custom ? "Custom" : order.order_type === "refill" ? "Refill" : "Order"}</td>
-                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]"><OrderHistoryStatusChip status={order.order_status} /></td>
-                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]"><OrderHistoryPayByChip payBy={order.payment_method} /></td>
-                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">{orderHistoryMoney(order.total_price)}</td>
-                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">{order.refunded_amount > 0 ? `-${orderHistoryMoney(order.refunded_amount)}` : "—"}</td>
-                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">
-                        {order.is_paid ? (
-                          <span className="flex flex-col gap-[2px] font-semibold leading-[13px] text-[#37703b]">
-                            <span>{orderHistoryMoney(order.net_paid)}</span>
-                            {order.payment_timestamp && <span className="text-[10px] font-medium leading-[11px] text-[#9a9a90]">{formatDate(order.payment_timestamp)}</span>}
-                          </span>
-                        ) : order.is_cancelled ? (
-                          "—"
-                        ) : (
-                          <span className="font-semibold text-[#9a4b3c]">Unpaid</span>
-                        )}
-                      </td>
-                      <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">
-                        <button
-                          type="button"
-                          onClick={event => { event.stopPropagation(); handleDownloadInvoice(order.order_id); }}
-                          disabled={downloadingOrderId === order.order_id}
-                          aria-label="Download invoice"
-                          title="Download invoice"
-                          className="inline-flex h-[30px] items-center gap-1.5 rounded-full border border-black bg-black px-3 text-[12px] font-semibold text-white transition-colors hover:border-[#242424] hover:bg-[#242424] disabled:cursor-default disabled:opacity-60 disabled:hover:border-black disabled:hover:bg-black"
-                        >
-                          {downloadingOrderId === order.order_id ? (
-                            <span className="size-[13px] animate-spin rounded-full border-2 border-[#d8d8d2] border-t-[#183229]" aria-hidden="true" />
-                          ) : (
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                              <path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 19h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          )}
-                          <span>Invoice</span>
-                        </button>
-                      </td>
+                      {historyVersion === "v2" ? (
+                        <>
+                          <td className="px-4 py-3 text-[12px] font-normal text-[#121212]">{formatDate(order.created_at)}</td>
+                          <td className="px-4 py-3 text-[12px] font-medium text-[#121212]">#{order.order_id.slice(-8).toUpperCase()}</td>
+                          <td className="px-4 py-3 text-[12px] font-normal text-[#121212]">{order.is_multi_patient ? <span className="inline-flex items-center gap-1.5">Multiple patients <span className="rounded-full bg-[#f1f1f1] px-2 py-0.5 text-[9px] text-[#666]">Group</span></span> : order.patient_name || "—"}</td>
+                          <td className="px-4 py-3 text-[12px] font-normal text-[#555]">{order.is_custom ? "Custom" : order.order_type === "refill" ? "Refill" : "Order"}</td>
+                          <td className="px-4 py-3"><OrderHistoryV2Status status={order.order_status} /></td>
+                          <td className="px-4 py-3">
+                            <span className={`text-[11px] font-medium ${order.payment_method === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>
+                              {order.payment_method === "patient" ? "Pay by Patient" : "Pay by Clinic"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            {order.is_cancelled ? <span className="text-[11px] font-normal text-[#888]">—</span> : order.is_paid ? <span className="flex flex-col gap-0.5"><span className="text-[11px] font-medium text-[#2f7a43]">Paid</span>{order.payment_timestamp && <span className="text-[10px] font-normal text-[#8b8b8b]">{formatDate(order.payment_timestamp)}</span>}</span> : <span className="text-[11px] font-medium text-[#7f1d1d]">Unpaid</span>}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="block text-[12px] font-semibold text-[#121212]">{orderHistoryMoney(order.total_price)}</span>
+                            {order.refunded_amount > 0 && <span className="mt-0.5 block text-[10px] font-normal text-[#777]">{orderHistoryMoney(order.refunded_amount)} refunded</span>}
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <button type="button" onClick={event => { event.stopPropagation(); handleDownloadInvoice(order.order_id); }} disabled={downloadingOrderId === order.order_id} className="inline-flex h-[30px] min-w-[94px] items-center justify-center gap-1.5 rounded-full bg-black px-3 text-[11px] font-medium text-white transition-colors hover:bg-[#242424] disabled:opacity-60">
+                              {downloadingOrderId === order.order_id ? <span className="size-3 animate-spin rounded-full border-2 border-[#666] border-t-white" /> : <><Download size={13} />Invoice</>}
+                            </button>
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">{formatDate(order.created_at)}</td>
+                          <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">#{order.order_id.slice(-8).toUpperCase()}</td>
+                          <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">{order.is_multi_patient ? "Multiple Patients" : order.patient_name || "—"}</td>
+                          <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">{order.is_custom ? "Custom" : order.order_type === "refill" ? "Refill" : "Order"}</td>
+                          <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]"><OrderHistoryStatusChip status={order.order_status} /></td>
+                          <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]"><OrderHistoryPayByChip payBy={order.payment_method} /></td>
+                          <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">{orderHistoryMoney(order.total_price)}</td>
+                          <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">{order.refunded_amount > 0 ? `-${orderHistoryMoney(order.refunded_amount)}` : "—"}</td>
+                          <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]">{order.is_paid ? <span className="flex flex-col gap-[2px] font-semibold leading-[13px] text-[#37703b]"><span>{orderHistoryMoney(order.net_paid)}</span>{order.payment_timestamp && <span className="text-[10px] font-medium leading-[11px] text-[#9a9a90]">{formatDate(order.payment_timestamp)}</span>}</span> : order.is_cancelled ? "—" : <span className="font-semibold text-[#9a4b3c]">Unpaid</span>}</td>
+                          <td className="max-w-[500px] px-4 py-2.5 text-[12px] font-medium leading-5 text-[#121212]"><button type="button" onClick={event => { event.stopPropagation(); handleDownloadInvoice(order.order_id); }} disabled={downloadingOrderId === order.order_id} aria-label="Download invoice" title="Download invoice" className="inline-flex h-[30px] items-center gap-1.5 rounded-full border border-black bg-black px-3 text-[12px] font-semibold text-white transition-colors hover:border-[#242424] hover:bg-[#242424] disabled:cursor-default disabled:opacity-60 disabled:hover:border-black disabled:hover:bg-black">{downloadingOrderId === order.order_id ? <span className="size-[13px] animate-spin rounded-full border-2 border-[#d8d8d2] border-t-[#183229]" aria-hidden="true" /> : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 19h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>}<span>Invoice</span></button></td>
+                        </>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -5501,6 +5534,7 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
+  const [detailVersion, setDetailVersion] = useState<"current" | "v2">("v2");
 
   const created = new Date(approval.createdAt);
   const timestamp = `${String(created.getMonth() + 1).padStart(2, "0")}/${String(created.getDate()).padStart(2, "0")}/${created.getFullYear()} - ${created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
@@ -5535,14 +5569,18 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
   return (
     <div className="max-w-[1040px]">
       {/* Top bar */}
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <div className={`mb-5 flex flex-wrap items-center justify-between gap-3 ${detailVersion === "v2" ? "sticky top-0 z-20 border-b border-[#eeeeec] bg-white/95 py-3 backdrop-blur-sm" : ""}`}>
         <div className="flex items-center gap-3">
           <button type="button" aria-label="Back to pending approvals" onClick={onBack} className="flex size-10 items-center justify-center rounded-r-[12px] bg-[#f0f1f2] text-[#111] transition-colors hover:bg-[#e6e8e9]">
             <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
           </button>
-          <h1 className="text-[22px] font-semibold text-[#1a1a1a]">Pending Approvals</h1>
+          {detailVersion === "v2" ? <div><h1 className="text-[22px] font-semibold text-[#1a1a1a]">Review order</h1><p className="mt-0.5 text-[10px] text-[#7b7b7b]">Order #{approval.id.slice(-6).toUpperCase()}</p></div> : <h1 className="text-[22px] font-semibold text-[#1a1a1a]">Pending Approvals</h1>}
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="mr-2 inline-flex h-10 items-center rounded-full bg-[#f1f1f1] p-1" role="tablist" aria-label="Review page version">
+            <button type="button" role="tab" aria-selected={detailVersion === "current"} onClick={() => setDetailVersion("current")} className={`h-8 rounded-full px-4 text-[11px] font-medium transition-colors ${detailVersion === "current" ? "bg-white text-black shadow-sm" : "text-[#777] hover:text-black"}`}>Current</button>
+            <button type="button" role="tab" aria-selected={detailVersion === "v2"} onClick={() => setDetailVersion("v2")} className={`h-8 rounded-full px-4 text-[11px] font-medium transition-colors ${detailVersion === "v2" ? "bg-black text-white" : "text-[#777] hover:text-black"}`}>V2</button>
+          </div>
           <button onClick={() => setIsRejectModalOpen(true)} className="inline-flex h-10 items-center gap-1.5 rounded-full border border-[#d8d8d8] bg-white px-4 text-[12px] font-semibold text-[#121212] transition-colors hover:bg-[#f1f1f1]">
             Reject
           </button>
@@ -5553,6 +5591,19 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
       </div>
 
       <div className="flex flex-col gap-4">
+        {detailVersion === "v2" && <section className="flex flex-col justify-between gap-4 rounded-[14px] border border-[#eadfd7] bg-[#fffaf7] px-5 py-4 sm:flex-row sm:items-center">
+          <div>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#B25327]">Decision required</p>
+            <h2 className="mt-1 text-[17px] font-semibold text-[#2a211d]">Pending payment</h2>
+            <p className="mt-1 text-[11px] text-[#746760]">Review the patient, payment, and prescription details before approving this order.</p>
+          </div>
+          <div className="grid grid-cols-2 gap-x-7 gap-y-3 sm:grid-cols-3">
+            <div><p className={metaLabel}>Patient</p><p className="mt-1 whitespace-nowrap text-[11px] font-semibold text-[#161a18]">{patient.firstName} {patient.lastName}</p></div>
+            <div><p className={metaLabel}>Payment</p><p className={`mt-1 whitespace-nowrap text-[11px] font-semibold ${payToClinic ? "text-[#0095a8]" : "text-[#2f7a43]"}`}>{payToClinic ? "Pay by Clinic" : "Pay by Patient"}</p><p className={`mt-0.5 text-[9px] font-semibold ${approval.paymentMethod === "clinic_ach" ? "text-[#2f7a43]" : "text-[#9f1239]"}`}>{approval.paymentMethod === "clinic_ach" ? "Paid" : "Unpaid"}</p></div>
+            <div><p className={metaLabel}>Total</p><p className="mt-1 text-[13px] font-bold text-[#161a18]">${finalTotal.toFixed(2)}</p></div>
+          </div>
+        </section>}
+
         {/* Order summary card */}
         <section className="overflow-hidden rounded-[14px] border border-[#e6e7e5] bg-white">
           <div className="grid gap-x-5 gap-y-4 border-b border-[#eceeeb] bg-[#fbfbfb] px-5 py-4 sm:grid-cols-3 lg:grid-cols-[1.15fr_.8fr_1fr_1.05fr_1.35fr_.85fr]">
@@ -5567,7 +5618,7 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
             <div>
               <p className={metaLabel}>Status</p>
               <div className="mt-1 flex">
-                <span className="inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full bg-[#EC0000] px-3 text-[11px] font-semibold text-white">Pending payment <CreditCard size={13} /></span>
+                {detailVersion === "v2" ? <span className="whitespace-nowrap text-[11px] font-semibold text-[#B25327]">Pending Payment</span> : <span className="inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full bg-[#EC0000] px-3 text-[11px] font-semibold text-white">Pending payment <CreditCard size={13} /></span>}
               </div>
             </div>
             <div>
@@ -5637,7 +5688,6 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
 
         {/* Pharmacy fulfillment cards */}
         {approval.pharmacies.map((pharmacyOrder, pharmacyIndex) => {
-          const hasControlledSubstance = pharmacyOrder.prescriptions.some(rx => rx.isControlled);
           const pharmacyTotal = pharmacyOrder.prescriptions.reduce((s, rx) => s + rx.price, 0);
           return (
             <section key={pharmacyIndex} className="overflow-hidden rounded-[14px] border border-[#e6e7e5] bg-white">
@@ -5649,18 +5699,9 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
                     <p className="mt-0.5 text-[11px] text-[#667085]">Licensed compounding pharmacy</p>
                   </div>
                 </div>
+                <p className="min-w-0 flex-1 whitespace-nowrap text-center text-[10px] font-medium text-[#b42318]">Please make sure to also forward an e-prescription via your clinical software to the above pharmacy!</p>
                 <p className="text-[16px] font-bold text-[#161a18]">${pharmacyTotal.toFixed(2)}</p>
               </div>
-
-              {hasControlledSubstance && (
-                <div className="ml-11 mt-1 flex max-w-max items-center gap-1 rounded-md bg-[#f9ecec] px-2 py-0.5 text-[12px] font-medium text-[#e14343]">
-                  <svg className="mt-0.5 shrink-0 text-[#dc2626]" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                    <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                  Please make sure to also forward an e-prescription via your clinical software to the above pharmacy!
-                </div>
-              )}
 
               <div className="grid gap-3 border-b border-[#eceeeb] px-5 py-3 sm:grid-cols-4">
                 <div>
@@ -5760,6 +5801,7 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
 function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Page) => void }) {
   const [approvals, setApprovals] = useState<PendingApproval[]>(PENDING_APPROVALS_MOCK);
   const [searchQuery, setSearchQuery] = useState("");
+  const [approvalsVersion, setApprovalsVersion] = useState<"current" | "v2" | "v3">("v3");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // ⌘F / Ctrl+F focuses the search box instead of the browser find bar
@@ -5802,29 +5844,39 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
     );
   });
 
-  const tdClass = "max-w-[500px] px-4 py-2 text-[12px] font-normal leading-5 text-[#121212]";
+  const tdClass = `max-w-[500px] px-4 text-[12px] font-normal leading-5 text-[#121212] ${approvalsVersion === "v2" ? "py-3" : "py-2"}`;
 
   return (
     <div className="max-w-[1400px]">
       <div className="mb-5 flex flex-col gap-3">
         <div className="flex flex-col items-start gap-3">
-          <h1 className="flex h-[38px] items-center text-[28px] font-medium leading-tight text-[#1a1a1a]">
-            Pending Approvals <span className="text-[16px] font-normal text-[#9d9d9d]">({approvals.length})</span>
-          </h1>
-          <label className="group mt-[17px] flex h-[38px] w-full items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 transition-all duration-300 ease-out focus-within:border-2 focus-within:border-black sm:w-[220px] sm:focus-within:w-[310px]">
-            <span className="flex shrink-0 text-[#686868] transition-transform duration-300 group-focus-within:scale-110">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-            </span>
-            <input
-              ref={searchInputRef}
-              value={searchQuery}
-              onChange={event => setSearchQuery(event.target.value)}
-              placeholder="Search by order, patient, or user"
-              aria-label="Search pending approvals"
-              className="min-w-0 flex-1 bg-transparent text-[11px] font-medium text-[#1a1a1a] outline-none placeholder:font-medium placeholder:text-[#686868]"
-            />
-            <span className="shrink-0 text-[10px] text-[#686868]">⌘ F</span>
-          </label>
+          <div className="flex w-full items-center justify-between gap-4">
+            <h1 className="flex h-[38px] items-center text-[28px] font-medium leading-tight text-[#1a1a1a]">
+              Pending Approvals <span className="text-[16px] font-normal text-[#9d9d9d]">({approvals.length})</span>
+            </h1>
+            <div className="inline-flex h-10 items-center rounded-full bg-[#f1f1f1] p-1" role="tablist" aria-label="Pending approvals version">
+              <button type="button" role="tab" aria-selected={approvalsVersion === "current"} onClick={() => setApprovalsVersion("current")} className={`h-8 rounded-full px-4 text-[11px] font-medium transition-colors ${approvalsVersion === "current" ? "bg-white text-black shadow-sm" : "text-[#777] hover:text-black"}`}>Current</button>
+              <button type="button" role="tab" aria-selected={approvalsVersion === "v2"} onClick={() => setApprovalsVersion("v2")} className={`h-8 rounded-full px-4 text-[11px] font-medium transition-colors ${approvalsVersion === "v2" ? "bg-black text-white" : "text-[#777] hover:text-black"}`}>V2</button>
+              <button type="button" role="tab" aria-selected={approvalsVersion === "v3"} onClick={() => setApprovalsVersion("v3")} className={`h-8 rounded-full px-4 text-[11px] font-medium transition-colors ${approvalsVersion === "v3" ? "bg-black text-white" : "text-[#777] hover:text-black"}`}>V3</button>
+            </div>
+          </div>
+          <div className="mt-[17px] flex w-full flex-wrap items-end justify-between gap-3">
+            <label className={`group flex h-[38px] w-full items-center gap-2 rounded-[9px] border border-[#cfcfcf] bg-white px-3 focus-within:border-black ${approvalsVersion !== "current" ? "transition-colors sm:w-[310px]" : "transition-all duration-300 ease-out sm:w-[220px] sm:focus-within:w-[310px]"}`}>
+              <span className={`flex shrink-0 text-[#686868] ${approvalsVersion === "current" ? "transition-transform duration-300 group-focus-within:scale-110" : ""}`}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+              </span>
+              <input
+                ref={searchInputRef}
+                value={searchQuery}
+                onChange={event => setSearchQuery(event.target.value)}
+                placeholder="Search by order, patient, or user"
+                aria-label="Search pending approvals"
+                className={`min-w-0 flex-1 bg-transparent text-[11px] text-[#1a1a1a] outline-none placeholder:text-[#686868] ${approvalsVersion !== "current" ? "font-normal placeholder:font-normal" : "font-medium placeholder:font-medium"}`}
+              />
+              <span className="shrink-0 text-[10px] text-[#686868]">⌘ F</span>
+            </label>
+            {approvalsVersion === "v2" && <span className="pb-2 text-[11px] font-medium text-[#7f1d1d]">{filteredApprovals.length} requiring review</span>}
+          </div>
         </div>
       </div>
 
@@ -5844,13 +5896,47 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
               {searchQuery ? "No orders found matching your search." : "There are no orders waiting for your approval."}
             </p>
           </div>
+        ) : approvalsVersion === "v3" ? (
+          <div className="overflow-hidden rounded-[12px] border border-[#e8e8e8] bg-white">
+            <div className="flex items-center justify-between border-b border-[#ececec] bg-[#fafafa] px-5 py-3">
+              <div><h2 className="text-[13px] font-semibold text-[#171717]">Review queue</h2><p className="mt-0.5 text-[10px] text-[#777]">Orders waiting for a clinical decision</p></div>
+              <span className="text-[11px] font-medium text-[#B25327]">{filteredApprovals.length} requiring review</span>
+            </div>
+            <div className="divide-y divide-[#eeeeee]">
+              {filteredApprovals.map(approval => {
+                const created = new Date(approval.createdAt);
+                const isPaid = approval.paymentMethod === "clinic_ach";
+                return (
+                  <article key={approval.id} onClick={() => setSelectedId(approval.id)} className="group grid cursor-pointer gap-4 px-5 py-4 transition-colors hover:bg-[#fafafa] md:grid-cols-[minmax(220px,1.25fr)_minmax(170px,.9fr)_minmax(150px,.8fr)_110px_90px] md:items-center">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2"><h3 className="truncate text-[13px] font-semibold text-[#161616]">{approval.patient.firstName} {approval.patient.lastName}</h3><span className="whitespace-nowrap text-[10px] font-semibold text-[#B25327]">Pending Approval</span></div>
+                      <p className="mt-1 text-[10px] text-[#777]">#{approval.id.slice(-8)} · Submitted by <span className="font-medium text-[#444]">{approval.submittedBy}</span></p>
+                      <p className="mt-0.5 text-[10px] text-[#999]">{created.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })} at {created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-medium uppercase tracking-[0.08em] text-[#999]">Payment</p>
+                      <div className="mt-1 flex items-center gap-2"><span className={`text-[11px] font-semibold ${approval.paymentMethod === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>{approval.paymentMethod === "patient" ? "Pay by Patient" : "Pay by Clinic"}</span><span className={`text-[9px] font-bold ${isPaid ? "text-[#2f7a43]" : "text-[#9f1239]"}`}>{isPaid ? "PAID" : "UNPAID"}</span></div>
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-medium uppercase tracking-[0.08em] text-[#999]">Fulfillment</p>
+                      <p className={`mt-1 text-[11px] font-medium ${approval.shipTo === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>{approval.shipTo === "patient" ? "Ship to Patient" : "Ship to Clinic"}</p>
+                      <p className="mt-0.5 text-[10px] text-[#888]">{pendingApprovalRxCount(approval)} {pendingApprovalRxCount(approval) === 1 ? "item" : "items"}</p>
+                    </div>
+                    <div className="md:text-right"><p className="text-[9px] font-medium uppercase tracking-[0.08em] text-[#999]">Total</p><p className="mt-1 text-[13px] font-semibold text-[#171717]">${pendingApprovalTotal(approval).toFixed(2)}</p></div>
+                    <div className="md:text-right"><button type="button" onClick={event => { event.stopPropagation(); setSelectedId(approval.id); }} className="inline-flex h-[30px] items-center justify-center rounded-full bg-black px-4 text-[11px] font-medium text-white transition-colors hover:bg-[#242424]">Review</button></div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
         ) : (
           <div className="w-full max-w-[1400px] overflow-x-auto bg-white">
-            <table className="w-full min-w-max border-collapse text-left text-sm">
+            <table className={`w-full min-w-max text-left text-sm ${approvalsVersion === "v2" ? "table-fixed border-separate border-spacing-0" : "border-collapse"}`}>
+              {approvalsVersion === "v2" && <colgroup><col className="w-[9%]" /><col className="w-[18%]" /><col className="w-[17%]" /><col className="w-[21%]" /><col className="w-[16%]" /><col className="w-[9%]" /><col className="w-[10%]" /></colgroup>}
               <thead>
                 <tr>
-                  {["ORDER ID", "PATIENT", "CREATED BY", "CREATED AT", "PAY BY", "SHIP TO", "ITEMS", "STATUS", "TOTAL", "ACTION"].map((header, index) => (
-                    <th key={index} className={`whitespace-nowrap border-b border-[#e5e7eb] bg-[#fbfbfb] py-2 text-[12px] font-medium uppercase leading-5 text-[#999999] ${index === 4 || index === 5 ? "w-px px-2" : "px-4"}`}>
+                  {(approvalsVersion === "v2" ? ["Order", "Patient", "Pay by", "Created by", "Ship to", "Total", ""] : ["ORDER ID", "PATIENT", "CREATED BY", "CREATED AT", "PAY BY", "SHIP TO", "ITEMS", "STATUS", "TOTAL", "ACTION"]).map((header, index) => (
+                    <th key={index} className={`whitespace-nowrap py-2 text-[12px] leading-5 text-[#999999] ${approvalsVersion === "v2" ? "bg-[#f5f5f5] px-4 font-normal first:rounded-l-[10px] last:rounded-r-[10px]" : `border-b border-[#e5e7eb] bg-[#fbfbfb] font-medium uppercase ${index === 4 || index === 5 ? "w-px px-2" : "px-4"}`}`}>
                       {header}
                     </th>
                   ))}
@@ -5863,25 +5949,30 @@ function PendingApprovalsPage({ onNavigate: _onNavigate }: { onNavigate: (p: Pag
                     <tr
                       key={approval.id}
                       onClick={() => setSelectedId(approval.id)}
-                      className="cursor-pointer transition-colors even:bg-[#fbfbfb] hover:bg-[#f1f1f1] even:hover:bg-[#f1f1f1]"
+                      className={`cursor-pointer transition-colors hover:bg-[#f1f1f1] even:hover:bg-[#f1f1f1] ${approvalsVersion === "v2" ? "even:bg-[#fafafa]" : "even:bg-[#fbfbfb]"}`}
                     >
                       <td className={tdClass}>#{approval.id.slice(-8)}</td>
                       <td className={tdClass}>
-                        <span className="text-[14px] font-medium text-[#121212]">{approval.patient.firstName} {approval.patient.lastName}</span>
+                        {approvalsVersion === "v2" ? <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[12px] font-semibold text-[#121212]"><span className="inline-block w-[104px] truncate">{approval.patient.firstName} {approval.patient.lastName}</span><span className="whitespace-nowrap rounded-full bg-[#f1f1f1] px-2 py-0.5 text-[9px] font-medium text-[#7f1d1d]">Pending Approval</span></span> : <span className="text-[14px] font-medium text-[#121212]">{approval.patient.firstName} {approval.patient.lastName}</span>}
                       </td>
-                      <td className={tdClass}>{approval.submittedBy}</td>
-                      <td className={tdClass}>
-                        <div className="inline-flex items-center gap-2 whitespace-nowrap text-[11px] font-normal text-[#282828]">
-                          <span>{created.getMonth() + 1}/{created.getDate()}/{created.getFullYear()}</span>
-                          <span className="text-[10px] text-[#686868]">{created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
-                        </div>
+                      {approvalsVersion === "v2" ? <>
+                        <td className="w-px whitespace-nowrap px-4 py-3 text-[12px] font-normal leading-5 text-[#121212]">
+                          <span className="inline-flex items-center gap-2 whitespace-nowrap">
+                            <span className={`inline-block w-[88px] text-[11px] font-semibold ${approval.paymentMethod === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>{approval.paymentMethod === "patient" ? "Pay by Patient" : "Pay by Clinic"}</span>
+                            <span className={`inline-flex h-5 items-center rounded-full px-2 text-[8px] font-bold ${approval.paymentMethod === "clinic_ach" ? "bg-[#f1f1f1] text-[#2f7a43]" : "bg-[#fff0f2] text-[#9f1239]"}`}>{approval.paymentMethod === "clinic_ach" ? "PAID" : "UNPAID"}</span>
+                          </span>
+                        </td>
+                        <td className={`${tdClass} whitespace-nowrap`}><span className="inline-flex flex-col items-start gap-0.5 leading-[13px]"><span>{approval.submittedBy}</span><span className="text-[9px] font-normal leading-[11px] text-[#777]">{created.getMonth() + 1}/{created.getDate()}/{created.getFullYear()} · {created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span></span></td>
+                      </> : <>
+                        <td className={tdClass}>{approval.submittedBy}</td>
+                        <td className={tdClass}><div className="inline-flex items-center gap-2 whitespace-nowrap text-[11px] font-normal text-[#282828]"><span>{created.getMonth() + 1}/{created.getDate()}/{created.getFullYear()}</span><span className="text-[10px] text-[#686868]">{created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span></div></td>
+                        <td className="w-px whitespace-nowrap px-2 py-2 text-[12px] font-normal leading-5 text-[#121212]"><OrderHistoryPayByChip payBy={approval.paymentMethod} showStatus neutral /></td>
+                      </>}
+                      <td className={`w-px whitespace-nowrap text-[12px] font-normal leading-5 text-[#121212] ${approvalsVersion === "v2" ? "px-4 py-3" : "px-2 py-2"}`}>
+                        {approvalsVersion === "v2" ? <span className="inline-flex flex-col items-start gap-0.5 whitespace-nowrap leading-[13px]"><span className={`text-[11px] font-medium ${approval.shipTo === "patient" ? "text-[#2f7a43]" : "text-[#0095a8]"}`}>{approval.shipTo === "patient" ? "Ship to Patient" : "Ship to Clinic"}</span><span className="whitespace-nowrap text-[9px] font-normal leading-[11px] text-[#777]">{pendingApprovalRxCount(approval)} {pendingApprovalRxCount(approval) === 1 ? "item" : "items"}</span></span> : <PendingShipToChip shipTo={approval.shipTo} />}
                       </td>
-                      <td className="w-px whitespace-nowrap px-2 py-2 text-[12px] font-normal leading-5 text-[#121212]"><OrderHistoryPayByChip payBy={approval.paymentMethod} showStatus neutral /></td>
-                      <td className="w-px whitespace-nowrap px-2 py-2 text-[12px] font-normal leading-5 text-[#121212]"><PendingShipToChip shipTo={approval.shipTo} /></td>
-                      <td className={tdClass}>{pendingApprovalRxCount(approval)}</td>
-                      <td className={tdClass}>
-                        <span className="whitespace-nowrap text-[11px] font-semibold text-[#B25327]">Pending Approval</span>
-                      </td>
+                      {approvalsVersion === "current" && <td className={tdClass}>{pendingApprovalRxCount(approval)}</td>}
+                      {approvalsVersion === "current" && <td className={tdClass}><span className="whitespace-nowrap text-[11px] font-semibold text-[#B25327]">Pending Approval</span></td>}
                       <td className={tdClass}>${pendingApprovalTotal(approval).toFixed(2)}</td>
                       <td className={tdClass}>
                         <div className="flex items-center gap-1.5">
