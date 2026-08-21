@@ -7258,22 +7258,22 @@ function UsersPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                   onClick={() => setSelectedPatientIndex(patientIndex)}
                   className="group cursor-pointer transition-colors hover:bg-[var(--app-soft-hover)]"
                 >
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-3.5">
                     <div className="min-w-0">
-                      <p className="whitespace-nowrap text-[13px] font-semibold text-[#1a1a1a]">{p.firstName} {p.lastName} <span className="font-semibold text-[#666]">({p.gender})</span></p>
-                      <p className="mt-0.5 text-[12px] font-normal text-[#8c95a1]">Date of birth {p.birthDate}</p>
+                      <p className="whitespace-nowrap text-[12px] font-semibold text-[#1a1a1a]">{p.firstName} {p.lastName} <span className="font-normal text-[#777]">({p.gender})</span></p>
+                      <p className="mt-0.5 text-[10px] font-normal text-[#858b88]">Date of birth {p.birthDate}</p>
                     </div>
                   </td>
-                  <td className="whitespace-nowrap px-5 py-4 text-[13px] font-medium text-[#4b4b4b]">{p.primaryPhone}</td>
-                  <td className="px-5 py-4">
-                    <div className="max-w-[360px] text-[13px] leading-[19px] text-[#4b4b4b]">
-                      <p className="font-medium">{p.address1}</p>
+                  <td className="whitespace-nowrap px-5 py-3.5 text-[12px] font-normal text-[#4b4b4b]">{p.primaryPhone}</td>
+                  <td className="px-5 py-3.5">
+                    <div className="max-w-[360px] text-[12px] leading-[17px] text-[#4b4b4b]">
+                      <p className="font-normal">{p.address1}</p>
                       {p.address2 && <p className="text-[#6f7780]">{p.address2}</p>}
                       <p className="text-[#6f7780]">{p.city}, {p.state} {p.zip}</p>
                     </div>
                   </td>
-                  <td className="whitespace-nowrap px-5 py-4 text-[13px] font-medium text-[#4b4b4b]">{patientOrderCount(p)}</td>
-                  <td onClick={event => event.stopPropagation()} className="relative px-4 py-4 text-right">
+                  <td className="whitespace-nowrap px-5 py-3.5 text-[12px] font-normal text-[#4b4b4b]">{patientOrderCount(p)}</td>
+                  <td onClick={event => event.stopPropagation()} className="relative px-4 py-3.5 text-right">
                     <button onClick={() => setOpenPatientMenu(current => current === patientIndex ? null : patientIndex)} className={`flex size-7 items-center justify-center rounded-[7px] text-[#777] transition-all hover:bg-[#eceae7] hover:text-[#111] ${openPatientMenu === patientIndex ? "bg-[#eceae7] opacity-100" : "opacity-0 group-hover:opacity-100"}`} aria-label={`Actions for ${p.firstName} ${p.lastName}`}>
                       <MoreHorizontal size={16} />
                     </button>
