@@ -4618,10 +4618,15 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
   const [cancellationReason, setCancellationReason] = useState("");
   const [createTicketModalOpen, setCreateTicketModalOpen] = useState(false);
   const [detailSideTab, setDetailSideTab] = useState<"status" | "receipt">("status");
+  const [selectedTrackingPharmacy, setSelectedTrackingPharmacy] = useState("Optimal Balance Pharmacy");
   const patients = "patients" in order ? order.patients : [order.patient];
   const patientTrackingLink = `https://scriptlinkrx.com/track/${order.id.replace('#','')}`;
   const statusSteps = ["Order Created", "In Progress", "Shipped", "Delivered"];
-  const activeStep = order.status === "Delivered" ? 3 : order.status === "Shipped" ? 2 : order.status === "Processing" ? 1 : 0;
+  const pharmacyTrackingOptions = [
+    { name: "Optimal Balance Pharmacy", status: "In progress", activeStep: 1, updated: "Updated just now" },
+    { name: "1st Choice Compounding Pharmacy", status: "Shipped", activeStep: 2, updated: "Updated 2 min ago" },
+  ];
+  const selectedPharmacyTracking = pharmacyTrackingOptions.find(pharmacy => pharmacy.name === selectedTrackingPharmacy) ?? pharmacyTrackingOptions[0];
   const compactLabel = "text-[9px] font-semibold uppercase tracking-[0.1em] text-[#8c95a1]";
   const detailStatusKey: OrderHistoryEntry["order_status"] = order.status === "Pending Payment" || order.status === "Pending Approval"
     ? "pending_payment"
@@ -4738,10 +4743,21 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
           {detailSideTab === "status" ? <>
             <section className="rounded-[14px] bg-[#FBFBFB] p-6">
               <h2 className="text-[18px] font-semibold text-[#161a18]">Order status</h2>
+              <p className="mt-1 text-[11px] text-[#667085]">Select a pharmacy to view its progress.</p>
+              <div className="relative mt-4">
+                <select value={selectedTrackingPharmacy} onChange={event => setSelectedTrackingPharmacy(event.target.value)} aria-label="Select pharmacy to track" className="h-10 w-full appearance-none rounded-[10px] border border-[#d7dce1] bg-white pl-3 pr-9 text-[11px] font-medium text-[#202020] outline-none focus:border-[#2563EB]">
+                  {pharmacyTrackingOptions.map(pharmacy => <option key={pharmacy.name} value={pharmacy.name}>{pharmacy.name}</option>)}
+                </select>
+                <ChevronsUpDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#667085]" />
+              </div>
+              <div className="mt-2 flex items-center justify-between px-1 text-[9px]">
+                <span className="inline-flex items-center gap-1.5 font-semibold text-[#344054]"><span className="size-2 rounded-full bg-[#22c55e]" />{selectedPharmacyTracking.status}</span>
+                <span className="text-[#7b8290]">{selectedPharmacyTracking.updated}</span>
+              </div>
               <div className="mt-6">{statusSteps.map((step,index) => (
                 <div key={step} className="flex gap-4">
                   <div className="flex flex-col items-center">
-                    <span className={`flex size-9 items-center justify-center rounded-full ${index <= activeStep ? order.payStatus === "UNPAID" ? "bg-[linear-gradient(135deg,#56203B_0%,#8F3F63_52%,#E8BFD2_100%)] text-white" : order.status === "Processing" || order.status === "Shipped" ? "bg-[linear-gradient(135deg,#1746D1_0%,#3B82F6_48%,#A7C8FF_100%)] text-white" : "bg-[#56203B] text-white" : "bg-[#edf0f2] text-[#9aa1a8]"}`}>{index === 0 ? <Package size={15}/> : <CheckCircle2 size={15}/>}</span>
+                    <span className={`flex size-9 items-center justify-center rounded-full ${index <= selectedPharmacyTracking.activeStep ? "bg-[linear-gradient(135deg,#1746D1_0%,#3B82F6_48%,#A7C8FF_100%)] text-white" : "bg-[#edf0f2] text-[#9aa1a8]"}`}>{index === 0 ? <Package size={15}/> : <CheckCircle2 size={15}/>}</span>
                     {index < statusSteps.length - 1 && <span className="h-10 w-px bg-[#dfe5e2]" />}
                   </div>
                   <div className="pt-1"><p className="text-[13px] font-semibold text-[#161a18]">{step}</p>{index === 0 && <><p className="mt-1 text-[11px] text-[#667085]">{order.timestamp}</p><p className={`mt-1 text-[11px] font-semibold ${order.payStatus === "PAID" ? "text-[#2563EB]" : "text-[#d92d20]"}`}>Payment {order.payStatus.toLowerCase()}</p></>}</div>
