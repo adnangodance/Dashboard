@@ -4620,22 +4620,16 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
   const [detailSideTab, setDetailSideTab] = useState<"status" | "receipt">("status");
   const patients = "patients" in order ? order.patients : [order.patient];
   const patientTrackingLink = `https://scriptlinkrx.com/track/${order.id.replace('#','')}`;
-  const detailLabelCase = (value: string) => {
-    const lower = value.toLowerCase();
-    return lower.charAt(0).toUpperCase() + lower.slice(1);
-  };
   const statusSteps = ["Order Created", "In Progress", "Shipped", "Delivered"];
   const activeStep = order.status === "Delivered" ? 3 : order.status === "Shipped" ? 2 : order.status === "Processing" ? 1 : 0;
   const compactLabel = "text-[9px] font-semibold uppercase tracking-[0.1em] text-[#8c95a1]";
-  const statusBadgeClass = order.status === "Pending Approval"
-    ? "bg-[#6D7280] text-white"
-    : order.status === "Processing"
-      ? "bg-[#F4B64A] text-[#161a18]"
-      : order.status === "Shipped"
-        ? "bg-[#3269E8] text-white"
-        : order.status === "Delivered"
-          ? "bg-[#05AF3B] text-white"
-          : "bg-[#6D7280] text-white";
+  const detailStatusKey: OrderHistoryEntry["order_status"] = order.status === "Pending Payment" || order.status === "Pending Approval"
+    ? "pending_payment"
+    : order.status === "Shipped"
+      ? "shipped"
+      : order.status === "Delivered"
+        ? "delivered"
+        : "processing";
   return (
     <>
       <div className="max-w-[1400px]">
@@ -4652,13 +4646,13 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
       </div>
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-4">
-          <section className="overflow-hidden rounded-[14px] border border-[#e6e7e5] bg-white">
+          <section className="overflow-hidden rounded-[14px] bg-white">
             <div className="grid gap-x-5 gap-y-4 border-b border-[#eceeeb] bg-[#FBFBFB] px-5 py-4 sm:grid-cols-3 lg:grid-cols-[1.15fr_.8fr_1fr_1.05fr_1.35fr_.85fr]">
               <div><p className={compactLabel}>Order Timestamp</p><p className="mt-1 text-[12px] font-semibold text-[#161a18]">{order.timestamp}</p></div>
               <div><p className={compactLabel}>Order ID</p><p className="mt-1 text-[12px] font-semibold text-[#161a18]">{order.id}</p></div>
-              <div><p className={compactLabel}>Status</p><span className={`mt-1 inline-flex h-6 items-center rounded-full px-3 text-[10px] font-bold uppercase ${statusBadgeClass}`}>{detailLabelCase(order.status)}</span></div>
-              <div><p className={compactLabel}>Ship To</p><span className={`mt-1 inline-flex h-6 items-center gap-1.5 rounded-full px-3 text-[10px] font-bold ${order.shipMethod === "Ship to Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>{detailLabelCase(order.shipMethod)} {order.shipMethod === "Ship to Clinic" ? <Building2 size={12} /> : <User size={12} />}</span></div>
-              <div><p className={compactLabel}>Payment Method</p><span className={`mt-1 inline-flex h-6 items-center gap-1.5 rounded-full px-3 text-[10px] font-bold ${order.payMethod === "Pay by Clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>{detailLabelCase(order.payMethod)} {order.payMethod === "Pay by Clinic" ? <Building2 size={12} /> : <User size={12} />}<span className={`inline-flex h-4 min-w-[42px] items-center justify-center rounded-full px-2 text-[8px] font-bold uppercase leading-none ${order.payStatus === "PAID" ? "bg-white text-[#173d25]" : "bg-[#FF4A87] text-white"}`}>{order.payStatus}</span></span></div>
+              <div><p className={compactLabel}>Status</p><div className="mt-1"><OrderHistoryV2Status status={detailStatusKey} label={order.status} /></div></div>
+              <div><p className={compactLabel}>Ship To</p><div className="mt-1"><PendingV2ShipToChip shipTo={order.shipMethod === "Ship to Clinic" ? "clinic" : "patient"} items={order.items.length} /></div></div>
+              <div><p className={compactLabel}>Payment Method</p><div className="mt-1"><OrderHistoryV2PayBy payBy={order.payMethod === "Pay by Clinic" ? "clinic" : "patient"} paid={order.payStatus === "PAID"} /></div></div>
               <div><p className={compactLabel}>Final Total</p><p className="mt-1 text-[12px] font-bold text-[#161a18]">{order.total}</p></div>
             </div>
             <div className="grid divide-y divide-[#eceeeb] lg:grid-cols-[1.15fr_.85fr] lg:divide-x lg:divide-y-0">
@@ -4681,7 +4675,7 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
             </div>
           </section>
 
-          <section className="overflow-hidden rounded-[14px] border border-[#e6e7e5] bg-white">
+          <section className="overflow-hidden rounded-[14px] bg-white">
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#eceeeb] bg-[#FBFBFB] px-5 py-4">
               <div className="flex items-center gap-3">
                 <span className="flex size-10 items-center justify-center rounded-[9px] bg-white text-[#667085]"><Building2 size={17} /></span>
@@ -4955,7 +4949,7 @@ function OrderHistoryStatusChip({ status }: { status: OrderHistoryEntry["order_s
 function OrderHistoryV2Status({ status, label, large = false }: { status: OrderHistoryEntry["order_status"]; label?: string; large?: boolean }) {
   const config = ORDER_HISTORY_STATUS_CONFIG[status];
   return (
-    <span className={`inline-flex items-center rounded-full bg-[#f1f1f1] pl-1 pr-3 text-[11px] font-normal text-[#333] ${large ? "h-8 gap-2" : "h-7 gap-1.5"}`}>
+    <span className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-[#f1f1f1] pl-1 pr-3 text-[11px] font-normal text-[#333] ${large ? "h-8 gap-2" : "h-7 gap-1.5"}`}>
       <span className={`flex items-center justify-center rounded-full ${large ? "size-6 [&_svg]:size-[13px]" : "size-5 [&_svg]:size-3"}`} style={{ backgroundColor: config.bgColor }}><OrderHistoryStatusIcon status={status} /></span>
       {label ?? config.label}
     </span>
@@ -5460,9 +5454,11 @@ function PendingV2ShipToChip({ shipTo, items }: { shipTo: "patient" | "clinic"; 
         {isPatient ? <User size={12} strokeWidth={2} /> : <Building2 size={12} strokeWidth={2} />}
       </span>
       {isPatient ? "Ship to Patient" : "Ship to Clinic"}
-      <span className="inline-flex h-5 items-center rounded-full bg-white px-2 text-[9px] font-semibold text-black">
-        {items} {items === 1 ? "item" : "items"}
-      </span>
+      {items > 1 && (
+        <span className="inline-flex h-5 items-center rounded-full bg-white px-2 text-[9px] font-semibold text-black">
+          {items} items
+        </span>
+      )}
     </span>
   );
 }
@@ -5577,7 +5573,7 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
-  const [detailVersion, setDetailVersion] = useState<"current" | "v2">("v2");
+  const [detailVersion] = useState<"current" | "v2">("v2");
 
   const created = new Date(approval.createdAt);
   const timestamp = `${String(created.getMonth() + 1).padStart(2, "0")}/${String(created.getDate()).padStart(2, "0")}/${created.getFullYear()} - ${created.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
@@ -5620,10 +5616,6 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
           {detailVersion === "v2" ? <div><h1 className="text-[22px] font-semibold text-[#1a1a1a]">Review order</h1><p className="mt-0.5 text-[10px] text-[#7b7b7b]">Order #{approval.id.slice(-6).toUpperCase()}</p></div> : <h1 className="text-[22px] font-semibold text-[#1a1a1a]">Pending Approvals</h1>}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="mr-2 inline-flex h-10 items-center rounded-full bg-[#f1f1f1] p-1" role="tablist" aria-label="Review page version">
-            <button type="button" role="tab" aria-selected={detailVersion === "current"} onClick={() => setDetailVersion("current")} className={`h-8 rounded-full px-4 text-[11px] font-medium transition-colors ${detailVersion === "current" ? "bg-white text-black shadow-sm" : "text-[#777] hover:text-black"}`}>Current</button>
-            <button type="button" role="tab" aria-selected={detailVersion === "v2"} onClick={() => setDetailVersion("v2")} className={`h-8 rounded-full px-4 text-[11px] font-medium transition-colors ${detailVersion === "v2" ? "bg-black text-white" : "text-[#777] hover:text-black"}`}>V2</button>
-          </div>
           <button onClick={() => setIsRejectModalOpen(true)} className="inline-flex h-10 items-center gap-1.5 rounded-full border border-[#d8d8d8] bg-white px-4 text-[12px] font-semibold text-[#121212] transition-colors hover:bg-[#f1f1f1]">
             Reject
           </button>
@@ -5634,21 +5626,8 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
       </div>
 
       <div className="flex flex-col gap-4">
-        {detailVersion === "v2" && <section className="flex flex-col justify-between gap-4 rounded-[14px] border border-[#eadfd7] bg-[#fffaf7] px-5 py-4 sm:flex-row sm:items-center">
-          <div>
-            <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#B25327]">Decision required</p>
-            <h2 className="mt-1 text-[17px] font-semibold text-[#2a211d]">Pending payment</h2>
-            <p className="mt-1 text-[11px] text-[#746760]">Review the patient, payment, and prescription details before approving this order.</p>
-          </div>
-          <div className="grid grid-cols-2 gap-x-7 gap-y-3 sm:grid-cols-3">
-            <div><p className={metaLabel}>Patient</p><p className="mt-1 whitespace-nowrap text-[11px] font-semibold text-[#161a18]">{patient.firstName} {patient.lastName}</p></div>
-            <div><p className={metaLabel}>Payment</p><p className={`mt-1 whitespace-nowrap text-[11px] font-semibold ${payToClinic ? "text-[#0095a8]" : "text-[#2f7a43]"}`}>{payToClinic ? "Pay by Clinic" : "Pay by Patient"}</p><p className={`mt-0.5 text-[9px] font-semibold ${approval.paymentMethod === "clinic_ach" ? "text-[#2f7a43]" : "text-[#9f1239]"}`}>{approval.paymentMethod === "clinic_ach" ? "Paid" : "Unpaid"}</p></div>
-            <div><p className={metaLabel}>Total</p><p className="mt-1 text-[13px] font-bold text-[#161a18]">${finalTotal.toFixed(2)}</p></div>
-          </div>
-        </section>}
-
         {/* Order summary card */}
-        <section className="overflow-hidden rounded-[14px] border border-[#e6e7e5] bg-white">
+        <section className="overflow-hidden rounded-[14px] bg-white">
           <div className="grid gap-x-5 gap-y-4 border-b border-[#eceeeb] bg-[#fbfbfb] px-5 py-4 sm:grid-cols-3 lg:grid-cols-[1.15fr_.8fr_1fr_1.05fr_1.35fr_.85fr]">
             <div>
               <p className={metaLabel}>Order Timestamp</p>
@@ -5661,28 +5640,19 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
             <div>
               <p className={metaLabel}>Status</p>
               <div className="mt-1 flex">
-                {detailVersion === "v2" ? <span className="whitespace-nowrap text-[11px] font-semibold text-[#B25327]">Pending Payment</span> : <span className="inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full bg-[#EC0000] px-3 text-[11px] font-semibold text-white">Pending payment <CreditCard size={13} /></span>}
+                {detailVersion === "v2" ? <OrderHistoryV2Status status="pending_payment" label="Pending Payment" /> : <span className="inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full bg-[#EC0000] px-3 text-[11px] font-semibold text-white">Pending payment <CreditCard size={13} /></span>}
               </div>
             </div>
             <div>
               <p className={metaLabel}>Ship To</p>
               <div className="mt-1 flex">
-                <span className={`inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[11px] font-semibold ${approval.shipTo === "clinic" ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
-                  {approval.shipTo === "clinic" ? "Ship To Clinic" : "Ship To Patient"}
-                  {approval.shipTo === "clinic" ? <Building2 size={13} /> : <User size={13} />}
-                </span>
+                <PendingV2ShipToChip shipTo={approval.shipTo} items={pendingApprovalRxCount(approval)} />
               </div>
             </div>
             <div>
               <p className={metaLabel}>Payment Method</p>
               <div className="mt-1 flex">
-                <span className={`inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full pl-3 pr-1 text-[11px] font-semibold ${payToClinic ? "bg-[#20D8DB] text-[#102c2d]" : "bg-[#ACEABB] text-[#173d25]"}`}>
-                  {payToClinic ? "Pay By Clinic" : "Pay By Patient"}
-                  {payToClinic ? <Building2 size={13} /> : <User size={13} />}
-                  <span className={`ml-1 inline-flex h-5 items-center justify-center rounded-full px-2 text-[8px] font-bold leading-none ${approval.paymentMethod === "clinic_ach" ? "bg-white text-[#101010]" : "bg-[#ff4a87] text-white"}`}>
-                    {approval.paymentMethod === "clinic_ach" ? "PAID" : "UNPAID"}
-                  </span>
-                </span>
+                <OrderHistoryV2PayBy payBy={approval.paymentMethod} paid={approval.paymentMethod === "clinic_ach"} />
               </div>
             </div>
             <div>
@@ -5733,7 +5703,7 @@ function PendingApprovalDetail({ approval, onBack, onResolve }: { approval: Pend
         {approval.pharmacies.map((pharmacyOrder, pharmacyIndex) => {
           const pharmacyTotal = pharmacyOrder.prescriptions.reduce((s, rx) => s + rx.price, 0);
           return (
-            <section key={pharmacyIndex} className="overflow-hidden rounded-[14px] border border-[#e6e7e5] bg-white">
+            <section key={pharmacyIndex} className="overflow-hidden rounded-[14px] bg-white">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#eceeeb] bg-[#fbfbfb] px-5 py-4">
                 <div className="flex items-center gap-3">
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-[9px] bg-white text-[#667085]"><Building2 size={17} /></span>
@@ -7833,6 +7803,20 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
           {activeTab === "Pay by Clinic" && (
             <div data-payment-methods>
+              <div className="mb-5 flex items-center justify-between gap-5 px-1 max-sm:items-start max-sm:flex-col">
+                <div>
+                  <h3 className="text-[13px] font-medium text-[#1a1a1a]">Default payment method</h3>
+                  <p className="mt-1 text-[11px] text-[#737373]">Automatically selected for Pay by Clinic orders.</p>
+                </div>
+                <div className="relative w-[230px] max-sm:w-full">
+                  <select aria-label="Default payment method" value={primaryClinicPayment} onChange={event => setPrimaryClinicPayment(event.target.value as "credit" | "ach")} className="h-10 w-full appearance-none rounded-[10px] border border-[#cfd3d8] bg-white pl-4 pr-10 text-[11px] font-medium text-[#1a1a1a] outline-none transition-colors hover:border-[#98a2b3] focus:border-[#2563EB]">
+                    <option value="credit">Credit Card</option>
+                    <option value="ach">Bank Account (ACH)</option>
+                  </select>
+                  <ChevronsUpDown size={14} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#344054]" />
+                </div>
+              </div>
+
               <div className="mb-4 flex items-end gap-5 border-b border-[#e3e3e3] px-1" role="tablist" aria-label="Payment methods">
                 {(["Credit Card", "Bank Account (ACH)"] as const).map(tab => (
                   <button
@@ -7845,9 +7829,6 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                   >
                     <span className="inline-flex items-center gap-2">
                       {tab}
-                      {((tab === "Credit Card" && primaryClinicPayment === "credit") || (tab === "Bank Account (ACH)" && primaryClinicPayment === "ach")) && (
-                        <span className="rounded-full bg-[#E8F0FF] px-2 py-1 text-[9px] font-semibold text-[#2563EB]">Primary</span>
-                      )}
                     </span>
                   </button>
                 ))}
@@ -7861,9 +7842,6 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                   <p className="mt-1 text-[11px] text-[#7b827e]">Manage the credit card used for clinic purchases.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {savedClinicCard && primaryClinicPayment !== "credit" && (
-                    <button type="button" onClick={() => setPrimaryClinicPayment("credit")} className="h-10 rounded-full border border-[#d8d8d2] bg-white px-4 text-[11px] font-medium text-black transition-colors hover:border-black hover:bg-[#f1f1f1]">Set as primary</button>
-                  )}
                   <button onClick={() => setCreditCardOpen(true)} className="flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Credit Card</button>
                 </div>
               </div>
@@ -7901,9 +7879,6 @@ function SettingsPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                       <p className="mt-1 text-[11px] text-[#7b827e]">Use a clinic bank account to pay for patient prescriptions directly from the account.</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      {primaryClinicPayment !== "ach" && (
-                        <button type="button" onClick={() => setPrimaryClinicPayment("ach")} className="h-10 rounded-full border border-[#d8d8d2] bg-white px-4 text-[11px] font-medium text-black transition-colors hover:border-black hover:bg-[#f1f1f1]">Set as primary</button>
-                      )}
                       <button className="flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-[11px] font-medium text-white transition-colors hover:bg-[#1a1a1a]/90"><Plus size={14} /> Add Bank Account</button>
                     </div>
                   </div>
@@ -8972,6 +8947,14 @@ const MULTI_CART_DATA = {
   ],
 };
 
+const DEFAULT_CART_DATA = {
+  ...MULTI_CART_DATA,
+  pharmacy: "DCA Pharmacy",
+  patients: MULTI_CART_DATA.patients.filter(patient =>
+    patient.items.some(item => item.pharmacy === "DCA Pharmacy")
+  ),
+};
+
 // Shipping capability is configured per pharmacy. Pharmacies without multi-patient
 // shipping create one shipment (and one shipping charge) for each patient.
 const PHARMACY_MULTI_PATIENT_SHIPPING: Record<string, boolean> = {
@@ -9086,7 +9069,7 @@ function MultiPatientCartPage({
           };
         }),
       }
-    : MULTI_CART_DATA, [cartEntries, selectedPatientIds]);
+    : DEFAULT_CART_DATA, [cartEntries, selectedPatientIds]);
   const [quantities, setQuantities] = useState<Record<number, number>>(() => {
     const init: Record<number, number> = {};
     cartData.patients.forEach(p => p.items.forEach(i => { init[i.id] = i.qty; }));
@@ -9546,7 +9529,7 @@ function MultiPatientCartPage({
                             <div className="rounded-[8px] bg-white px-5 py-5 ring-1 ring-[#E6E6E6]">
                               <div className="grid gap-x-5 gap-y-4 md:grid-cols-[1.1fr_1.1fr_0.56fr_0.56fr]">
                                 <label className="block">
-                                  <span className="mb-1.5 block text-[11px] font-semibold text-[#858585]">Strength + Size</span>
+                                  <span className="mb-1.5 block text-[11px] font-semibold text-[#858585]">Strength</span>
                                   <input disabled value={item.detail.split("|")[0]?.trim() ?? item.detail} className="h-[34px] w-full rounded-[4px] border border-[#EAE8E1] bg-white px-3 text-[12px] font-medium text-[#cfcfcd] outline-none" />
                                 </label>
                                 <label className="block">
@@ -9622,7 +9605,7 @@ function MultiPatientCartPage({
 	                            <div className="rounded-[10px] bg-white px-5 py-5 ring-1 ring-[#DDE8E2]">
 	                              <div className="grid gap-x-3 gap-y-3 md:grid-cols-[minmax(150px,0.44fr)_76px_76px_minmax(280px,1fr)]">
 	                                <label className="block">
-	                                  <span className="mb-1 flex h-[20px] items-end text-[11px] font-semibold text-[#858585]">Strength + Size</span>
+	                                  <span className="mb-1 flex h-[20px] items-end text-[11px] font-semibold text-[#858585]">Strength</span>
 	                                  <input disabled value={item.detail} className="h-[34px] w-full rounded-[8px] border border-[#EAE8E1] bg-white px-3 text-[12px] font-medium text-[#cfcfcd] outline-none" />
 	                                </label>
 	                                <label className="block">
@@ -9781,7 +9764,7 @@ function MultiPatientCartPage({
                             <div className="rounded-[10px] bg-white px-5 py-5 ring-1 ring-[#DDE8E2]">
                               <div className="grid gap-x-5 gap-y-4 md:grid-cols-[1.1fr_1.1fr_0.56fr_0.56fr]">
                                 <label className="block">
-                                  <span className="mb-1.5 block text-[11px] font-semibold text-[#858585]">Strength + Size</span>
+                                  <span className="mb-1.5 block text-[11px] font-semibold text-[#858585]">Strength</span>
                                   <input disabled value={item.detail.split("|")[0]?.trim() ?? item.detail} className="h-[34px] w-full rounded-[8px] border border-[#EAE8E1] bg-white px-3 text-[12px] font-medium text-[#cfcfcd] outline-none" />
                                 </label>
                                 <label className="block">
@@ -9849,7 +9832,7 @@ function MultiPatientCartPage({
                             <>
                               <div className="grid gap-x-5 gap-y-4 md:grid-cols-[minmax(145px,0.24fr)_minmax(0,1fr)]">
                               <label className="block">
-                                <span className="mb-1.5 block text-[10px] font-semibold text-[#303030]">Strength + Size</span>
+                                <span className="mb-1.5 block text-[10px] font-semibold text-[#303030]">Strength</span>
                                 <input disabled value={item.detail} className="h-[34px] w-full rounded-[8px] border border-[#EAE8E1] bg-white px-3 text-[12px] font-medium text-[#9a9a9a] outline-none" />
                               </label>
                               <label className="block">
