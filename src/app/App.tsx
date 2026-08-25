@@ -4627,6 +4627,9 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
     { name: "1st Choice Compounding Pharmacy", status: "Shipped", activeStep: 2, updated: "Updated 2 min ago" },
   ];
   const selectedPharmacyTracking = pharmacyTrackingOptions.find(pharmacy => pharmacy.name === selectedTrackingPharmacy) ?? pharmacyTrackingOptions[0];
+  const effectivePharmacyTracking = order.payStatus === "UNPAID"
+    ? { ...selectedPharmacyTracking, status: "Awaiting payment", activeStep: 0, updated: "Payment required" }
+    : selectedPharmacyTracking;
   const compactLabel = "text-[9px] font-semibold uppercase tracking-[0.1em] text-[#8c95a1]";
   const detailStatusKey: OrderHistoryEntry["order_status"] = order.status === "Pending Payment" || order.status === "Pending Approval"
     ? "pending_payment"
@@ -4751,13 +4754,13 @@ function OrderDetailPage({ order, onNavigate }: { order: typeof ORDERS[number]; 
                 <ChevronsUpDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#667085]" />
               </div>
               <div className="mt-2 flex items-center justify-between px-1 text-[9px]">
-                <span className="inline-flex items-center gap-1.5 font-semibold text-[#344054]"><span className="size-2 rounded-full bg-[#22c55e]" />{selectedPharmacyTracking.status}</span>
-                <span className="text-[#7b8290]">{selectedPharmacyTracking.updated}</span>
+                <span className="inline-flex items-center gap-1.5 font-semibold text-[#344054]"><span className={`size-2 rounded-full ${order.payStatus === "UNPAID" ? "bg-[#d92d20]" : "bg-[#22c55e]"}`} />{effectivePharmacyTracking.status}</span>
+                <span className="text-[#7b8290]">{effectivePharmacyTracking.updated}</span>
               </div>
               <div className="mt-6">{statusSteps.map((step,index) => (
                 <div key={step} className="flex gap-4">
                   <div className="flex flex-col items-center">
-                    <span className={`flex size-9 items-center justify-center rounded-full ${index <= selectedPharmacyTracking.activeStep ? "bg-[linear-gradient(135deg,#1746D1_0%,#3B82F6_48%,#A7C8FF_100%)] text-white" : "bg-[#edf0f2] text-[#9aa1a8]"}`}>{index === 0 ? <Package size={15}/> : <CheckCircle2 size={15}/>}</span>
+                    <span className={`flex size-9 items-center justify-center rounded-full ${index <= effectivePharmacyTracking.activeStep ? order.payStatus === "UNPAID" ? "bg-[linear-gradient(135deg,#56203B_0%,#8F3F63_52%,#E8BFD2_100%)] text-white" : "bg-[linear-gradient(135deg,#1746D1_0%,#3B82F6_48%,#A7C8FF_100%)] text-white" : "bg-[#edf0f2] text-[#9aa1a8]"}`}>{index === 0 ? <Package size={15}/> : <CheckCircle2 size={15}/>}</span>
                     {index < statusSteps.length - 1 && <span className="h-10 w-px bg-[#dfe5e2]" />}
                   </div>
                   <div className="pt-1"><p className="text-[13px] font-semibold text-[#161a18]">{step}</p>{index === 0 && <><p className="mt-1 text-[11px] text-[#667085]">{order.timestamp}</p><p className={`mt-1 text-[11px] font-semibold ${order.payStatus === "PAID" ? "text-[#2563EB]" : "text-[#d92d20]"}`}>Payment {order.payStatus.toLowerCase()}</p></>}</div>
@@ -9107,6 +9110,9 @@ function MultiPatientCartPage({
   const [addedPrescriptionIds, setAddedPrescriptionIds] = useState<Set<number>>(new Set());
   const [addingPrescriptionId, setAddingPrescriptionId] = useState<number | null>(null);
   const [editingPrescription, setEditingPrescription] = useState<{ id: number; original: { days: string; refills: string; directions: string; reason: string } } | null>(null);
+  const [sigBuilderItemId, setSigBuilderItemId] = useState<number | null>(null);
+  const [sigBuilder, setSigBuilder] = useState({ action: "Inject", route: "intramuscularly", dose: "", unit: "units", frequency: "", timing: "Any time", sites: [] as string[] });
+  const [sigCustomDirections, setSigCustomDirections] = useState<string | null>(null);
   const [openPrescriptionNoteIds, setOpenPrescriptionNoteIds] = useState<Set<number>>(new Set());
   const [expandedPrescriptionIds, setExpandedPrescriptionIds] = useState<Set<number>>(() => {
     const firstPrescription = cartData.patients.flatMap(patient => patient.items).find(item => item.kind !== "supply");
@@ -9190,6 +9196,36 @@ function MultiPatientCartPage({
     }));
   }
 
+  function selectDirections(id: number, value: string) {
+    if (value === "__sig_builder__") {
+      setSigCustomDirections(null);
+      setSigBuilderItemId(id);
+      return;
+    }
+    updatePrescriptionDetail(id, "directions", value);
+  }
+
+  function applySigBuilder() {
+    const finalDirections = sigCustomDirections ?? (sigBuilder.dose.trim() && sigBuilder.frequency ? buildSigText() : "");
+    if (sigBuilderItemId === null || !finalDirections.trim()) return;
+    updatePrescriptionDetail(sigBuilderItemId, "directions", finalDirections.trim());
+    setSigBuilderItemId(null);
+    setSigCustomDirections(null);
+    setSigBuilder({ action: "Inject", route: "intramuscularly", dose: "", unit: "units", frequency: "", timing: "Any time", sites: [] });
+  }
+
+  function buildSigText() {
+    const timing = sigBuilder.timing === "Any time" ? "" : ` ${sigBuilder.timing.toLowerCase()}`;
+    const sites = sigBuilder.sites.length ? ` in the ${sigBuilder.sites.join(" or ").toLowerCase()}` : "";
+    return `${sigBuilder.action} ${sigBuilder.dose.trim() || "[dose]"} ${sigBuilder.unit} ${sigBuilder.route} ${sigBuilder.frequency}${timing}${sites}.`;
+  }
+
+  function toggleSigSite(site: string) {
+    setSigBuilder(current => ({ ...current, sites: current.sites.includes(site) ? current.sites.filter(value => value !== site) : [...current.sites, site] }));
+  }
+
+  const resolvedSigDirections = sigCustomDirections ?? (sigBuilder.dose.trim() && sigBuilder.frequency ? buildSigText() : "");
+
   function prescriptionFieldClass(value: string) {
     const complete = value.trim().length > 0;
     const state = complete
@@ -9217,6 +9253,7 @@ function MultiPatientCartPage({
       .filter(item => item.kind !== "supply")
       .map(item => ({ patient, item }))
   ).filter(({ item }) => !removed.has(item.id));
+  const activeSigItem = cartRows.find(({ item }) => item.id === sigBuilderItemId)?.item;
   const cartRowsWithNumbers = cartRows.map((row, index) => ({ ...row, prescriptionNumber: index + 1 }));
   const prescriptionCount = cartData.patients.length;
   const prescriptionsComplete = cartRows.every(({ item }) => {
@@ -9274,6 +9311,34 @@ function MultiPatientCartPage({
       return "border-[#7F9EE3] bg-white focus:border-[#7F9EE3]";
     }
     return "border-[#EAE8E1] bg-white focus:border-[#183229]";
+  }
+
+  function renderInlineSigBuilder() {
+    return (
+      <section className="mt-4 overflow-hidden rounded-[10px] border border-[#dbe5f7] bg-[#FAFAFA]">
+        <div className="flex items-start justify-between gap-4 border-b border-[#e9e9e9] px-5 py-4">
+          <div><h3 className="text-[14px] font-semibold text-[#171717]">SIG Builder</h3><p className="mt-0.5 text-[10px] text-[#667085]">Build clear, standardized directions for this prescription.</p></div>
+          <button type="button" onClick={() => setSigBuilderItemId(null)} className="text-[#777] hover:text-black" aria-label="Close SIG Builder"><X size={17} /></button>
+        </div>
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_300px]">
+          <div className="grid gap-4 px-5 py-4 sm:grid-cols-2">
+            <label><span className="mb-1.5 block text-[11px] font-semibold text-[#171717]">Action</span><select value={sigBuilder.action} onChange={event => setSigBuilder(current => ({ ...current, action: event.target.value }))} className="h-[34px] w-full rounded-[8px] border border-[#EAE8E1] bg-white px-3 text-[12px] outline-none focus:border-[#183229]"><option>Inject</option><option>Take</option><option>Apply</option><option>Administer</option></select></label>
+            <label><span className="mb-1.5 block text-[11px] font-semibold text-[#171717]">Route</span><select value={sigBuilder.route} onChange={event => setSigBuilder(current => ({ ...current, route: event.target.value }))} className="h-[34px] w-full rounded-[8px] border border-[#EAE8E1] bg-white px-3 text-[12px] outline-none focus:border-[#183229]"><option value="intramuscularly">Intramuscular (IM)</option><option value="subcutaneously">Subcutaneous (SQ)</option><option value="intravenously">Intravenous (IV)</option><option value="orally">Oral</option></select></label>
+            <label><span className="mb-1.5 block text-[11px] font-semibold text-[#171717]">Dose <span className="text-[#b44b42]">*</span></span><input autoFocus value={sigBuilder.dose} onChange={event => setSigBuilder(current => ({ ...current, dose: event.target.value }))} placeholder="Amount" className={"h-[34px] w-full rounded-[8px] border px-3 text-[12px] outline-none " + requiredFieldClass(sigBuilder.dose)} /></label>
+            <label><span className="mb-1.5 block text-[11px] font-semibold text-[#171717]">Unit</span><select value={sigBuilder.unit} onChange={event => setSigBuilder(current => ({ ...current, unit: event.target.value }))} className="h-[34px] w-full rounded-[8px] border border-[#EAE8E1] bg-white px-3 text-[12px] outline-none focus:border-[#183229]"><option>units</option><option>mg</option><option>mL</option><option>mcg</option><option>tablet(s)</option></select></label>
+            <label><span className="mb-1.5 block text-[11px] font-semibold text-[#171717]">Frequency <span className="text-[#b44b42]">*</span></span><select value={sigBuilder.frequency} onChange={event => setSigBuilder(current => ({ ...current, frequency: event.target.value }))} className={"h-[34px] w-full rounded-[8px] border px-3 text-[12px] outline-none " + requiredFieldClass(sigBuilder.frequency)}><option value="" disabled>How often</option><option>once daily</option><option>twice daily</option><option>once weekly</option><option>twice weekly</option><option>as directed</option></select></label>
+            <label><span className="mb-1.5 block text-[11px] font-semibold text-[#171717]">Timing <span className="font-normal text-[#8a8a8a]">optional</span></span><select value={sigBuilder.timing} onChange={event => setSigBuilder(current => ({ ...current, timing: event.target.value }))} className="h-[34px] w-full rounded-[8px] border border-[#EAE8E1] bg-white px-3 text-[12px] outline-none focus:border-[#183229]"><option>Any time</option><option>In the morning</option><option>In the evening</option><option>At bedtime</option><option>Before meals</option><option>After meals</option></select></label>
+            <div className="sm:col-span-2"><p className="mb-2 text-[11px] font-semibold text-[#171717]">Injection sites <span className="font-normal text-[#8a8a8a]">optional</span></p><div className="flex flex-wrap gap-2">{["Abdomen", "Thigh", "Upper Arm", "Buttock"].map(site => <button key={site} type="button" onClick={() => toggleSigSite(site)} className={`h-8 rounded-full border px-3 text-[10px] font-medium transition-colors ${sigBuilder.sites.includes(site) ? "border-black bg-black text-white" : "border-[#EAE8E1] bg-white text-[#344054] hover:bg-[#f1f1f1]"}`}>{site}</button>)}</div></div>
+          </div>
+          <aside className="border-t border-white/80 bg-[radial-gradient(circle_at_100%_0%,rgba(147,197,253,0.42),transparent_48%),linear-gradient(145deg,#f8fbff_0%,#eaf2ff_100%)] px-5 py-4 lg:border-l lg:border-t-0">
+            <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2.5"><span className="flex size-8 items-center justify-center rounded-full bg-white/80 text-[#2563EB]"><CheckCircle2 size={16} /></span><div><p className="text-[12px] font-semibold text-[#172554]">Live directions</p><p className="text-[9px] text-[#64748b]">Updates as you complete the fields</p></div></div><span className="rounded-full bg-white/70 px-2.5 py-1 text-[9px] font-semibold text-[#2563EB]">SIG</span></div>
+            {sigCustomDirections === null ? <div className="mt-3 min-h-[120px] rounded-[10px] border border-white/90 bg-white/70 px-4 py-3 text-[12px] leading-5 text-[#202938]">{resolvedSigDirections || <span className="text-[#8491a6]">Directions will appear here.</span>}</div> : <textarea autoFocus value={sigCustomDirections} onChange={event => setSigCustomDirections(event.target.value)} placeholder="Type custom directions" className="mt-3 min-h-[120px] w-full resize-none rounded-[10px] border border-[#7F9EE3] bg-white/80 px-4 py-3 text-[12px] leading-5 outline-none" />}
+            <button type="button" onClick={() => setSigCustomDirections(current => current === null ? resolvedSigDirections : null)} className="mt-2 text-[10px] font-semibold text-[#171717] hover:underline">{sigCustomDirections === null ? "+ Edit directions" : "− Use generated directions"}</button>
+          </aside>
+        </div>
+        <div className="flex justify-end gap-3 border-t border-[#e9e9e9] px-5 py-3"><button type="button" onClick={() => setSigBuilderItemId(null)} className="text-[11px] font-medium text-[#202020]">Cancel</button><button type="button" disabled={!resolvedSigDirections.trim()} onClick={applySigBuilder} className="h-8 rounded-full bg-black px-4 text-[11px] font-medium text-white disabled:cursor-not-allowed disabled:bg-[#dfdfdc] disabled:text-[#92928f]">Save directions</button></div>
+      </section>
+    );
   }
 
   function handleCheckout() {
@@ -9807,8 +9872,9 @@ function MultiPatientCartPage({
                                   </label>
                                   <label className="block min-w-0">
                                     <span className="mb-1.5 block text-[11px] font-semibold text-[#171717]">Directions of Use <span className="text-[#b44b42]">*</span></span>
-                                    <select value={details?.directions ?? ""} onChange={event => updatePrescriptionDetail(item.id, "directions", event.target.value)} className={"h-[34px] w-full rounded-[8px] border px-3 text-[12px] outline-none " + requiredFieldClass(details?.directions)}>
+                                    <select value={details?.directions ?? ""} onChange={event => selectDirections(item.id, event.target.value)} className={"h-[34px] w-full rounded-[8px] border px-3 text-[12px] outline-none " + requiredFieldClass(details?.directions)}>
                                       <option value="" disabled>Select directions</option>
+                                      <option value="__sig_builder__">Use our SIG Builder</option>
                                       <option>Inject (10 mg) subcutaneously once weekly.</option>
                                       <option>Inject (2.5 mg) subcutaneously once weekly.</option>
                                       <option>Inject (5 mg) subcutaneously once weekly.</option>
@@ -10176,6 +10242,51 @@ function MultiPatientCartPage({
               </div>
             </div>
           </aside>
+        </div>
+      )}
+      {sigBuilderItemId !== null && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 p-5 backdrop-blur-[2px]">
+          <button type="button" className="absolute inset-0 cursor-default" onClick={() => setSigBuilderItemId(null)} aria-label="Close SIG Builder" />
+          <section className="relative z-10 max-h-[92vh] w-full max-w-[840px] overflow-y-auto rounded-[10px] bg-[#fbfbfb] shadow-[0_24px_70px_rgba(0,0,0,0.2)]">
+            <div className="flex items-start justify-between gap-4 border-b border-[#ededed] bg-white px-6 py-5">
+              <div className="min-w-0"><div className="flex items-center gap-2"><h2 className="text-[18px] font-semibold text-[#171717]">Build directions</h2><span className="rounded-full bg-[#f1f1f1] px-2 py-1 text-[9px] font-semibold text-[#555]">SIG Builder</span></div><p className="mt-1 truncate text-[11px] text-[#667085]">{activeSigItem?.name ?? "Prescription"} · Complete the required dose instructions below.</p></div>
+              <button type="button" onClick={() => setSigBuilderItemId(null)} className="mt-0.5 text-[#777] hover:text-black" aria-label="Close"><X size={19} /></button>
+            </div>
+            <div className="grid lg:grid-cols-[minmax(0,1fr)_300px]">
+              <div className="grid content-start gap-4 bg-white px-6 py-5 sm:grid-cols-2">
+                <div className="flex items-center justify-between sm:col-span-2"><p className="text-[11px] font-semibold text-[#171717]">Dose instructions</p><p className="text-[9px] text-[#8a8a8a]"><span className="text-[#b44b42]">*</span> Required</p></div>
+                <label><span className="mb-1.5 block text-[11px] font-semibold text-[#171717]">Action</span><select value={sigBuilder.action} onChange={event => setSigBuilder(current => ({ ...current, action: event.target.value }))} className="h-[34px] w-full rounded-[8px] border border-[#EAE8E1] bg-white px-3 text-[12px] outline-none focus:border-[#183229]"><option>Inject</option><option>Take</option><option>Apply</option><option>Administer</option></select></label>
+                <label><span className="mb-1.5 block text-[11px] font-semibold text-[#171717]">Route</span><select value={sigBuilder.route} onChange={event => setSigBuilder(current => ({ ...current, route: event.target.value }))} className="h-[34px] w-full rounded-[8px] border border-[#EAE8E1] bg-white px-3 text-[12px] outline-none focus:border-[#183229]"><option value="intramuscularly">Intramuscular (IM)</option><option value="subcutaneously">Subcutaneous (SQ)</option><option value="intravenously">Intravenous (IV)</option><option value="orally">Oral</option></select></label>
+                <label><span className="mb-1.5 block text-[11px] font-semibold text-[#171717]">Dose <span className="text-[#b44b42]">*</span></span><input autoFocus value={sigBuilder.dose} onChange={event => setSigBuilder(current => ({ ...current, dose: event.target.value }))} placeholder="Amount" className={"h-[34px] w-full rounded-[8px] border px-3 text-[12px] outline-none " + requiredFieldClass(sigBuilder.dose)} /></label>
+                <label><span className="mb-1.5 block text-[11px] font-semibold text-[#171717]">Unit</span><select value={sigBuilder.unit} onChange={event => setSigBuilder(current => ({ ...current, unit: event.target.value }))} className="h-[34px] w-full rounded-[8px] border border-[#EAE8E1] bg-white px-3 text-[12px] outline-none focus:border-[#183229]"><option>units</option><option>mg</option><option>mL</option><option>mcg</option><option>tablet(s)</option></select></label>
+                <label><span className="mb-1.5 block text-[11px] font-semibold text-[#171717]">Frequency <span className="text-[#b44b42]">*</span></span><select value={sigBuilder.frequency} onChange={event => setSigBuilder(current => ({ ...current, frequency: event.target.value }))} className={"h-[34px] w-full rounded-[8px] border px-3 text-[12px] outline-none " + requiredFieldClass(sigBuilder.frequency)}><option value="" disabled>How often</option><option>once daily</option><option>twice daily</option><option>once weekly</option><option>twice weekly</option><option>as directed</option></select></label>
+                <label><span className="mb-1.5 block text-[11px] font-semibold text-[#171717]">Timing <span className="font-normal text-[#8a8a8a]">optional</span></span><select value={sigBuilder.timing} onChange={event => setSigBuilder(current => ({ ...current, timing: event.target.value }))} className="h-[34px] w-full rounded-[8px] border border-[#EAE8E1] bg-white px-3 text-[12px] outline-none focus:border-[#183229]"><option>Any time</option><option>In the morning</option><option>In the evening</option><option>At bedtime</option><option>Before meals</option><option>After meals</option></select></label>
+                <div className="sm:col-span-2"><p className="mb-2 text-[11px] font-semibold text-[#171717]">Injection sites <span className="font-normal text-[#8a8a8a]">optional</span></p><div className="flex flex-wrap gap-2">{["Abdomen", "Thigh", "Upper Arm", "Buttock"].map(site => <button key={site} type="button" onClick={() => toggleSigSite(site)} className={`h-8 rounded-full border px-3 text-[10px] font-medium transition-colors ${sigBuilder.sites.includes(site) ? "border-black bg-black text-white" : "border-[#EAE8E1] bg-white text-[#344054] hover:bg-[#f1f1f1]"}`}>{site}</button>)}</div></div>
+              </div>
+              <aside className="m-4 rounded-[12px] border border-white/80 bg-[radial-gradient(circle_at_100%_0%,rgba(147,197,253,0.42),transparent_48%),linear-gradient(145deg,#f8fbff_0%,#eaf2ff_100%)] px-4 py-4 shadow-[0_10px_28px_rgba(37,99,235,0.08)]">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex size-8 items-center justify-center rounded-full bg-white/80 text-[#2563EB] shadow-[0_4px_14px_rgba(37,99,235,0.12)]"><CheckCircle2 size={16} /></span>
+                    <div><p className="text-[12px] font-semibold text-[#172554]">Live directions</p><p className="text-[9px] text-[#64748b]">Updates as you complete the fields</p></div>
+                  </div>
+                  <span className="rounded-full bg-white/70 px-2.5 py-1 text-[9px] font-semibold tracking-[0.08em] text-[#2563EB]">SIG</span>
+                </div>
+                {sigCustomDirections === null ? (
+                  <div className="mt-4 min-h-[180px] rounded-[12px] border border-white/90 bg-white/70 px-4 py-4 text-[13px] leading-6 text-[#202938] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_10px_26px_rgba(37,99,235,0.08)] backdrop-blur-sm">
+                    {resolvedSigDirections || <span className="text-[#8491a6]">Your completed directions will appear here after you enter the dose and frequency.</span>}
+                  </div>
+                ) : (
+                  <textarea autoFocus value={sigCustomDirections} onChange={event => setSigCustomDirections(event.target.value)} placeholder="Type custom directions" className="mt-4 min-h-[180px] w-full resize-none rounded-[12px] border border-[#7F9EE3] bg-white/80 px-4 py-4 text-[13px] leading-6 text-[#202938] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_10px_26px_rgba(37,99,235,0.08)] backdrop-blur-sm placeholder:text-[#8491a6]" />
+                )}
+                <button type="button" onClick={() => setSigCustomDirections(current => current === null ? resolvedSigDirections : null)} className="mt-3 text-[10px] font-semibold text-[#171717] hover:underline">{sigCustomDirections === null ? "+ Edit directions" : "− Use generated directions"}</button>
+                <div className="mt-2 flex items-center justify-between text-[9px] text-[#718096]"><span>{resolvedSigDirections.trim() ? sigCustomDirections === null ? "Ready to save" : "Editing directions" : "Enter dose and frequency"}</span><span>{resolvedSigDirections.length} characters</span></div>
+              </aside>
+            </div>
+            <div className="sticky bottom-0 flex items-center justify-between gap-4 border-t border-[#ededed] bg-white/95 px-6 py-4 backdrop-blur">
+              <p className="hidden text-[9px] text-[#777] sm:block">Review the live directions before saving.</p>
+              <div className="ml-auto flex items-center gap-3"><button type="button" onClick={() => setSigBuilderItemId(null)} className="text-[11px] font-medium text-[#202020]">Cancel</button><button type="button" disabled={!resolvedSigDirections.trim()} onClick={applySigBuilder} className="h-[35px] min-w-[120px] rounded-full bg-black px-5 text-[11px] font-semibold text-white hover:bg-[#121212] disabled:cursor-not-allowed disabled:bg-[#e5e5e5] disabled:text-[#999]">Save directions</button></div>
+            </div>
+          </section>
         </div>
       )}
     </>
