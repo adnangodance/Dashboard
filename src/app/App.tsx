@@ -1,4 +1,6 @@
 import { Fragment, createContext, useContext, useState, useRef, useEffect, useLayoutEffect, useMemo, type CSSProperties, type Dispatch, type FormEvent, type PointerEvent as ReactPointerEvent, type ReactNode, type SetStateAction } from "react";
+import { createPortal } from "react-dom";
+import USAMap from "react-usa-map";
 import {
   LayoutDashboard,
   BookOpen,
@@ -1158,8 +1160,138 @@ const PHARMACY_LOGOS = [
   { name: "Wells Pharmacy", src: pharmacyWells },
 ] as const;
 
+type PharmacyLogo = (typeof PHARMACY_LOGOS)[number];
+
+const US_LICENSE_STATES = [
+  ["WA", "Washington", 1, 1], ["MT", "Montana", 3, 1], ["ND", "North Dakota", 5, 1], ["MN", "Minnesota", 6, 1], ["WI", "Wisconsin", 7, 1], ["MI", "Michigan", 8, 1], ["VT", "Vermont", 11, 1], ["ME", "Maine", 12, 1],
+  ["OR", "Oregon", 1, 2], ["ID", "Idaho", 2, 2], ["WY", "Wyoming", 3, 2], ["SD", "South Dakota", 5, 2], ["IA", "Iowa", 6, 2], ["IL", "Illinois", 7, 2], ["IN", "Indiana", 8, 2], ["OH", "Ohio", 9, 2], ["PA", "Pennsylvania", 10, 2], ["NY", "New York", 11, 2], ["NH", "New Hampshire", 12, 2],
+  ["CA", "California", 1, 3], ["NV", "Nevada", 2, 3], ["UT", "Utah", 3, 3], ["CO", "Colorado", 4, 3], ["NE", "Nebraska", 5, 3], ["MO", "Missouri", 6, 3], ["KY", "Kentucky", 8, 3], ["WV", "West Virginia", 9, 3], ["VA", "Virginia", 10, 3], ["MD", "Maryland", 11, 3], ["MA", "Massachusetts", 12, 3],
+  ["AZ", "Arizona", 2, 4], ["NM", "New Mexico", 3, 4], ["KS", "Kansas", 5, 4], ["AR", "Arkansas", 6, 4], ["TN", "Tennessee", 8, 4], ["NC", "North Carolina", 10, 4], ["NJ", "New Jersey", 11, 4], ["CT", "Connecticut", 12, 4],
+  ["OK", "Oklahoma", 5, 5], ["LA", "Louisiana", 6, 5], ["MS", "Mississippi", 7, 5], ["AL", "Alabama", 8, 5], ["GA", "Georgia", 9, 5], ["SC", "South Carolina", 10, 5], ["DE", "Delaware", 11, 5], ["RI", "Rhode Island", 12, 5],
+  ["TX", "Texas", 4, 6], ["FL", "Florida", 10, 6], ["AK", "Alaska", 1, 7], ["HI", "Hawaii", 2, 7],
+] as const;
+
+function PharmacyComplianceModal({ pharmacy, onClose }: { pharmacy: PharmacyLogo; onClose: () => void }) {
+  const [selectedState, setSelectedState] = useState("NE");
+  const [licensePopoverPosition, setLicensePopoverPosition] = useState({ left: 72, top: 46 });
+  const pharmacyGradient = "radial-gradient(circle at 8% 12%, rgba(255,255,255,.96), transparent 34%), linear-gradient(135deg, #f6f9fc 0%, #dce5ef 55%, #bdcadd 100%)";
+  const selectedStateName = US_LICENSE_STATES.find(state => state[0] === selectedState)?.[1] ?? selectedState;
+  const stateBoardLicenseUrl = ({
+    NE: "https://www.nebraska.gov/LISSearch/search.cgi",
+    UT: "https://secure.utah.gov/llv/search/index.html",
+  } as Record<string, string>)[selectedState] ?? "https://www.naspa.us/member/boards-of-pharmacy/";
+  const unavailableStates = new Set(["CA", "SC", "AK"]);
+  const blueMapPalette = ["#B9C4D3", "#ACB8C9", "#9EABBE", "#8F9DB2", "#7F8EA5"];
+  const mapCustomization = Object.fromEntries(
+    US_LICENSE_STATES.map(([code], index) => [code, {
+      fill: selectedState === code ? "#617593" : unavailableStates.has(code) ? "#E5E9EF" : blueMapPalette[index % blueMapPalette.length],
+      clickHandler: () => setSelectedState(code),
+    }]),
+  );
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const map = document.querySelector(".pharmacy-usa-map svg");
+      if (!map) return;
+      map.querySelectorAll(".state-initial").forEach(label => label.remove());
+      map.querySelectorAll<SVGPathElement>("path.state").forEach(path => {
+        const code = path.dataset.name;
+        if (!code) return;
+        const bounds = path.getBBox();
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.classList.add("state-initial");
+        label.setAttribute("x", String(bounds.x + bounds.width / 2));
+        label.setAttribute("y", String(bounds.y + bounds.height / 2));
+        label.setAttribute("text-anchor", "middle");
+        label.setAttribute("dominant-baseline", "central");
+        label.setAttribute("font-size", String(Math.max(6, Math.min(11, bounds.width / 3.5))));
+        label.setAttribute("font-weight", "600");
+        label.setAttribute("fill", selectedState === code ? "#ffffff" : "#3f4c60");
+        label.setAttribute("pointer-events", "none");
+        label.textContent = code;
+        map.appendChild(label);
+      });
+      const selectedPath = map.querySelector<SVGPathElement>(`path.state[data-name="${selectedState}"]`);
+      const viewBox = (map as SVGSVGElement).viewBox.baseVal;
+      if (selectedPath && viewBox.width && viewBox.height) {
+        const bounds = selectedPath.getBBox();
+        const stateX = ((bounds.x + bounds.width / 2 - viewBox.x) / viewBox.width) * 100;
+        const stateY = ((bounds.y + bounds.height / 2 - viewBox.y) / viewBox.height) * 100;
+        setLicensePopoverPosition({
+          left: Math.max(24, Math.min(76, stateX + (stateX > 58 ? -25 : 25))),
+          top: Math.max(25, Math.min(72, stateY)),
+        });
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [selectedState]);
+  return createPortal(
+    <div className="fixed inset-0 z-[180] flex items-center justify-center bg-black/35 p-4 backdrop-blur-[2px]" role="dialog" aria-modal="true" aria-labelledby="pharmacy-compliance-title" onClick={event => event.stopPropagation()} onMouseDown={onClose}>
+      <div className="max-h-[92vh] w-full max-w-[760px] overflow-y-auto rounded-[16px] bg-white shadow-[0_30px_90px_rgba(0,0,0,0.25)]" onClick={event => event.stopPropagation()} onMouseDown={event => event.stopPropagation()}>
+        <div className="flex items-start justify-between gap-4 border-b border-[#ececec] px-6 py-5">
+          <div>
+            <h2 id="pharmacy-compliance-title" className="text-[22px] font-medium tracking-[-0.02em] text-[#171717]">Licensing &amp; compliance</h2>
+          </div>
+          <button type="button" onClick={onClose} className="flex size-8 items-center justify-center text-[#777] transition-colors hover:text-black" aria-label="Close"><X size={19} /></button>
+        </div>
+
+        <div className="p-6">
+          <div className="relative overflow-hidden rounded-[14px] p-5 shadow-[0_14px_34px_rgba(50,75,120,0.13)]" style={{ backgroundImage: pharmacyGradient }}>
+            <div className="relative z-10 flex flex-wrap items-center gap-4">
+              <img src={pharmacy.src} alt="" className="size-14 rounded-full border-2 border-white object-cover shadow-[0_7px_18px_rgba(30,64,175,0.18)]" />
+              <div className="min-w-0 flex-1">
+                <h3 className="text-[16px] font-medium text-[#1b1b1b]">{pharmacy.name}</h3>
+                <p className="mt-1 text-[11px] text-[#61708a]">Pharmacy · NPI 1235136987</p>
+                <p className="mt-2 text-[12px] font-medium text-[#42506a]">233 Bedford Way, Franklin, TN, 37064</p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/72 px-3 py-1.5 text-[10px] font-medium text-[#2563eb] shadow-[0_4px_14px_rgba(37,99,235,0.10)] backdrop-blur-sm"><span className="size-1.5 rounded-full bg-[#2563eb]" />Active</span>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <div className="flex items-end justify-between gap-4"><div><h3 className="text-[15px] font-medium text-[#202020]">Nationwide licensing</h3><p className="mt-1 text-[11px] text-[#777]">Select a state on the map to view license details.</p></div><div className="flex items-center gap-5 text-[12px] font-medium text-[#666]"><span className="flex items-center gap-2"><i className="size-3 rounded-full bg-[#8797ad]" />Licensed</span><span className="flex items-center gap-2"><i className="size-3 rounded-full bg-[#e5e9ef]" />Not licensed</span></div></div>
+            <div className="mt-4 overflow-hidden rounded-[12px] border border-[#e6e8e7] bg-[#fafafa] px-5 py-4">
+              <style>{`.pharmacy-usa-map svg{display:block;width:100%;height:auto}.pharmacy-usa-map .state{stroke:#fff;stroke-width:.65;vector-effect:non-scaling-stroke;transition:fill .18s ease,opacity .18s ease,filter .18s ease}.pharmacy-usa-map .state:hover{cursor:pointer;opacity:.82;filter:drop-shadow(0 2px 3px rgba(0,0,0,.16))}.pharmacy-usa-map .state-initial{font-family:Inter,sans-serif;letter-spacing:-.02em}@keyframes license-pop{0%{opacity:0;transform:translate(-50%,-45%) scale(.94)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}`}</style>
+              <div className="pharmacy-usa-map relative mx-auto max-w-[650px]" aria-label="United States pharmacy license coverage map">
+                <USAMap
+                  title="United States pharmacy license coverage"
+                  width={650}
+                  height={400}
+                  defaultFill="#a6b3c5"
+                  customize={mapCustomization}
+                  onClick={(event: { target: { dataset?: { name?: string } } }) => {
+                    const code = event.target.dataset?.name;
+                    if (code) setSelectedState(code);
+                  }}
+                />
+                <div
+                  key={selectedState}
+                  className="absolute z-20 w-[250px] rounded-[12px] border border-white/80 bg-white/95 p-3 shadow-[0_14px_36px_rgba(18,18,18,0.16)] backdrop-blur-md animate-[license-pop_.24s_ease-out]"
+                  style={{ left: `${licensePopoverPosition.left}%`, top: `${licensePopoverPosition.top}%`, transform: "translate(-50%, -50%)" }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[8px] font-medium uppercase tracking-[0.08em] text-[#6f83a5]">Selected license</p>
+                      <h3 className="mt-1 text-[14px] font-medium text-[#17233a]">{selectedStateName} <span className="text-[#71819b]">({selectedState})</span></h3>
+                    </div>
+                    <button type="button" className="h-8 shrink-0 rounded-full bg-[#121212] px-3 text-[10px] font-medium text-white shadow-[0_6px_18px_rgba(0,0,0,0.16)] transition-all hover:-translate-y-0.5 hover:bg-black">View PDF</button>
+                  </div>
+                  <p className="mt-1.5 text-[10px] text-[#65758f]">State board license · Active and verified</p>
+                  <a href={stateBoardLicenseUrl} target="_blank" rel="noreferrer" className="mt-2 block truncate text-[9px] font-medium text-[#2563eb] underline decoration-[#94b3f5] underline-offset-2 hover:text-[#174bb8]">{stateBoardLicenseUrl}</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
 function ReferenceProductCard({ card, onClick }: { card: CardDef; onClick: () => void }) {
   const [pharmaciesExpanded, setPharmaciesExpanded] = useState(false);
+  const [compliancePharmacy, setCompliancePharmacy] = useState<PharmacyLogo | null>(null);
+  const pharmacyCollapseTimer = useRef<ReturnType<typeof window.setTimeout> | null>(null);
   const primaryLogo = PHARMACY_LOGOS.find(pharmacy => pharmacy.name === card.pharmacy);
   const orderedLogos = primaryLogo ? [primaryLogo, ...PHARMACY_LOGOS.filter(pharmacy => pharmacy.name !== primaryLogo.name)] : [...PHARMACY_LOGOS];
   const visibleLogos = orderedLogos.slice(0, Math.min(card.pharmacies, 5));
@@ -1169,6 +1301,20 @@ function ReferenceProductCard({ card, onClick }: { card: CardDef; onClick: () =>
     : card.dosage === "Patch" ? "30 Patches"
     : card.dosage === "Lyophilized" ? "1 Vial"
     : "1 (5mL) Vial";
+  const schedulePharmacyCollapse = () => {
+    if (pharmacyCollapseTimer.current) window.clearTimeout(pharmacyCollapseTimer.current);
+    pharmacyCollapseTimer.current = window.setTimeout(() => {
+      setPharmaciesExpanded(false);
+      pharmacyCollapseTimer.current = null;
+    }, 5000);
+  };
+  const expandPharmacies = () => {
+    setPharmaciesExpanded(true);
+    schedulePharmacyCollapse();
+  };
+  useEffect(() => () => {
+    if (pharmacyCollapseTimer.current) window.clearTimeout(pharmacyCollapseTimer.current);
+  }, []);
   return (
     <article onClick={onClick} className="group relative h-[393px] w-[268px] shrink-0 cursor-pointer overflow-hidden rounded-[4px] bg-gradient-to-b from-[rgba(247,239,233,0.1)] to-[rgba(236,229,182,0.1)] transition-transform duration-200 hover:-translate-y-0.5">
       <div className="absolute left-[18px] top-[18px] z-10 flex flex-col items-start gap-2">
@@ -1194,26 +1340,50 @@ function ReferenceProductCard({ card, onClick }: { card: CardDef; onClick: () =>
         )}
       </div>
       <div className="absolute inset-x-0 bottom-0 px-[18px] pb-[18px]">
-        <button
-          type="button"
+        <div
+          role="button"
+          tabIndex={0}
           aria-expanded={pharmaciesExpanded}
           aria-label={`${pharmaciesExpanded ? "Collapse" : "Show"} ${card.pharmacies} pharmacies`}
           onClick={(event) => {
             event.stopPropagation();
-            setPharmaciesExpanded((expanded) => !expanded);
+            if (pharmaciesExpanded) {
+              setPharmaciesExpanded(false);
+              if (pharmacyCollapseTimer.current) window.clearTimeout(pharmacyCollapseTimer.current);
+            } else {
+              expandPharmacies();
+            }
           }}
-          className={`mb-2 flex h-8 items-center rounded-full border border-white/80 bg-white/80 px-1.5 shadow-[0_5px_16px_rgba(0,0,0,0.08)] backdrop-blur-sm transition-all duration-300 hover:bg-white ${pharmaciesExpanded ? "gap-1.5" : "gap-0"}`}
+          onKeyDown={event => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              if (pharmaciesExpanded) setPharmaciesExpanded(false);
+              else expandPharmacies();
+            }
+          }}
+          className={`mb-2 flex h-8 w-fit items-center rounded-full border border-white/80 bg-white/80 px-1.5 shadow-[0_5px_16px_rgba(0,0,0,0.08)] backdrop-blur-sm transition-all duration-300 hover:bg-white ${pharmaciesExpanded ? "gap-1.5" : "gap-0"}`}
         >
           {visibleLogos.map((pharmacy, index) => (
-            <span
+            <button
+              type="button"
               key={pharmacy.name}
+              onClick={event => {
+                event.stopPropagation();
+                if (!pharmaciesExpanded) {
+                  expandPharmacies();
+                  return;
+                }
+                schedulePharmacyCollapse();
+                setCompliancePharmacy(pharmacy);
+              }}
+              aria-label={`View compliance for ${pharmacy.name}`}
               className={`relative flex size-6 items-center justify-center rounded-full border-2 border-white bg-white shadow-[0_1px_4px_rgba(0,0,0,0.14)] transition-all duration-300 ${!pharmaciesExpanded && index > 0 ? "-ml-2" : "ml-0"}`}
               style={{ transitionDelay: `${index * 28}ms` }}
             >
               <img src={pharmacy.src} alt={pharmacy.name} className="size-full rounded-full object-cover" />
-            </span>
+            </button>
           ))}
-        </button>
+        </div>
         <h3 className="break-words text-[14px] font-semibold leading-[18px] text-[#111]">{card.name}</h3>
         <p className="mt-0.5 text-[12px] leading-[16px] text-[#666]">{card.price}</p>
         <p className="flex items-center gap-1.5 text-[11px] leading-[15px] text-[#888]">
@@ -1222,6 +1392,7 @@ function ReferenceProductCard({ card, onClick }: { card: CardDef; onClick: () =>
           <span>{card.dosage}</span>
         </p>
       </div>
+      {compliancePharmacy && <PharmacyComplianceModal pharmacy={compliancePharmacy} onClose={() => setCompliancePharmacy(null)} />}
     </article>
   );
 }
