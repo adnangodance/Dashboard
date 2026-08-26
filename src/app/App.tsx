@@ -1206,11 +1206,10 @@ function ReferenceProductCard({ card, onClick }: { card: CardDef; onClick: () =>
           {visibleLogos.map((pharmacy, index) => (
             <span
               key={pharmacy.name}
-              className={`flex size-6 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white shadow-[0_1px_4px_rgba(0,0,0,0.14)] transition-all duration-300 ${!pharmaciesExpanded && index > 0 ? "-ml-2" : "ml-0"}`}
+              className={`relative flex size-6 items-center justify-center rounded-full border-2 border-white bg-white shadow-[0_1px_4px_rgba(0,0,0,0.14)] transition-all duration-300 ${!pharmaciesExpanded && index > 0 ? "-ml-2" : "ml-0"}`}
               style={{ transitionDelay: `${index * 28}ms` }}
-              title={pharmacy.name}
             >
-              <img src={pharmacy.src} alt={pharmacy.name} className="size-full object-cover" />
+              <img src={pharmacy.src} alt={pharmacy.name} className="size-full rounded-full object-cover" />
             </span>
           ))}
         </button>
