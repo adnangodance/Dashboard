@@ -8924,7 +8924,65 @@ function SinglePatientCartPage({
                   </div>
                 </div>
               )}
-              <div className={previewSubmitted ? "hidden" : ""}>
+              {!previewSubmitted && reviewVariant === "v1" && (
+                <div className="space-y-6">
+                  <div>
+                    <div className="mb-3">
+                      <p className="text-[14px] font-semibold text-[#171717]">Who will pay for this order?</p>
+                      <p className="mt-1 text-[10px] text-[#7d838d]">Choose a payment method</p>
+                    </div>
+                    <div className="space-y-2">
+                      <button type="button" onClick={() => setPaymentMethod("patient")} className={`flex min-h-[58px] w-full items-start gap-3 rounded-[9px] border bg-white px-3.5 py-3 text-left transition-all ${paymentMethod === "patient" ? "border-[#2563eb] ring-1 ring-[#2563eb]" : "border-[#dfe2e6] hover:border-[#aeb9cf]"}`}>
+                        <span className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border ${paymentMethod === "patient" ? "border-[#2563eb]" : "border-[#c4c8cf]"}`}>{paymentMethod === "patient" && <span className="size-2 rounded-full bg-[#2563eb]" />}</span>
+                        <span><span className="block text-[11px] font-semibold text-[#202124]">Pay by Patient</span><span className="mt-1 block text-[9px] text-[#7d838d]">The patient receives a secure payment request.</span></span>
+                      </button>
+                      <button type="button" onClick={() => setPaymentMethod("clinic")} className={`flex min-h-[58px] w-full items-start gap-3 rounded-[9px] border bg-white px-3.5 py-3 text-left transition-all ${paymentMethod === "clinic" ? "border-[#2563eb] ring-1 ring-[#2563eb]" : "border-[#dfe2e6] hover:border-[#aeb9cf]"}`}>
+                        <span className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border ${paymentMethod === "clinic" ? "border-[#2563eb]" : "border-[#c4c8cf]"}`}>{paymentMethod === "clinic" && <span className="size-2 rounded-full bg-[#2563eb]" />}</span>
+                        <span><span className="block text-[11px] font-semibold text-[#202124]">Pay by Clinic</span><span className="mt-1 block text-[9px] text-[#7d838d]">Charge the clinic's saved payment method.</span></span>
+                      </button>
+                    </div>
+                    <button type="button" className="mt-2 text-[10px] font-medium text-[#2563eb] hover:text-[#1d4ed8]">+ Add credit card</button>
+                  </div>
+                  <div>
+                    <div className="mb-3">
+                      <p className="text-[14px] font-semibold text-[#171717]">Where should we ship it?</p>
+                      <p className="mt-1 text-[10px] text-[#7d838d]">Choose a delivery destination</p>
+                    </div>
+                    <div className="space-y-2">
+                      <button type="button" onClick={() => setShipTo("patient")} className={`flex min-h-[58px] w-full items-start gap-3 rounded-[9px] border bg-white px-3.5 py-3 text-left transition-all ${shipTo === "patient" ? "border-[#2563eb] ring-1 ring-[#2563eb]" : "border-[#dfe2e6] hover:border-[#aeb9cf]"}`}>
+                        <span className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border ${shipTo === "patient" ? "border-[#2563eb]" : "border-[#c4c8cf]"}`}>{shipTo === "patient" && <span className="size-2 rounded-full bg-[#2563eb]" />}</span>
+                        <span><span className="block text-[11px] font-semibold text-[#202124]">Ship to Patient</span><span className="mt-1 block text-[9px] text-[#7d838d]">Deliver directly to the patient's address.</span></span>
+                      </button>
+                      <button type="button" onClick={() => setShipTo("clinic")} className={`flex min-h-[58px] w-full items-start gap-3 rounded-[9px] border bg-white px-3.5 py-3 text-left transition-all ${shipTo === "clinic" ? "border-[#2563eb] ring-1 ring-[#2563eb]" : "border-[#dfe2e6] hover:border-[#aeb9cf]"}`}>
+                        <span className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border ${shipTo === "clinic" ? "border-[#2563eb]" : "border-[#c4c8cf]"}`}>{shipTo === "clinic" && <span className="size-2 rounded-full bg-[#2563eb]" />}</span>
+                        <span><span className="block text-[11px] font-semibold text-[#202124]">Ship to Clinic</span><span className="mt-1 block text-[9px] text-[#7d838d]">Send the complete order to the clinic.</span></span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {!previewSubmitted && reviewVariant === "v2" && (
+                <div>
+                  <div className="mb-4"><h3 className="text-[16px] font-medium text-[#181818]">Order preferences</h3><p className="mt-1 text-[10px] text-[#7a818c]">Confirm who pays and where the order will be delivered.</p></div>
+                  <div className="overflow-hidden rounded-[12px] border border-[#e1e5eb] bg-[#f8fafc]">
+                    <div className="p-4">
+                      <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2"><span className="flex size-7 items-center justify-center rounded-[8px] bg-white text-[#2563eb] shadow-sm"><CreditCard size={14} /></span><div><p className="text-[12px] font-medium text-[#202020]">Payment</p><p className="text-[9px] text-[#818894]">Choose the payer</p></div></div><button type="button" className="text-[10px] font-medium text-[#2563eb] hover:underline">Add credit card</button></div>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <button type="button" onClick={() => setPaymentMethod("patient")} className={`flex h-10 items-center justify-between rounded-[8px] border px-3 text-[11px] font-medium transition-all ${paymentMethod === "patient" ? "border-[#7da2ff] bg-white text-[#1d4ed8] shadow-[0_3px_10px_rgba(37,99,235,0.10)]" : "border-transparent bg-[#eef1f5] text-[#68717d] hover:bg-white"}`}><span className="flex items-center gap-2"><User size={13} />Patient</span>{paymentMethod === "patient" && <CheckCircle2 size={14} />}</button>
+                        <button type="button" onClick={() => setPaymentMethod("clinic")} className={`flex h-10 items-center justify-between rounded-[8px] border px-3 text-[11px] font-medium transition-all ${paymentMethod === "clinic" ? "border-[#7da2ff] bg-white text-[#1d4ed8] shadow-[0_3px_10px_rgba(37,99,235,0.10)]" : "border-transparent bg-[#eef1f5] text-[#68717d] hover:bg-white"}`}><span className="flex items-center gap-2"><Building2 size={13} />Clinic</span>{paymentMethod === "clinic" && <CheckCircle2 size={14} />}</button>
+                      </div>
+                    </div>
+                    <div className="border-t border-[#e1e5eb] p-4">
+                      <div className="flex items-center gap-2"><span className="flex size-7 items-center justify-center rounded-[8px] bg-white text-[#2563eb] shadow-sm"><Truck size={14} /></span><div><p className="text-[12px] font-medium text-[#202020]">Delivery</p><p className="text-[9px] text-[#818894]">Choose the destination</p></div></div>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <button type="button" onClick={() => setShipTo("patient")} className={`flex h-10 items-center justify-between rounded-[8px] border px-3 text-[11px] font-medium transition-all ${shipTo === "patient" ? "border-[#7da2ff] bg-white text-[#1d4ed8] shadow-[0_3px_10px_rgba(37,99,235,0.10)]" : "border-transparent bg-[#eef1f5] text-[#68717d] hover:bg-white"}`}><span className="flex items-center gap-2"><User size={13} />Patient</span>{shipTo === "patient" && <CheckCircle2 size={14} />}</button>
+                        <button type="button" onClick={() => setShipTo("clinic")} className={`flex h-10 items-center justify-between rounded-[8px] border px-3 text-[11px] font-medium transition-all ${shipTo === "clinic" ? "border-[#7da2ff] bg-white text-[#1d4ed8] shadow-[0_3px_10px_rgba(37,99,235,0.10)]" : "border-transparent bg-[#eef1f5] text-[#68717d] hover:bg-white"}`}><span className="flex items-center gap-2"><Building2 size={13} />Clinic</span>{shipTo === "clinic" && <CheckCircle2 size={14} />}</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className={previewSubmitted || reviewVariant !== "current" ? "hidden" : ""}>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#667085]">Payment</p>
                 <p className="mt-1 text-[13px] text-[#1a1a1a]">{previewSubmitted ? "Payment method used for this order" : "Select the payment method for the prescription"}</p>
                 {previewSubmitted ? (
@@ -8960,7 +9018,7 @@ function SinglePatientCartPage({
                 )}
               </div>
 
-              <div className={previewSubmitted ? "hidden" : "mt-5 border-t border-[#eee8e3] pt-5"}>
+              <div className={previewSubmitted || reviewVariant !== "current" ? "hidden" : "mt-5 border-t border-[#eee8e3] pt-5"}>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#667085]">Shipping</p>
                 <p className="mt-1 text-[13px] text-[#1a1a1a]">{previewSubmitted ? "Shipping destination for this order" : "Choose where to ship the prescription"}</p>
                 {previewSubmitted ? (
@@ -9294,6 +9352,7 @@ function MultiPatientCartPage({
   const [expandedSupplies, setExpandedSupplies] = useState<Set<number>>(new Set([1]));
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewSubmissionState, setPreviewSubmissionState] = useState<CheckoutSubmissionState>("idle");
+  const [reviewVariant, setReviewVariant] = useState<"current" | "v1" | "v2">("v1");
   const [paymentMethod, setPaymentMethod] = useState<"patient" | "clinic">("patient");
   const [shipTo, setShipTo] = useState<"patient" | "clinic">("clinic");
   const [voucherCode, setVoucherCode] = useState("");
@@ -10246,33 +10305,53 @@ function MultiPatientCartPage({
       {previewOpen && (
         <div className="fixed inset-0 z-50 flex justify-end bg-[#111]/35 backdrop-blur-[3px]">
           <button className="absolute inset-0 cursor-default" onClick={() => { setPreviewOpen(false); setPreviewSubmissionState("idle"); }} aria-label="Close preview" />
-          <aside className="relative h-full w-full max-w-[500px] overflow-auto border-l border-[#e8e3df] bg-[#FAFAFA] shadow-[-24px_0_70px_rgba(24,24,24,0.16)]">
+          <aside className="relative h-full w-full max-w-[500px] overflow-auto bg-white shadow-[-24px_0_70px_rgba(24,24,24,0.16)]">
             <header className="sticky top-0 z-10 border-b border-[#eee8e3] bg-white/95 px-5 pb-5 pt-6 backdrop-blur">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8c95a1]">Checkout</p>
-                  <h2 className="mt-1 text-[22px] font-semibold tracking-[-0.03em] text-[#171717]">Review and submit</h2>
+                  <h2 className="mt-1 text-[22px] font-semibold tracking-[-0.03em] text-[#171717]">{reviewVariant === "current" ? "Review order" : "Review and submit"}</h2>
                   <p className="mt-1 text-[12px] leading-[18px] text-[#6f7782]">Confirm items, payment, shipping, and totals before submitting.</p>
+                  <div className="mt-4 inline-flex rounded-[8px] bg-[#f1f1f1] p-1">
+                    {(["current", "v1", "v2"] as const).map(variant => (
+                      <button key={variant} type="button" onClick={() => setReviewVariant(variant)} className={`h-7 rounded-[6px] px-3 text-[10px] font-medium transition-all ${reviewVariant === variant ? "bg-white text-[#111] shadow-[0_1px_5px_rgba(0,0,0,0.10)]" : "text-[#777] hover:text-[#111]"}`}>
+                        {variant === "current" ? "Current" : variant.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <button onClick={() => { setPreviewOpen(false); setPreviewSubmissionState("idle"); }} className="flex size-8 items-center justify-center rounded-full text-[#777] transition-colors hover:bg-[#f5f3ef] hover:text-[#111]" aria-label="Close preview">
                   <X size={17} strokeWidth={1.8} />
                 </button>
               </div>
             </header>
-            <div className="space-y-4 px-5 pb-6 pt-5">
+            <div className="px-6 pb-6 pt-2">
 
-            <section className="rounded-[18px] bg-white p-3 shadow-[0_18px_50px_rgba(24,24,24,0.07)]">
-              <div className="px-2 pb-2">
-                <p className="text-[13px] font-semibold text-[#1a1a1a]">Items</p>
+            <section className={`py-5 ${reviewVariant === "v2" ? "border-b border-dashed border-[#cfcfcf]" : "border-b border-[#e8e8e8]"}`}>
+              <h3 className="text-[16px] font-medium text-[#181818]">Order for</h3>
+              <div className="mt-3 rounded-[10px] border border-[#e3e5e8] px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.035)]">
+                <p className="text-[13px] font-medium text-[#202020]">{cartData.patients.map(patient => patient.name.replace(/\s*\([^)]*\)\s*$/, "")).join(", ")}</p>
+                <p className="mt-1 text-[11px] text-[#717985]">{cartRowsWithNumbers.length} prescription{cartRowsWithNumbers.length === 1 ? "" : "s"}</p>
+                {reviewVariant === "current" && (
+                  <details className="group/patient mt-2">
+                    <summary className="flex cursor-pointer list-none items-center gap-1 text-[11px] font-medium text-[#202020] marker:content-none"><ChevronRight size={12} className="transition-transform group-open/patient:rotate-90" /><span className="group-open/patient:hidden">Show details</span><span className="hidden group-open/patient:inline">Hide details</span></summary>
+                    <div className="mt-2 border-t border-[#ededed] pt-2 text-[10px] leading-[16px] text-[#717985]">{cartData.patients[0]?.phone}<br />{cartData.patients[0]?.address}</div>
+                  </details>
+                )}
+              </div>
+            </section>
+
+            <section className={`py-5 ${reviewVariant === "v2" ? "border-b border-dashed border-[#cfcfcf]" : "border-b border-[#e8e8e8]"}`}>
+              <div className="pb-1">
+                <p className="text-[16px] font-medium text-[#181818]">Prescriptions</p>
               </div>
               {(showAllSummaryItems ? cartRowsWithNumbers : cartRowsWithNumbers.slice(0, 4)).map(({ patient, item, prescriptionNumber }, index) => {
                 const supplies = patient.items.filter(candidate => candidate.kind === "supply" && !removed.has(candidate.id));
                 const quantity = quantities[item.id] ?? 1;
                 return (
-                  <div key={item.id} className="mt-3 rounded-[14px] bg-[#fbfaf8] p-4">
-                    <div className="flex items-center gap-2 rounded-[9px] bg-[#f7faf8] px-3 py-2">
-                      <p className="min-w-0 truncate text-[11px] font-medium text-[#222]">{patient.name} ({patient.name.match(/\((.*?)\)/)?.[1] ?? "M"})</p>
-                      <span className="shrink-0 rounded-full bg-[#ecefed] px-2 py-0.5 text-[9px] font-semibold text-[#69736e]">Prescription {prescriptionNumber}</span>
+                  <div key={item.id} className={`mt-3 p-4 ${reviewVariant === "v2" ? "border-t border-dashed border-[#d6d6d6] bg-white px-0 shadow-none" : "rounded-[10px] border border-[#e3e5e8] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.035)]"}`}>
+                    <div className="flex items-center gap-2 border-b border-[#ededed] pb-3">
+                      <p className="min-w-0 truncate text-[11px] font-medium text-[#222]">Prescription {prescriptionNumber}</p>
                     </div>
                     <div className="mt-3 flex items-start gap-3">
                       <CartItemImage item={item} />
@@ -10288,7 +10367,7 @@ function MultiPatientCartPage({
                     <div>{supplies.map(supply => {
                       const supplyQuantity = quantities[supply.id] ?? 1;
                       return (
-                          <div key={supply.id} className="mt-3 flex items-start gap-3 rounded-[10px] bg-white p-2.5">
+                          <div key={supply.id} className="mt-3 flex items-start gap-3 border-t border-[#ededed] pt-3">
                           <CartItemImage item={supply} />
                           <div className="min-w-0 flex-1">
                             <p className="text-[12px] font-semibold leading-[16px] text-[#1a1a1a]">{supply.name} <span className="rounded bg-[#efefef] px-1.5 py-0.5 text-[8px] font-medium text-[#7b7b7b]">Supplies</span></p>
@@ -10301,6 +10380,19 @@ function MultiPatientCartPage({
                         </div>
                       );
                     })}</div>
+                    <details className="group/details mt-3 border-t border-[#ededed] pt-3">
+                      <summary className="flex cursor-pointer list-none items-center gap-1.5 text-[11px] font-medium text-[#202020] marker:content-none">
+                        <ChevronRight size={13} className="transition-transform group-open/details:rotate-90" />
+                        <span className="group-open/details:hidden">Show details</span><span className="hidden group-open/details:inline">Hide details</span>
+                      </summary>
+                      <dl className="mt-3 grid grid-cols-[104px_1fr] gap-x-3 gap-y-2 text-[11px] leading-[16px]">
+                        <dt className="text-[#7a818c]">Directions</dt><dd className="text-[#242424]">{prescriptionDetails[item.id]?.directions || "Not provided"}</dd>
+                        <dt className="text-[#7a818c]">Reason</dt><dd className="text-[#242424]">{prescriptionDetails[item.id]?.reason || "Not provided"}</dd>
+                        <dt className="text-[#7a818c]">Days supply</dt><dd className="text-[#242424]">{prescriptionDetails[item.id]?.days || "—"}</dd>
+                        <dt className="text-[#7a818c]">Refills</dt><dd className="text-[#242424]">{prescriptionDetails[item.id]?.refills || "—"}</dd>
+                        <dt className="text-[#7a818c]">Pharmacy</dt><dd className="text-[#242424]">{cartData.pharmacy}</dd>
+                      </dl>
+                    </details>
                   </div>
                 );
               })}
@@ -10315,7 +10407,7 @@ function MultiPatientCartPage({
               )}
             </section>
 
-            <section className="rounded-[18px] bg-white p-4 shadow-[0_18px_50px_rgba(24,24,24,0.07)]">
+            <section className={`py-5 ${reviewVariant === "v2" ? "border-b border-dashed border-[#cfcfcf]" : "border-b border-[#e8e8e8]"}`}>
               {previewSubmitted && (
                 <div>
                   <div className="px-1 py-1">
@@ -10336,8 +10428,72 @@ function MultiPatientCartPage({
                   </div>
                 </div>
               )}
-              <div className={previewSubmitted ? "hidden" : ""}>
-                <div className="rounded-[12px] bg-[#fbfaf8] px-4 py-3">
+              {!previewSubmitted && reviewVariant === "v1" && (
+                <div className="space-y-6">
+                  <div>
+                    <p className="text-[16px] font-semibold leading-[20px] text-[#171717]">Who will pay for this order?</p>
+                    <p className="mb-3 mt-1 text-[10px] text-[#7d838d]">Choose a payment method</p>
+                    <div className="space-y-2">
+                      {([['patient', 'Pay by Patient', 'The patient receives a secure payment request.'], ['clinic', 'Pay by Clinic', "Charge the clinic's saved payment method."]] as const).map(([value, title, description]) => (
+                        <button key={value} type="button" onClick={() => setPaymentMethod(value)} className={`flex min-h-[62px] w-full items-start gap-3 rounded-[9px] border bg-white px-4 py-3 text-left transition-all ${paymentMethod === value ? "border-[#2563eb] ring-1 ring-[#2563eb]" : "border-[#dfe2e6] hover:border-[#aeb9cf]"}`}>
+                          <span className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border ${paymentMethod === value ? "border-[#2563eb]" : "border-[#c4c8cf]"}`}>{paymentMethod === value && <span className="size-2 rounded-full bg-[#2563eb]" />}</span>
+                          <span><span className="block text-[11px] font-semibold text-[#202124]">{title}</span><span className="mt-1 block text-[9px] text-[#7d838d]">{description}</span></span>
+                        </button>
+                      ))}
+                    </div>
+                    <button type="button" className="mt-2.5 text-[10px] font-medium text-[#2563eb] hover:text-[#1d4ed8]">+ Add credit card</button>
+                  </div>
+                  <div>
+                    <p className="text-[16px] font-semibold leading-[20px] text-[#171717]">Where should we ship it?</p>
+                    <p className="mb-3 mt-1 text-[10px] text-[#7d838d]">Choose a delivery destination</p>
+                    <div className="space-y-2">
+                      {([['patient', 'Ship to Patient', "Deliver directly to the patient's address."], ['clinic', 'Ship to Clinic', 'Send the complete order to the clinic.']] as const).map(([value, title, description]) => (
+                        <button key={value} type="button" onClick={() => setShipTo(value)} className={`flex min-h-[62px] w-full items-start gap-3 rounded-[9px] border bg-white px-4 py-3 text-left transition-all ${shipTo === value ? "border-[#2563eb] ring-1 ring-[#2563eb]" : "border-[#dfe2e6] hover:border-[#aeb9cf]"}`}>
+                          <span className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border ${shipTo === value ? "border-[#2563eb]" : "border-[#c4c8cf]"}`}>{shipTo === value && <span className="size-2 rounded-full bg-[#2563eb]" />}</span>
+                          <span><span className="block text-[11px] font-semibold text-[#202124]">{title}</span><span className="mt-1 block text-[9px] text-[#7d838d]">{description}</span></span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {!previewSubmitted && reviewVariant === "v2" && (
+                <div className="space-y-6">
+                  <div>
+                    <p className="text-[17px] font-semibold leading-[22px] text-[#171717]">Who will pay?</p>
+                    <p className="mb-3 mt-1 text-[10px] text-[#7d838d]">Select the payment method for this order.</p>
+                    <div className="space-y-2">
+                      {([['patient', 'Pay by Patient', 'The patient receives a secure payment link.'], ['clinic', 'Pay by Clinic', "Use the clinic's saved payment method."]] as const).map(([value, title, description]) => {
+                        const selected = paymentMethod === value;
+                        return (
+                          <button key={value} type="button" onClick={() => setPaymentMethod(value)} className={`flex min-h-[68px] w-full items-center gap-3 rounded-[10px] border px-4 py-3 text-left transition-all duration-200 ${selected ? "border-[#4aa9ed] bg-[#e9f7ff] shadow-[0_5px_14px_rgba(37,99,235,0.10)]" : "border-[#e0e2e5] bg-white hover:border-[#b9cde0] hover:bg-[#fafcff]"}`}>
+                            <span className="min-w-0 flex-1"><span className="block text-[12px] font-semibold text-[#202124]">{title}</span><span className="mt-1 block text-[9px] text-[#777f8a]">{description}</span></span>
+                            <span className={`flex size-5 shrink-0 items-center justify-center rounded-full border-2 ${selected ? "border-[#3b9ee8]" : "border-[#d2d5da]"}`}>{selected && <span className="size-2.5 rounded-full bg-[#3b9ee8]" />}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button type="button" className="mt-2.5 text-[10px] font-medium text-[#2563eb] hover:text-[#1d4ed8]">+ Add credit card</button>
+                  </div>
+                  <div>
+                    <p className="text-[17px] font-semibold leading-[22px] text-[#171717]">Where should we ship?</p>
+                    <p className="mb-3 mt-1 text-[10px] text-[#7d838d]">Select one delivery destination.</p>
+                    <div className="space-y-2">
+                      {([['patient', 'Ship to Patient', "Deliver directly to the patient's address."], ['clinic', 'Ship to Clinic', 'Send the complete order to the clinic.']] as const).map(([value, title, description]) => {
+                        const selected = shipTo === value;
+                        return (
+                          <button key={value} type="button" onClick={() => setShipTo(value)} className={`flex min-h-[68px] w-full items-center gap-3 rounded-[10px] border px-4 py-3 text-left transition-all duration-200 ${selected ? "border-[#4aa9ed] bg-[#e9f7ff] shadow-[0_5px_14px_rgba(37,99,235,0.10)]" : "border-[#e0e2e5] bg-white hover:border-[#b9cde0] hover:bg-[#fafcff]"}`}>
+                            <span className="min-w-0 flex-1"><span className="block text-[12px] font-semibold text-[#202124]">{title}</span><span className="mt-1 block text-[9px] text-[#777f8a]">{description}</span></span>
+                            <span className={`flex size-5 shrink-0 items-center justify-center rounded-full border-2 ${selected ? "border-[#3b9ee8]" : "border-[#d2d5da]"}`}>{selected && <span className="size-2.5 rounded-full bg-[#3b9ee8]" />}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className={previewSubmitted || reviewVariant !== "current" ? "hidden" : ""}>
+                <div>
                   <p className="text-[13px] font-semibold text-[#171717]">Payment</p>
                   <p className="mt-0.5 text-[10px] text-[#8c8c8c]">{previewSubmitted ? "Payment method used for this order" : "Select the payment method for the prescription"}</p>
                 </div>
@@ -10374,8 +10530,8 @@ function MultiPatientCartPage({
                 )}
               </div>
 
-              <div className={previewSubmitted ? "hidden" : "mt-5 border-t border-[#eee8e3] pt-5"}>
-                <div className="rounded-[12px] bg-[#fbfaf8] px-4 py-3">
+              <div className={previewSubmitted || reviewVariant !== "current" ? "hidden" : "mt-5 border-t border-[#eee8e3] pt-5"}>
+                <div>
                   <p className="text-[13px] font-semibold text-[#171717]">Shipping</p>
                   <p className="mt-0.5 text-[10px] text-[#8c8c8c]">{previewSubmitted ? "Shipping destination for this order" : "Choose where to ship the prescription"}</p>
                 </div>
@@ -10410,7 +10566,8 @@ function MultiPatientCartPage({
               </div>
             </section>
 
-            <section className={previewSubmitted ? "hidden" : "rounded-[18px] bg-white p-4 shadow-[0_18px_50px_rgba(24,24,24,0.07)]"}>
+            <section className={previewSubmitted ? "hidden" : "py-5"}>
+              <h3 className="mb-4 text-[16px] font-medium text-[#181818]">Summary</h3>
               <div className="space-y-3 text-[13px]">
                 <div className="flex justify-between text-[#222]"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
                 <div className="flex justify-between text-[#222]"><span>Estimated Shipping &amp; Handling</span><span>{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span></div>
