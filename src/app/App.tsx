@@ -1187,7 +1187,7 @@ function ReferenceProductCard({ card, onClick }: { card: CardDef; onClick: () =>
           ))}
           {card.pharmacies > 3 && <span className="flex size-6 items-center justify-center rounded-full border border-[#ddd8d2] bg-[#f8f6f2] text-[8px] font-medium text-[#555]">+{card.pharmacies - 3}</span>}
         </div>
-        <h3 className="truncate text-[14px] font-semibold leading-[18px] text-[#111]">{card.name}</h3>
+        <h3 className="break-words text-[14px] font-semibold leading-[18px] text-[#111]">{card.name}</h3>
         <p className="mt-0.5 text-[12px] leading-[16px] text-[#666]">{card.price}</p>
         {card.dosage !== "Injection" && <p className="text-[11px] leading-[15px] text-[#666]">{card.dosage}</p>}
       </div>
