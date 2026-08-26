@@ -7,7 +7,7 @@ export type InjectionProductSeed = {
 
 export const INJECTION_PRODUCT_SEEDS: InjectionProductSeed[] = [
   { catalogNumber: 1, name: "Tirzepatide/Pyridoxine (B6)", strength: "10mg/2mg/mL", ordered: 612 },
-  { catalogNumber: 2, name: "Semaglutide/Pyridoxine (B6)", strength: "2.5mg/2mg/mL", ordered: 282 },
+  { catalogNumber: 2, name: "Semaglutide Flex-Dose 4 mL", strength: "2.5 mg/mL", ordered: 282 },
   { catalogNumber: 3, name: "Retatrutide", strength: "16mg/mL", ordered: 73 },
   { catalogNumber: 4, name: "Tirzepatide/Cyanocobalamin (B12)", strength: "15mg/1mg/0.5mL", ordered: 67 },
   { catalogNumber: 5, name: "Nicotinamide Adenine Dinucleotide (NAD+)", strength: "200mg/mL", ordered: 66 },

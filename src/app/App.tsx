@@ -95,6 +95,19 @@ import blankLyophilizedVialReference from "@/assets/blank-lyophilized-vial-refer
 import blankTopicalDropperReference from "@/assets/blank-topical-dropper-reference.png";
 import blankPatchPackageReference from "@/assets/blank-patch-package-reference.png";
 import blankCapsuleBottleReference from "@/assets/blank-capsule-bottle-reference.png";
+import pharmacyFirstChoice from "@/assets/pharmacies/first-choice.png";
+import pharmacyDca from "@/assets/pharmacies/dca.png";
+import pharmacyLush from "@/assets/pharmacies/lush.png";
+import pharmacyNationalHealthRx from "@/assets/pharmacies/national-health-rx.png";
+import pharmacyOptimalBalance from "@/assets/pharmacies/optimal-balance.png";
+import pharmacyPharmko from "@/assets/pharmacies/pharmko.png";
+import pharmacyPrecision from "@/assets/pharmacies/precision.png";
+import pharmacyRush from "@/assets/pharmacies/rush.png";
+import pharmacySpringCreek from "@/assets/pharmacies/spring-creek.png";
+import pharmacyStriker from "@/assets/pharmacies/striker.png";
+import pharmacyThesis from "@/assets/pharmacies/thesis.png";
+import pharmacyVios from "@/assets/pharmacies/vios.png";
+import pharmacyWells from "@/assets/pharmacies/wells.png";
 import { INJECTION_PRODUCT_SEEDS } from "./injection-products";
 import { NASAL_SPRAY_PRODUCT_SEEDS } from "./nasal-spray-products";
 import { LYOPHILIZED_PRODUCT_SEEDS } from "./lyophilized-products";
@@ -1128,6 +1141,60 @@ const HEART_FILLED = "M15.4077 6.55061C15.4077 11.0445 8.7445 14.682 8.46075 14.
 const RX_ICON = "M15.9802 8.84809C15.9898 8.88727 15.9916 8.92795 15.9855 8.96784C15.9794 9.00772 15.9656 9.046 15.9447 9.08052C15.9238 9.11503 15.8963 9.14509 15.8638 9.16897C15.8313 9.19286 15.7944 9.21011 15.7552 9.21973L14.8092 9.45009L15.0572 10.3757C15.0677 10.4147 15.0703 10.4554 15.0651 10.4954C15.0598 10.5354 15.0467 10.5739 15.0265 10.6089C15.0063 10.6438 14.9795 10.6744 14.9475 10.699C14.9154 10.7235 14.8789 10.7416 14.8399 10.752C14.8141 10.7594 14.7873 10.7636 14.7604 10.7643C14.6929 10.7642 14.6272 10.7419 14.5736 10.7007C14.52 10.6595 14.4815 10.6019 14.464 10.5366L14.1677 9.43089L12.6105 8.53212V10.33L13.442 11.1612C13.4706 11.1898 13.4932 11.2237 13.5087 11.2609C13.5241 11.2982 13.532 11.3382 13.532 11.3785C13.532 11.4189 13.5241 11.4589 13.5087 11.4961C13.4932 11.5334 13.4706 11.5673 13.442 11.5958C13.4135 11.6244 13.3796 11.647 13.3423 11.6625C13.3051 11.6779 13.2651 11.6859 13.2247 11.6859C13.1844 11.6859 13.1444 11.6779 13.1071 11.6625C13.0699 11.647 13.036 11.6244 13.0074 11.5958L12.3033 10.8913L11.5992 11.5958C11.5707 11.6244 11.5368 11.647 11.4995 11.6625C11.4622 11.6779 11.4223 11.6859 11.3819 11.6859C11.3415 11.6859 11.3016 11.6779 11.2643 11.6625C11.227 11.647 11.1931 11.6244 11.1646 11.5958C11.1361 11.5673 11.1134 11.5334 11.098 11.4961C11.0825 11.4589 11.0746 11.4189 11.0746 11.3785C11.0746 11.3382 11.0825 11.2982 11.098 11.2609C11.1134 11.2237 11.1361 11.1898 11.1646 11.1612L11.9962 10.33V8.53212L10.4394 9.43089L10.143 10.5366C10.1255 10.6019 10.0869 10.6596 10.0332 10.7008C9.97958 10.742 9.91383 10.7643 9.8462 10.7643C9.81925 10.7642 9.79241 10.7607 9.76634 10.7539C9.72736 10.7435 9.69082 10.7255 9.6588 10.7009C9.62678 10.6764 9.59991 10.6457 9.57973 10.6108C9.55955 10.5759 9.54646 10.5373 9.54119 10.4973C9.53592 10.4573 9.53859 10.4166 9.54904 10.3776L9.79705 9.45201L8.85106 9.22165C8.77195 9.2022 8.7038 9.15212 8.6616 9.08243C8.61941 9.01273 8.60663 8.92913 8.62608 8.85001C8.64553 8.77089 8.69561 8.70274 8.76531 8.66055C8.835 8.61836 8.91861 8.60558 8.99772 8.62503L10.1284 8.90261L11.689 8L10.1288 7.09931L8.99811 7.37689C8.97412 7.38283 8.94949 7.38579 8.92478 7.38572C8.84968 7.38577 8.77716 7.35831 8.72094 7.30852C8.66471 7.25873 8.62868 7.19006 8.61965 7.11551C8.61062 7.04095 8.62922 6.96567 8.67193 6.9039C8.71464 6.84213 8.77851 6.79815 8.85145 6.78027L9.79744 6.54991L9.54942 5.62235C9.52835 5.54364 9.5394 5.45978 9.58015 5.38922C9.6209 5.31866 9.68801 5.26718 9.76672 5.2461C9.84543 5.22503 9.92929 5.23608 9.99985 5.27683C10.0704 5.31758 10.1219 5.3847 10.143 5.46341L10.4394 6.56911L11.9962 7.46788V5.66996L11.1646 4.83876C11.107 4.78113 11.0746 4.70296 11.0746 4.62146C11.0746 4.5811 11.0825 4.54114 11.098 4.50385C11.1134 4.46657 11.1361 4.43269 11.1646 4.40416C11.1931 4.37562 11.227 4.35298 11.2643 4.33754C11.3016 4.32209 11.3415 4.31415 11.3819 4.31415C11.4634 4.31415 11.5416 4.34652 11.5992 4.40416L12.3033 5.10866L13.0074 4.40416C13.0651 4.34652 13.1432 4.31415 13.2247 4.31415C13.3062 4.31415 13.3844 4.34652 13.442 4.40416C13.4997 4.46179 13.532 4.53995 13.532 4.62146C13.532 4.70296 13.4997 4.78113 13.442 4.83876L12.6105 5.66996V7.46788L14.1673 6.56911L14.4637 5.46341C14.4847 5.3847 14.5362 5.31758 14.6068 5.27683C14.6773 5.23608 14.7612 5.22503 14.8399 5.2461C14.9186 5.26718 14.9857 5.31866 15.0265 5.38922C15.0672 5.45978 15.0783 5.54364 15.0572 5.62235L14.8092 6.54799L15.7552 6.77835C15.8302 6.79436 15.8964 6.83783 15.941 6.90023C15.9855 6.96262 16.0052 7.03942 15.996 7.11553C15.9868 7.19164 15.9495 7.26157 15.8913 7.31157C15.8332 7.36156 15.7585 7.38801 15.6819 7.38572C15.6571 7.38579 15.6325 7.38283 15.6085 7.37689L14.4779 7.09931L12.9176 8L14.4779 8.90069L15.6085 8.62311C15.6477 8.61347 15.6884 8.61165 15.7283 8.61774C15.7682 8.62383 15.8064 8.63772 15.841 8.65861C15.8755 8.67951 15.9055 8.70699 15.9294 8.7395C15.9533 8.77201 15.9705 8.80891 15.9802 8.84809Z";
 
 // Exact Figma product card using stacking CSS grid (col-1 row-1 for all children)
+const PHARMACY_LOGOS = [
+  { name: "1st Choice Compounding Pharmacy", src: pharmacyFirstChoice },
+  { name: "DCA Pharmacy", src: pharmacyDca },
+  { name: "Lush Pharmacy", src: pharmacyLush },
+  { name: "National Health RX", src: pharmacyNationalHealthRx },
+  { name: "Optimal Balance Pharmacy", src: pharmacyOptimalBalance },
+  { name: "Pharmko Pharmacy", src: pharmacyPharmko },
+  { name: "Precision Fulfillment Pharmacy", src: pharmacyPrecision },
+  { name: "Rush Pharmacy TX", src: pharmacyRush },
+  { name: "Spring Creek Pharmacy", src: pharmacySpringCreek },
+  { name: "Striker Pharmacy", src: pharmacyStriker },
+  { name: "Thesis Pharmacy", src: pharmacyThesis },
+  { name: "VIOS Pharmacy", src: pharmacyVios },
+  { name: "Wells Pharmacy", src: pharmacyWells },
+] as const;
+
+function ReferenceProductCard({ card, onClick }: { card: CardDef; onClick: () => void }) {
+  const primaryLogo = PHARMACY_LOGOS.find(pharmacy => pharmacy.name === card.pharmacy);
+  const orderedLogos = primaryLogo ? [primaryLogo, ...PHARMACY_LOGOS.filter(pharmacy => pharmacy.name !== primaryLogo.name)] : [...PHARMACY_LOGOS];
+  const visibleLogos = orderedLogos.slice(0, Math.min(card.pharmacies, 3));
+  return (
+    <article onClick={onClick} className="group relative h-[393px] w-[268px] shrink-0 cursor-pointer overflow-hidden rounded-[4px] bg-gradient-to-b from-[rgba(247,239,233,0.1)] to-[rgba(236,229,182,0.1)] transition-transform duration-200 hover:-translate-y-0.5">
+      <div className="flex h-[285px] items-center justify-center px-7 pt-5">
+        {card.img === blankVialReference || card.img === blankLyophilizedVialReference ? (
+          <div className="h-[245px] w-[184px] transition-transform duration-300 group-hover:scale-[1.02]"><ManualVialPreview name={card.name} strength={card.strength ?? "2.5 mg/mL"} size="Multi-Dose Vial" palette={card.vialPalette} baseImage={card.img} compact flatLabel /></div>
+        ) : card.img === blankNasalSprayReference ? (
+          <div className="h-[245px] w-[190px] transition-transform duration-300 group-hover:scale-[1.02]"><ManualNasalSprayPreview name={card.name} strength={card.strength ?? "100mg/mL"} palette={card.vialPalette} compact flatLabel /></div>
+        ) : card.img === blankTopicalDropperReference ? (
+          <div className="h-[235px] w-[180px] transition-transform duration-300 group-hover:scale-[1.02]"><ManualNasalSprayPreview name={card.name} strength={card.strength ?? "2%"} palette={card.vialPalette} baseImage={card.img} variant="topical" compact flatLabel /></div>
+        ) : card.img === blankPatchPackageReference ? (
+          <div className="size-[220px] transition-transform duration-300 group-hover:scale-[1.02]"><ManualPatchPreview name={card.name} strength={card.strength ?? "0.1mg/day"} compact /></div>
+        ) : card.img === blankCapsuleBottleReference ? (
+          <div className="h-[250px] w-[195px] transition-transform duration-300 group-hover:scale-[1.02]"><ManualCapsulePreview name={card.name} strength={card.strength ?? "200mg/mL"} palette={card.vialPalette} compact flatLabel /></div>
+        ) : (
+          <img src={card.img} alt={card.name} className="max-h-[245px] max-w-[195px] object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-[1.02]" />
+        )}
+      </div>
+      <div className="absolute inset-x-0 bottom-0 px-[18px] pb-[18px]">
+        <div className="mb-2 flex items-center gap-1.5" aria-label={`Available from ${card.pharmacies} pharmacies`}>
+          {visibleLogos.map(pharmacy => (
+            <span key={pharmacy.name} className="flex size-6 items-center justify-center overflow-hidden rounded-full border border-white bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12)]" title={pharmacy.name}>
+              <img src={pharmacy.src} alt={pharmacy.name} className="size-full object-cover" />
+            </span>
+          ))}
+          {card.pharmacies > 3 && <span className="flex size-6 items-center justify-center rounded-full border border-[#ddd8d2] bg-[#f8f6f2] text-[8px] font-medium text-[#555]">+{card.pharmacies - 3}</span>}
+        </div>
+        <h3 className="truncate text-[14px] font-semibold leading-[18px] text-[#111]">{card.name}</h3>
+        <p className="mt-0.5 text-[12px] leading-[16px] text-[#666]">{card.price}</p>
+        {card.dosage !== "Injection" && <p className="text-[11px] leading-[15px] text-[#666]">{card.dosage}</p>}
+      </div>
+    </article>
+  );
+}
+
 function FigmaCard({
   name,
   strength,
@@ -1913,31 +1980,7 @@ function ProductsPage({
         />
       );
     }
-    return (
-      <FigmaCard
-        key={card.id}
-        name={card.name}
-        strength={card.strength}
-        vialPalette={card.vialPalette}
-        price={card.price}
-        pharmacies={card.pharmacies}
-        img={card.img}
-        imgW={card.imgW}
-        imgH={card.imgH}
-        imgL={card.imgL}
-        imgT={card.imgT}
-        imgContain={card.imgContain}
-        favorited={fav}
-        onFavorite={() => toggleFav(card.id)}
-        hasRxBadge={card.hasRxBadge}
-        btnOffsetX={card.btnOffsetX}
-        heartVariant={heart}
-        onClick={() => {
-          onProductSelect(card);
-          onNavigate("product-detail");
-        }}
-      />
-    );
+    return <ReferenceProductCard key={card.id} card={card} onClick={() => { onProductSelect(card); onNavigate("product-detail"); }} />;
   }
 
   function matchesCatalogFilters(card: CardDef) {
@@ -10271,15 +10314,8 @@ function MultiPatientCartPage({
                   </div>
                   <span className="rounded-full bg-white/70 px-2.5 py-1 text-[9px] font-semibold tracking-[0.08em] text-[#2563EB]">SIG</span>
                 </div>
-                {sigCustomDirections === null ? (
-                  <div className="mt-4 min-h-[180px] rounded-[12px] border border-white/90 bg-white/70 px-4 py-4 text-[13px] leading-6 text-[#202938] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_10px_26px_rgba(37,99,235,0.08)] backdrop-blur-sm">
-                    {resolvedSigDirections || <span className="text-[#8491a6]">Your completed directions will appear here after you enter the dose and frequency.</span>}
-                  </div>
-                ) : (
-                  <textarea autoFocus value={sigCustomDirections} onChange={event => setSigCustomDirections(event.target.value)} placeholder="Type custom directions" className="mt-4 min-h-[180px] w-full resize-none rounded-[12px] border border-[#7F9EE3] bg-white/80 px-4 py-4 text-[13px] leading-6 text-[#202938] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_10px_26px_rgba(37,99,235,0.08)] backdrop-blur-sm placeholder:text-[#8491a6]" />
-                )}
-                <button type="button" onClick={() => setSigCustomDirections(current => current === null ? resolvedSigDirections : null)} className="mt-3 text-[10px] font-semibold text-[#171717] hover:underline">{sigCustomDirections === null ? "+ Edit directions" : "− Use generated directions"}</button>
-                <div className="mt-2 flex items-center justify-between text-[9px] text-[#718096]"><span>{resolvedSigDirections.trim() ? sigCustomDirections === null ? "Ready to save" : "Editing directions" : "Enter dose and frequency"}</span><span>{resolvedSigDirections.length} characters</span></div>
+                <textarea value={resolvedSigDirections} onChange={event => setSigCustomDirections(event.target.value)} placeholder="Your completed directions will appear here after you enter the dose and frequency. You can edit them directly." className="mt-4 min-h-[180px] w-full resize-none rounded-[12px] border border-white/90 bg-white/80 px-4 py-4 text-[13px] leading-6 text-[#202938] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_10px_26px_rgba(37,99,235,0.08)] backdrop-blur-sm placeholder:text-[#8491a6] focus:border-[#7F9EE3]" />
+                <div className="mt-3 flex items-center justify-between text-[9px] text-[#718096]"><span>{resolvedSigDirections.trim() ? "Editable · Ready to save" : "Enter dose and frequency, or type directions"}</span><span>{resolvedSigDirections.length} characters</span></div>
               </aside>
             </div>
             <div className="sticky bottom-0 flex items-center justify-between gap-4 border-t border-[#ededed] bg-white/95 px-6 py-4 backdrop-blur">
