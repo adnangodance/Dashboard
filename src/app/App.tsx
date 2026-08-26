@@ -95,6 +95,7 @@ import blankLyophilizedVialReference from "@/assets/blank-lyophilized-vial-refer
 import blankTopicalDropperReference from "@/assets/blank-topical-dropper-reference.png";
 import blankPatchPackageReference from "@/assets/blank-patch-package-reference.png";
 import blankCapsuleBottleReference from "@/assets/blank-capsule-bottle-reference.png";
+import productSupplyNeedle from "@/assets/product-supply-needle.png";
 import pharmacyFirstChoice from "@/assets/pharmacies/first-choice.png";
 import pharmacyDca from "@/assets/pharmacies/dca.png";
 import pharmacyLush from "@/assets/pharmacies/lush.png";
@@ -3167,6 +3168,7 @@ function ProductDetailPage({
   const [pharmacy, setPharmacy] = useState(product.pharmacy);
   const [qty, setQty] = useState(1);
   const [suppliesOpen, setSuppliesOpen] = useState(false);
+  const [supplyQty, setSupplyQty] = useState(1);
   const [patientPickerOpen, setPatientPickerOpen] = useState(false);
   const [createPatientOpen, setCreatePatientOpen] = useState(false);
   const [patientSearch, setPatientSearch] = useState("");
@@ -3400,6 +3402,7 @@ function ProductDetailPage({
 
   const isReferenceStyle = productDetailVariant === 5 || productDetailVariant === 6;
   const isBlueReference = productDetailVariant === 6;
+  const similarProducts = ALL_CARDS.filter(candidate => candidate.id !== product.id && candidate.dosage === product.dosage).slice(0, 4);
 
   return (
     <>
@@ -3719,118 +3722,109 @@ function ProductDetailPage({
         </div>
       </div>
 
-      <section className="mt-8 max-w-[1180px] overflow-hidden rounded-[12px] border border-[#e8e3df] bg-white">
-        <div className="overflow-x-auto border-b border-[#e8e3df] px-5 sm:px-6">
-          <div className="flex min-w-max gap-7" role="tablist" aria-label="Product information">
-            {[
-              { id: "overview", label: "Overview" },
-              { id: "formula", label: "Formula & Benefits" },
-              { id: "dosage", label: "Dosage" },
-              { id: "safety", label: "Storage & Safety" },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                role="tab"
-                aria-selected={activeInfoTab === tab.id}
-                onClick={() => setActiveInfoTab(tab.id as typeof activeInfoTab)}
-                className={`h-12 border-b-2 text-[12px] font-semibold transition-colors ${activeInfoTab === tab.id ? "border-black text-black" : "border-transparent text-[#737b77] hover:text-black"}`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+      <section className="mt-9 max-w-[1180px] overflow-hidden rounded-[14px] border border-[#e4e4e4] bg-white">
+        <div className="border-b border-[#e8e8e8] px-6 py-4 lg:px-8">
+          <p className="text-[12px] font-semibold text-[#2563EB]">About this product</p>
         </div>
 
-        <div className="px-5 py-6 sm:px-6 lg:px-8">
-          {activeInfoTab === "overview" && (
-            <div className="max-w-[1050px]">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#777]">Product reference</p>
-              <h2 className="mt-2 text-[20px] font-semibold text-[#1a1a1a]">{product.name}</h2>
-              <p className="mt-4 max-w-[850px] text-[13px] leading-6 text-[#555]">{product.name} is a compounded {product.dosage.toLowerCase()} prepared for personalized {product.areaOfTreatment.toLowerCase()} protocols. The dispensing pharmacy prepares the medication according to the selected configuration and patient prescription.</p>
+        <div className="px-6 py-7 lg:px-8 lg:py-9">
+          <h2 className="text-[22px] font-medium tracking-[-0.02em] text-[#171717]">Tesamorelin / Ipamorelin Injection</h2>
+          <p className="mt-4 text-[13px] leading-6 text-[#555]">Tesamorelin / Ipamorelin is an advanced synergistic peptide therapy designed to optimize endogenous growth hormone production and improve metabolic health. Tesamorelin targets the reduction of visceral adipose tissue—the metabolically active fat surrounding internal organs—while Ipamorelin provides a highly selective signal to the pituitary gland to increase the strength of the growth hormone “pulse.”</p>
+          <p className="mt-3 text-[13px] leading-6 text-[#555]">This combination is a cornerstone of modern longevity and body composition protocols. By activating two separate pathways (GHRH and Ghrelin receptors), this formulation facilitates significant fat loss and supports the preservation of lean muscle tissue. Because it preserves the body's natural regulatory feedback loops, it offers a physiological approach to age-management, improving systemic vitality, sleep quality, and physical recovery.</p>
 
-              <div className="mt-6 border-y border-[#e8e3df]">
-                <div className="grid grid-cols-[120px_minmax(0,1fr)] gap-4 border-b border-[#e8e3df] py-3 sm:grid-cols-[150px_minmax(0,1fr)]">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#888]">Selected configuration</p>
-                  <p className="text-right text-[12px] font-semibold text-[#111]">${configuredPrice.toFixed(2)}</p>
+          <h3 className="mt-8 text-[16px] font-medium text-[#202020]">Product List</h3>
+          <div className="mt-3 overflow-x-auto rounded-[10px] border border-[#e5e5e5]">
+            <table className="w-full min-w-[700px] text-left text-[12px]">
+              <thead className="bg-[#f7f7f7] text-[10px] uppercase tracking-[0.07em] text-[#777]"><tr><th className="px-4 py-3">Item Name</th><th className="px-4 py-3">Strength (TESA/IPAM)</th><th className="px-4 py-3">Form</th><th className="px-4 py-3">Quantity</th></tr></thead>
+              <tbody><tr><td className="px-4 py-3.5">Tesamorelin / Ipamorelin</td><td className="px-4 py-3.5">2.4mg / 1.2mg / mL</td><td className="px-4 py-3.5">Injection</td><td className="px-4 py-3.5">5 mL Vial</td></tr></tbody>
+            </table>
+          </div>
+
+          <h3 className="mt-8 text-[16px] font-medium text-[#202020]">Ingredient Breakdown &amp; Benefits</h3>
+          <div className="mt-3 space-y-2 text-[12px] leading-5 text-[#555]">
+            <p><strong className="font-medium text-[#222]">Tesamorelin Acetate:</strong> A stabilized GHRH analogue that specifically facilitates the reduction of deep abdominal fat and improves lipid profiles.</p>
+            <p><strong className="font-medium text-[#222]">Ipamorelin:</strong> A selective growth hormone secretagogue that stimulates the timing and amplitude of GH release without increasing hunger, cortisol, or prolactin.</p>
+            <p><strong className="font-medium text-[#222]">Metabolic Synergy:</strong> The dual-action approach ensures a more robust hormonal response than single-peptide therapies, maximizing fat oxidation and tissue repair.</p>
+          </div>
+
+          <h3 className="mt-8 text-[16px] font-medium text-[#202020]">Typical Dosage and Administration</h3>
+          <p className="mt-3 text-[12px] italic leading-5 text-[#555]">Dosing is administered via subcutaneous (SQ) injection, ideally at bedtime. To maximize the growth hormone pulse, avoid eating for at least 2 hours before administration.</p>
+          <div className="mt-4 overflow-x-auto rounded-[10px] border border-[#e5e5e5]">
+            <table className="w-full min-w-[700px] text-left text-[12px]">
+              <thead className="bg-[#f7f7f7] text-[10px] uppercase tracking-[0.07em] text-[#777]"><tr><th className="px-4 py-3">Goal</th><th className="px-4 py-3">Frequency</th><th className="px-4 py-3">Route</th><th className="px-4 py-3">Notes</th></tr></thead>
+              <tbody className="divide-y divide-[#ebebeb] text-[#424242]">
+                <tr><td className="px-4 py-3">Visceral Fat Loss</td><td className="px-4 py-3">Once Daily</td><td className="px-4 py-3">Subcutaneous</td><td className="px-4 py-3">1.2mg/0.6mg standard dose</td></tr>
+                <tr className="bg-[#fafafa]"><td className="px-4 py-3">Pulsatile Protocol</td><td className="px-4 py-3">5x Weekly</td><td className="px-4 py-3">Subcutaneous</td><td className="px-4 py-3">5 days on / 2 days off</td></tr>
+                <tr><td className="px-4 py-3">Intensive Support</td><td className="px-4 py-3">Once Daily</td><td className="px-4 py-3">Subcutaneous</td><td className="px-4 py-3">2.4mg/1.2mg dose</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-4 space-y-1 text-[12px] leading-5 text-[#555]">
+            <p><strong className="font-medium text-[#222]">Beyond Use Days:</strong> 90 days (unopened) or 28 days after first puncture.</p>
+            <p><strong className="font-medium text-[#222]">Storage:</strong> Store in the refrigerator (36°F to 46°F). Protect from light. Do not freeze.</p>
+            <p><strong className="font-medium text-[#222]">Status:</strong> 503A Compounded (Sterile)</p>
+          </div>
+
+          <div className="mt-8 rounded-[12px] border border-[#f5e6d2] bg-[radial-gradient(circle_at_95%_0%,rgba(255,231,194,0.42),transparent_48%),linear-gradient(145deg,#fffdf9_0%,#fff8ee_100%)] p-5">
+            <div className="flex items-start gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/85 text-[#c9782f] shadow-[0_1px_0_rgba(120,65,8,0.04)]">
+                <TriangleAlert size={17} strokeWidth={1.9} />
+              </span>
+              <div>
+                <h3 className="text-[16px] font-medium text-[#75481f]">Safety Warning</h3>
+                <p className="mt-2 text-[12px] leading-5 text-[#66574a]"><strong className="font-medium text-[#5f432b]">FOR SUBCUTANEOUS USE ONLY.</strong> Use a fresh sterile needle for every administration. Discard 28 days after first puncture or by the BUD date, whichever comes first. For optimal results, administer on an empty stomach. Common side effects may include transient redness at the injection site, mild joint pain, or swelling. Consult your provider if you have a history of active malignancy or pituitary disorders. Discontinue use and seek medical attention if you experience severe headaches, vision changes, or signs of an allergic reaction. Keep out of reach of children.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {product.dosage === "Injection" && (
+        <section className="mt-5 max-w-[1180px] rounded-[14px] border border-[#e4e4e4] bg-white p-6 lg:p-8">
+          <h2 className="text-[20px] font-medium tracking-[-0.02em] text-[#171717]">Product Supply</h2>
+          <div className="mt-5 flex h-[393px] w-[268px] max-w-full flex-col overflow-hidden rounded-[14px] border border-[#e4e4e4] bg-white">
+            <div className="flex h-[190px] shrink-0 items-center justify-center overflow-hidden bg-[#fafafa] p-5">
+              <img src={productSupplyNeedle} alt="Packaged subcutaneous needle" className="h-full w-full object-contain mix-blend-multiply" />
+            </div>
+            <div className="flex min-h-0 flex-1 flex-col p-4">
+              <h3 className="text-[15px] font-medium leading-5 text-[#1d1d1d]">SQ Supplies Pack</h3>
+              <p className="mt-1 text-[11px] leading-4 text-[#656565]">Suitable needles, syringe, and alcohol pads for the selected dosage.</p>
+              <span className="mt-2 inline-flex w-fit rounded-[6px] bg-[#eef3ff] px-2 py-1 text-[9px] font-medium text-[#526fe8]">Subcutaneous (SC)</span>
+              <div className="mt-auto flex items-center justify-between gap-3 pt-3">
+                <div className="inline-flex h-8 items-center overflow-hidden rounded-full border border-[#e1e1e1] bg-white">
+                  {supplyQty === 1 ? (
+                    <button type="button" onClick={() => { setSuppliesOpen(false); showToast("Supply removed"); }} className="flex size-8 items-center justify-center text-[#555] transition-colors hover:bg-[#f1f1f1]" aria-label="Remove supply"><Trash2 size={13} strokeWidth={1.7} /></button>
+                  ) : (
+                    <button type="button" onClick={() => setSupplyQty(value => value - 1)} className="flex size-8 items-center justify-center text-[#555] transition-colors hover:bg-[#f1f1f1]" aria-label="Decrease supply quantity"><Minus size={13} /></button>
+                  )}
+                  <span className="flex h-8 min-w-7 items-center justify-center text-[11px] font-medium text-[#222]">{supplyQty}</span>
+                  <button type="button" onClick={() => setSupplyQty(value => value + 1)} className="flex size-8 items-center justify-center text-[#555] transition-colors hover:bg-[#f1f1f1]" aria-label="Increase supply quantity"><Plus size={13} /></button>
                 </div>
-                <dl className="grid sm:grid-cols-2">
-                {[
-                  ["Strength", strength],
-                  ["Size", size],
-                  [product.dosage === "Injection" ? "Route" : "Form", injType],
-                  ["Pharmacy", selectedPharmacy.name],
-                ].map(([label, value]) => (
-                  <div key={label} className="grid grid-cols-[90px_minmax(0,1fr)] gap-3 border-b border-[#eeeae7] py-3 last:border-b-0 sm:odd:border-r sm:odd:pr-5 sm:even:pl-5">
-                    <dt className="text-[10px] text-[#888]">{label}</dt>
-                    <dd className="text-[11px] font-semibold text-[#222]">{value}</dd>
-                  </div>
-                ))}
-                </dl>
+                <p className="text-[14px] font-medium text-[#171717]">${(1.2 * supplyQty).toFixed(2)}</p>
               </div>
+              <button type="button" onClick={() => { setSuppliesOpen(true); showToast("Supply added"); }} className={`-mx-1 mt-3 h-10 w-[calc(100%+8px)] rounded-full text-[11px] font-medium transition-colors ${suppliesOpen ? "bg-[#f1f1f1] text-[#222]" : "bg-[#111] text-white hover:bg-[#121212]"}`}>
+                {suppliesOpen ? "Added" : "Add supply"}
+              </button>
             </div>
-          )}
+          </div>
+        </section>
+      )}
 
-          {activeInfoTab === "formula" && (
-            <div className="max-w-[1050px]">
-              <h2 className="text-[20px] font-semibold text-[#1a1a1a]">Ingredient breakdown & benefits</h2>
-              <div className="mt-5 grid gap-3 lg:grid-cols-3">
-                {[
-                  { title: product.name, text: `Configured as ${strength} in a ${size} ${product.dosage.toLowerCase()} format.` },
-                  { title: "Treatment area", text: `Prepared for personalized ${product.areaOfTreatment.toLowerCase()} protocols under prescriber direction.` },
-                  { title: "Pharmacy preparation", text: `Dispensed by ${selectedPharmacy.name} using the selected product configuration.` },
-                ].map(item => (
-                  <article key={item.title} className="rounded-[8px] border border-[#e8e3df] p-4">
-                    <div className="flex size-8 items-center justify-center rounded-[7px] bg-[#eef5f1] text-[#183229]"><Leaf size={15} /></div>
-                    <h3 className="mt-3 text-[13px] font-semibold text-[#1a1a1a]">{item.title}</h3>
-                    <p className="mt-2 text-[12px] leading-5 text-[#626d68]">{item.text}</p>
-                  </article>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeInfoTab === "dosage" && (
-            <div className="max-w-[1050px]">
-              <h2 className="text-[20px] font-semibold text-[#1a1a1a]">Typical dosage and administration</h2>
-              <p className="mt-2 text-[12px] leading-5 text-[#626d68]">Administration and dosing instructions are determined by the prescriber for the selected {product.dosage.toLowerCase()} configuration.</p>
-              <div className="mt-5 overflow-x-auto rounded-[8px] border border-[#e8e3df]">
-                <table className="w-full min-w-[720px] text-left text-[12px]">
-                  <thead className="bg-[#f6f4f2] text-[10px] uppercase tracking-[0.08em] text-[#667085]">
-                    <tr><th className="px-4 py-3">Goal</th><th className="px-4 py-3">Frequency</th><th className="px-4 py-3">Route</th><th className="px-4 py-3">Notes</th></tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#e8e3df] text-[#39433f]">
-                    <tr><td className="px-4 py-3 font-semibold">Standard protocol</td><td className="px-4 py-3">As prescribed</td><td className="px-4 py-3">{injType}</td><td className="px-4 py-3">{strength}</td></tr>
-                    <tr><td className="px-4 py-3 font-semibold">Product form</td><td className="px-4 py-3">Patient specific</td><td className="px-4 py-3">{product.dosage}</td><td className="px-4 py-3">{size}</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {activeInfoTab === "safety" && (
-            <div className="max-w-[1050px]">
-              <h2 className="text-[20px] font-semibold text-[#1a1a1a]">Storage & safety</h2>
-              <div className="mt-5 grid gap-3 md:grid-cols-3">
-                {[
-                  ["Beyond use", "90 days unopened or 28 days after first puncture"],
-                  ["Storage", "Refrigerate at 36°F to 46°F. Protect from light. Do not freeze."],
-                  ["Status", "503A compounded, sterile preparation"],
-                ].map(([label, value]) => (
-                  <div key={label} className="rounded-[8px] border border-[#e8e3df] bg-[#fbfaf8] p-4">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#8c8c8c]">{label}</p>
-                    <p className="mt-2 text-[12px] font-semibold leading-5 text-[#1a1a1a]">{value}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-5 flex items-start gap-3 rounded-[8px] border border-[#f0bd67] bg-[#fff7e8] p-4">
-                <AlertCircle size={17} className="mt-0.5 shrink-0 text-[#a45b00]" />
-                <div>
-                  <h3 className="text-[13px] font-semibold text-[#6f3e00]">Safety warning</h3>
-                  <p className="mt-1 text-[12px] leading-5 text-[#744d1c]"><strong>For subcutaneous use only.</strong> Use a fresh sterile needle for every administration. Discard 28 days after first puncture or by the beyond-use date, whichever comes first. Use only as directed by a licensed prescriber.</p>
-                </div>
-              </div>
-            </div>
-          )}
+      <section className="mt-5 max-w-[1180px] rounded-[14px] border border-[#e4e4e4] bg-white p-6 lg:p-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="text-[20px] font-medium tracking-[-0.02em] text-[#171717]">Similar Products</h2>
+            <p className="mt-2 text-[12px] leading-5 text-[#6b6b6b]">For any unanswered questions, reach out to our support team via email.</p>
+          </div>
+          <button type="button" onClick={() => onNavigate("products")} className="inline-flex h-9 items-center gap-1.5 rounded-[8px] px-3 text-[12px] font-medium text-[#2563EB] transition-colors hover:bg-[#f3f7ff]">
+            View catalogue <ChevronRight size={15} strokeWidth={1.8} />
+          </button>
+        </div>
+        <div className="mt-6 flex gap-4 overflow-x-auto pb-2">
+          {similarProducts.map(candidate => (
+            <ReferenceProductCard key={candidate.id} card={candidate} onClick={() => onNavigate("products")} />
+          ))}
         </div>
       </section>
       </div>
