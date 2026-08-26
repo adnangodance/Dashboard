@@ -1158,11 +1158,25 @@ const PHARMACY_LOGOS = [
 ] as const;
 
 function ReferenceProductCard({ card, onClick }: { card: CardDef; onClick: () => void }) {
+  const [pharmaciesExpanded, setPharmaciesExpanded] = useState(false);
   const primaryLogo = PHARMACY_LOGOS.find(pharmacy => pharmacy.name === card.pharmacy);
   const orderedLogos = primaryLogo ? [primaryLogo, ...PHARMACY_LOGOS.filter(pharmacy => pharmacy.name !== primaryLogo.name)] : [...PHARMACY_LOGOS];
-  const visibleLogos = orderedLogos.slice(0, Math.min(card.pharmacies, 3));
+  const visibleLogos = orderedLogos.slice(0, Math.min(card.pharmacies, 5));
+  const displaySize = card.dosage === "Capsule" ? "30 Capsules"
+    : card.dosage === "Nasal Spray" ? "1 (10mL) Bottle"
+    : card.dosage === "Topical" ? "1 (30mL) Bottle"
+    : card.dosage === "Patch" ? "30 Patches"
+    : card.dosage === "Lyophilized" ? "1 Vial"
+    : "1 (5mL) Vial";
   return (
     <article onClick={onClick} className="group relative h-[393px] w-[268px] shrink-0 cursor-pointer overflow-hidden rounded-[4px] bg-gradient-to-b from-[rgba(247,239,233,0.1)] to-[rgba(236,229,182,0.1)] transition-transform duration-200 hover:-translate-y-0.5">
+      <div className="absolute left-[18px] top-[18px] z-10 flex flex-col items-start gap-2">
+        {(card.dosage === "Injection" || card.dosage === "Lyophilized") && (
+          <span className="flex size-8 items-center justify-center rounded-full bg-[#EEF4FF] text-[#2563EB] shadow-[0_4px_14px_rgba(37,99,235,0.10)]" title="Refrigerated" aria-label="Refrigerated">
+            <Snowflake size={15} strokeWidth={2} />
+          </span>
+        )}
+      </div>
       <div className="flex h-[285px] items-center justify-center px-7 pt-5">
         {card.img === blankVialReference || card.img === blankLyophilizedVialReference ? (
           <div className="h-[245px] w-[184px] transition-transform duration-300 group-hover:scale-[1.02]"><ManualVialPreview name={card.name} strength={card.strength ?? "2.5 mg/mL"} size="Multi-Dose Vial" palette={card.vialPalette} baseImage={card.img} compact flatLabel /></div>
@@ -1179,17 +1193,30 @@ function ReferenceProductCard({ card, onClick }: { card: CardDef; onClick: () =>
         )}
       </div>
       <div className="absolute inset-x-0 bottom-0 px-[18px] pb-[18px]">
-        <div className="mb-2 flex items-center gap-1.5" aria-label={`Available from ${card.pharmacies} pharmacies`}>
-          {visibleLogos.map(pharmacy => (
-            <span key={pharmacy.name} className="flex size-6 items-center justify-center overflow-hidden rounded-full border border-white bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12)]" title={pharmacy.name}>
+        <button
+          type="button"
+          aria-expanded={pharmaciesExpanded}
+          aria-label={`${pharmaciesExpanded ? "Collapse" : "Show"} ${card.pharmacies} pharmacies`}
+          onClick={(event) => {
+            event.stopPropagation();
+            setPharmaciesExpanded((expanded) => !expanded);
+          }}
+          className={`mb-2 flex h-8 items-center rounded-full border border-white/80 bg-white/80 px-1.5 shadow-[0_5px_16px_rgba(0,0,0,0.08)] backdrop-blur-sm transition-all duration-300 hover:bg-white ${pharmaciesExpanded ? "gap-1.5" : "gap-0"}`}
+        >
+          {visibleLogos.map((pharmacy, index) => (
+            <span
+              key={pharmacy.name}
+              className={`flex size-6 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white shadow-[0_1px_4px_rgba(0,0,0,0.14)] transition-all duration-300 ${!pharmaciesExpanded && index > 0 ? "-ml-2" : "ml-0"}`}
+              style={{ transitionDelay: `${index * 28}ms` }}
+              title={pharmacy.name}
+            >
               <img src={pharmacy.src} alt={pharmacy.name} className="size-full object-cover" />
             </span>
           ))}
-          {card.pharmacies > 3 && <span className="flex size-6 items-center justify-center rounded-full border border-[#ddd8d2] bg-[#f8f6f2] text-[8px] font-medium text-[#555]">+{card.pharmacies - 3}</span>}
-        </div>
+        </button>
         <h3 className="break-words text-[14px] font-semibold leading-[18px] text-[#111]">{card.name}</h3>
         <p className="mt-0.5 text-[12px] leading-[16px] text-[#666]">{card.price}</p>
-        {card.dosage !== "Injection" && <p className="text-[11px] leading-[15px] text-[#666]">{card.dosage}</p>}
+        <p className="text-[11px] leading-[15px] text-[#888]">{displaySize}</p>
       </div>
     </article>
   );
@@ -1935,51 +1962,6 @@ function ProductsPage({
   }
 
   function renderCard(card: CardDef) {
-    const fav = favoriteProductIds.has(card.id);
-    const heart: "green" | "black" | "none" =
-      card.heartVariant === "none" ? "none" : fav ? "green" : "black";
-    if (pharmacyCatalog) {
-      return (
-        <PharmacyCatalogCard
-          key={card.id}
-          name={card.name}
-          strength={card.strength}
-          vialPalette={card.vialPalette}
-          price={card.price}
-          pharmacy={card.pharmacy}
-          pharmacies={card.pharmacies}
-          dosage={card.dosage}
-          img={card.img}
-          favorited={fav}
-          onFavorite={() => toggleFav(card.id)}
-          heartVariant={heart}
-          onClick={() => {
-            onProductSelect(card);
-            onNavigate("product-detail");
-          }}
-        />
-      );
-    }
-    if (oldCatalog) {
-      return (
-        <OldCatalogCard
-          key={card.id}
-          name={card.name}
-          strength={card.strength}
-          vialPalette={card.vialPalette}
-          price={card.price}
-          pharmacies={card.pharmacies}
-          img={card.img}
-          favorited={fav}
-          onFavorite={() => toggleFav(card.id)}
-          heartVariant={heart}
-          onClick={() => {
-            onProductSelect(card);
-            onNavigate("product-detail");
-          }}
-        />
-      );
-    }
     return <ReferenceProductCard key={card.id} card={card} onClick={() => { onProductSelect(card); onNavigate("product-detail"); }} />;
   }
 
