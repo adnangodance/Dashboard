@@ -1215,7 +1215,11 @@ function ReferenceProductCard({ card, onClick }: { card: CardDef; onClick: () =>
         </button>
         <h3 className="break-words text-[14px] font-semibold leading-[18px] text-[#111]">{card.name}</h3>
         <p className="mt-0.5 text-[12px] leading-[16px] text-[#666]">{card.price}</p>
-        <p className="text-[11px] leading-[15px] text-[#888]">{displaySize}</p>
+        <p className="flex items-center gap-1.5 text-[11px] leading-[15px] text-[#888]">
+          <span>{displaySize}</span>
+          <span aria-hidden="true" className="text-[#bbb]">·</span>
+          <span>{card.dosage}</span>
+        </p>
       </div>
     </article>
   );
@@ -3423,7 +3427,7 @@ function ProductDetailPage({
       </div>}
       <div className={`grid max-w-[1180px] items-start gap-10 ${isReferenceStyle ? "xl:grid-cols-[minmax(0,1.1fr)_minmax(480px,0.9fr)]" : "xl:grid-cols-[minmax(0,1.244fr)_minmax(0,1fr)]"}`}>
         <div className="min-w-0">
-          <div className={`flex h-[600px] items-center justify-center overflow-hidden rounded-[18px] p-16 ${isReferenceStyle ? "bg-[#fafafa]" : `border border-[#e4e4e4] ${productDetailVariant === 2 ? "bg-[#fbfdfc]" : "bg-[#f8f8f8]"}`}`}>
+          <div className={`relative flex h-[600px] items-center justify-center overflow-hidden rounded-[18px] p-16 ${isReferenceStyle ? "bg-[#fafafa]" : `border border-[#e4e4e4] ${productDetailVariant === 2 ? "bg-[#fbfdfc]" : "bg-[#f8f8f8]"}`}`}>
             {product.img === blankVialReference || product.img === blankLyophilizedVialReference ? (
               <ManualVialPreview name={product.name} strength={strength} size={size} palette={product.vialPalette} baseImage={product.img} />
             ) : product.img === blankNasalSprayReference ? (
