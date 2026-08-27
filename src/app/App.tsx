@@ -2069,6 +2069,27 @@ function FavoritesPage({
   );
 }
 
+function CatalogProductSkeleton({ index }: { index: number }) {
+  return (
+    <div
+      className="h-[393px] w-[268px] overflow-hidden rounded-[4px] bg-gradient-to-b from-[#fbfbfb] to-[#f7f7f5]"
+      aria-hidden="true"
+      style={{ animationDelay: `${index * 55}ms` }}
+    >
+      <div className="relative flex h-[285px] items-center justify-center">
+        <div className="absolute left-[18px] top-[18px] size-8 animate-pulse rounded-full bg-[#e9edf3]" />
+        <div className="h-[205px] w-[118px] animate-pulse rounded-[54px_54px_22px_22px] bg-gradient-to-r from-[#ececec] via-[#f7f7f7] to-[#ececec] bg-[length:200%_100%]" />
+      </div>
+      <div className="px-[18px] pt-2">
+        <div className="mb-3 h-6 w-full animate-pulse rounded-full bg-[#eeeeec]" />
+        <div className="h-4 w-[78%] animate-pulse rounded bg-[#e5e5e3]" />
+        <div className="mt-2 h-3 w-[38%] animate-pulse rounded bg-[#ededeb]" />
+        <div className="mt-2 h-3 w-[58%] animate-pulse rounded bg-[#f0f0ee]" />
+      </div>
+    </div>
+  );
+}
+
 function ProductsPage({
   onNavigate,
   cartMode,
@@ -2092,9 +2113,15 @@ function ProductsPage({
   const [dosages, setDosages] = useState<string[]>([]);
   const [openCatalogFilter, setOpenCatalogFilter] = useState<string | null>(null);
   const [catalogFilterSearch, setCatalogFilterSearch] = useState<Record<string, string>>({});
+  const [catalogLoading, setCatalogLoading] = useState(true);
   const { runWithAppLoader, showToast } = useAppLoading();
   const searchRef = useRef<HTMLInputElement>(null);
   const catalogFiltersRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const loadingTimer = window.setTimeout(() => setCatalogLoading(false), 700);
+    return () => window.clearTimeout(loadingTimer);
+  }, []);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -2410,8 +2437,20 @@ function ProductsPage({
         </div>
       )}
 
+      {catalogLoading && (
+        <section className="mb-6" aria-live="polite" aria-busy="true" aria-label="Loading products">
+          <div className="mb-4 flex items-center gap-2">
+            <span className="size-3.5 animate-spin rounded-full border-2 border-[#d9d9d7] border-t-[#121212]" />
+            <h2 className="font-['Inter',sans-serif] text-[18px] font-medium leading-none text-black">Loading products</h2>
+          </div>
+          <div className="grid justify-items-start gap-[13px] [grid-template-columns:repeat(auto-fit,268px)]">
+            {Array.from({ length: 8 }, (_, index) => <CatalogProductSkeleton key={index} index={index} />)}
+          </div>
+        </section>
+      )}
+
       {/* Popular Products */}
-      {(() => {
+      {!catalogLoading && (() => {
         const q = search.toLowerCase();
         const filtered = POPULAR_CARDS.filter(c => {
           const matchesSearch = !q || c.name.toLowerCase().includes(q) || c.price.toLowerCase().includes(q);
@@ -2430,7 +2469,7 @@ function ProductsPage({
       })()}
 
       {/* All Products */}
-      {(() => {
+      {!catalogLoading && (() => {
         const q = search.toLowerCase();
         const filtered = ALL_CARDS.filter(c => {
           const matchesSearch = !q || c.name.toLowerCase().includes(q) || c.price.toLowerCase().includes(q);
@@ -12346,6 +12385,76 @@ function LandingPage({ onLoginClick, onRegisterClick, onRequestDemoClick, onCont
   );
 }
 
+function PageContentSkeleton({ page }: { page: Page }) {
+  const isTablePage = ["orders", "order-history", "pending-approvals", "users"].includes(page);
+  const isCartPage = page === "cart-single" || page === "cart-multi" || page === "checkout-prescription";
+  const isSupportPage = page === "support";
+
+  if (isTablePage) {
+    return (
+      <div aria-live="polite" aria-busy="true" aria-label="Loading page" className="animate-pulse">
+        <div className="h-9 w-56 rounded bg-[#e8e8e6]" />
+        <div className="mt-8 flex items-center justify-between gap-6">
+          <div className="h-10 w-[310px] rounded-[9px] bg-[#eeeeec]" />
+          <div className="flex gap-3"><div className="h-10 w-28 rounded-[9px] bg-[#eeeeec]" /><div className="h-10 w-36 rounded-[9px] bg-[#eeeeec]" /></div>
+        </div>
+        <div className="mt-8 overflow-hidden rounded-[10px]">
+          <div className="grid h-12 grid-cols-[1.2fr_1fr_1fr_1fr_.8fr] items-center gap-8 bg-[#f1f1ef] px-5">
+            {Array.from({ length: 5 }, (_, index) => <div key={index} className="h-3 rounded bg-[#dcdcd9]" />)}
+          </div>
+          {Array.from({ length: 7 }, (_, row) => (
+            <div key={row} className={`grid h-[72px] grid-cols-[1.2fr_1fr_1fr_1fr_.8fr] items-center gap-8 px-5 ${row % 2 ? "bg-[#fafafa]" : "bg-white"}`}>
+              {Array.from({ length: 5 }, (_, column) => <div key={column} className={`h-4 rounded bg-[#e8e8e5] ${column === 0 ? "w-[82%]" : column === 4 ? "w-[60%]" : "w-full"}`} />)}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (isCartPage) {
+    return (
+      <div aria-live="polite" aria-busy="true" aria-label="Loading cart" className="animate-pulse">
+        <div className="h-9 w-24 rounded bg-[#e8e8e6]" />
+        <div className="mt-10 rounded-[12px] bg-[#f7f7f6] p-6">
+          <div className="flex justify-between"><div className="h-6 w-52 rounded bg-[#dededb]" /><div className="h-10 w-64 rounded-[9px] bg-[#e6e6e3]" /></div>
+          {Array.from({ length: 2 }, (_, index) => (
+            <div key={index} className="mt-6 grid min-h-[190px] grid-cols-[120px_1.2fr_1fr_230px] items-center gap-8 bg-white p-6">
+              <div className="mx-auto h-28 w-16 rounded-[24px] bg-[#e9e9e6]" />
+              <div className="space-y-3"><div className="h-5 w-44 rounded bg-[#dededb]" /><div className="h-4 w-56 rounded bg-[#eeeeeb]" /><div className="mt-8 h-10 w-full rounded-[9px] bg-[#f1f1ef]" /></div>
+              <div className="space-y-3"><div className="h-5 w-36 rounded bg-[#e2e2df]" /><div className="h-4 w-52 rounded bg-[#eeeeeb]" /><div className="h-4 w-40 rounded bg-[#eeeeeb]" /></div>
+              <div className="h-11 rounded-full bg-[#e8e8e5]" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (isSupportPage) {
+    return (
+      <div aria-live="polite" aria-busy="true" aria-label="Loading support tickets" className="animate-pulse">
+        <div className="flex items-center justify-between"><div className="h-9 w-52 rounded bg-[#e7e7e4]" /><div className="h-10 w-36 rounded-full bg-[#e4e4e1]" /></div>
+        <div className="mt-8 grid min-h-[650px] grid-cols-[360px_1fr] overflow-hidden rounded-[12px] border border-[#ededeb]">
+          <div className="border-r border-[#ededeb] p-4"><div className="h-10 rounded-[9px] bg-[#ededeb]" />{Array.from({ length: 6 }, (_, index) => <div key={index} className="mt-3 h-[82px] rounded-[9px] bg-[#f3f3f1]" />)}</div>
+          <div className="flex items-center justify-center"><div className="space-y-3 text-center"><div className="mx-auto size-14 rounded-full bg-[#ececea]" /><div className="mx-auto h-5 w-44 rounded bg-[#e4e4e1]" /><div className="mx-auto h-4 w-64 rounded bg-[#eeeeeb]" /></div></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div aria-live="polite" aria-busy="true" aria-label="Loading page" className="animate-pulse">
+      <div className="h-9 w-56 rounded bg-[#e7e7e4]" />
+      <div className="mt-8 flex gap-4"><div className="h-10 w-36 rounded-[9px] bg-[#ededeb]" /><div className="h-10 w-36 rounded-[9px] bg-[#ededeb]" /></div>
+      <div className="mt-8 grid grid-cols-[1.35fr_.9fr] gap-5">
+        <div className="min-h-[520px] rounded-[12px] bg-[#f7f7f5] p-6"><div className="h-6 w-48 rounded bg-[#ddddda]" /><div className="mt-7 h-[360px] rounded-[10px] bg-white" /></div>
+        <div className="space-y-5"><div className="h-[245px] rounded-[12px] bg-[#f3f3f1] p-6"><div className="h-5 w-36 rounded bg-[#ddddda]" /><div className="mt-5 h-12 rounded-[9px] bg-white" /><div className="mt-3 h-12 rounded-[9px] bg-white" /></div><div className="h-[210px] rounded-[12px] bg-[#f3f3f1]" /></div>
+      </div>
+    </div>
+  );
+}
+
 // ─── App Shell ────────────────────────────────────────────────────────────────
 
 export default function App() {
@@ -12359,6 +12468,8 @@ export default function App() {
   const [oldCatalog, setOldCatalog] = useState(() => window.localStorage.getItem("scriptlinkrx-old-catalog") === "true");
   const [pharmacyCatalog, setPharmacyCatalog] = useState(() => window.localStorage.getItem("scriptlinkrx-pharmacy-catalog") === "true");
   const [page, setPage] = useState<Page>(DEFAULT_PAGE);
+  const [pageLoading, setPageLoading] = useState(false);
+  const previousPageRef = useRef<Page>(DEFAULT_PAGE);
   const [cartMode, setCartMode] = useState<CartMode>("single");
   const [multiCartPatientIds, setMultiCartPatientIds] = useState<number[]>([]);
   const [patientCartEntries, setPatientCartEntries] = useState<PatientCartEntry[]>([]);
@@ -12386,6 +12497,18 @@ export default function App() {
   const [platformTourStep, setPlatformTourStep] = useState(0);
   const [platformTourTooltipVisible, setPlatformTourTooltipVisible] = useState(false);
   const [chatInput, setChatInput] = useState("");
+
+  useLayoutEffect(() => {
+    if (previousPageRef.current === page) return;
+    previousPageRef.current = page;
+    if (page === "products") {
+      setPageLoading(false);
+      return;
+    }
+    setPageLoading(true);
+    const pageLoadingTimer = window.setTimeout(() => setPageLoading(false), 560);
+    return () => window.clearTimeout(pageLoadingTimer);
+  }, [page]);
 
   useLayoutEffect(() => {
     if (page !== "product-detail") return;
@@ -12790,7 +12913,7 @@ export default function App() {
             <main ref={mainScrollRef} className="app-main-scroll h-screen min-w-0 flex-1 overflow-y-scroll p-3 pl-1.5">
               <div className="bg-card rounded-[10px] min-h-full p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
                 <div className="w-full max-w-[1400px]">
-                  {renderPage()}
+                  {pageLoading ? <PageContentSkeleton page={page} /> : renderPage()}
                 </div>
               </div>
             </main>
