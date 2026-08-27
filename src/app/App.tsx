@@ -86,6 +86,7 @@ import landingTestosterone from "@/assets/landing-testosterone-cypionate.png";
 import landingTriMix from "@/assets/landing-tri-mix.png";
 import imgProduct452 from "@/imports/ScriptlinkrxProductPage/a7404d4186f9383142485474193c8c2ca1b2259c.png";
 import scriptlinkrxLogo from "@/assets/scriptlinkrx-logo.svg";
+import maxrxLogo from "@/assets/maxrx-logo.svg";
 import scriptlinkrxLandingLogo from "@/assets/scriptlinkrx-landing-logo.png";
 import supportShayne from "@/assets/support-shayne.png";
 import supportZee from "@/assets/support-zee.png";
@@ -10978,13 +10979,14 @@ function LoginPage({ onLogin, onRegister, onSingleSignOn, onBackToLanding }: { o
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-white font-['Inter',sans-serif] text-[#1a1a1a]">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(circle_at_50%_0%,rgba(219,232,255,0.9),rgba(237,244,255,0.55)_38%,rgba(255,255,255,0)_76%)]" />
+      <div className={`pointer-events-none absolute inset-0 ${loginRole === "pharmacy" ? "bg-[radial-gradient(ellipse_72%_82%_at_50%_0%,#ffe1e5_0%,#ffedf0_30%,#fff5f6_52%,#fffafa_70%,#ffffff_88%)]" : "bg-[radial-gradient(ellipse_72%_82%_at_50%_0%,#dce9ff_0%,#eaf2ff_30%,#f4f8ff_52%,#fbfdff_70%,#ffffff_88%)]"}`} />
       <div className="relative mx-auto flex min-h-screen w-full max-w-[620px] flex-col items-center px-6 pt-7">
-        <button type="button" onClick={onBackToLanding} className="flex cursor-pointer items-center gap-2.5 rounded-[8px] px-2 py-1 transition-opacity hover:opacity-70" aria-label="Return to landing page">
-          <img src={scriptlinkrxLogo} alt="ScriptLinkRx" className="h-[30px] w-9 object-contain" />
-          <span className="font-['Poppins',sans-serif] text-[18px] font-semibold uppercase tracking-wide text-[#183229]">
-            S<span className="lowercase">CRIPTLINKrx</span>
-          </span>
+        <button type="button" onClick={onBackToLanding} className="flex min-h-[42px] cursor-pointer items-center gap-2.5 rounded-[8px] px-2 py-1 transition-opacity hover:opacity-70" aria-label="Return to landing page">
+          {loginRole === "pharmacy" ? (
+            <img src={maxrxLogo} alt="MaxRx" className="h-[38px] w-auto object-contain" />
+          ) : (
+            <><img src={scriptlinkrxLogo} alt="ScriptLinkRx" className="h-[30px] w-9 object-contain" /><span className="font-['Poppins',sans-serif] text-[18px] font-semibold uppercase tracking-wide text-[#183229]">S<span className="lowercase">CRIPTLINKrx</span></span></>
+          )}
         </button>
 
         <section className="mt-[110px] w-full max-w-[430px] text-center">
@@ -11044,7 +11046,7 @@ function LoginPage({ onLogin, onRegister, onSingleSignOn, onBackToLanding }: { o
               </button>
             </p>
             <p>
-              Are you a Pharmacy user?{" "}
+              Are you a MaxRx user?{" "}
               <button type="button" onClick={() => setLoginRole("pharmacy")} className="inline cursor-pointer align-baseline text-[12px] font-medium leading-none text-[#6f7782] transition-colors hover:text-[#1a1a1a]">
                 Login here
               </button>
