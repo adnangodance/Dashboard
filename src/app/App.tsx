@@ -10427,31 +10427,35 @@ function MultiPatientCartPage({
                 </div>
               )}
               {!previewSubmitted && reviewVariant === "v1" && (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   <div>
-                    <p className="text-[16px] font-semibold leading-[20px] text-[#171717]">Who will pay for this order?</p>
-                    <p className="mb-3 mt-1 text-[10px] text-[#7d838d]">Choose a payment method</p>
-                    <div className="space-y-2">
-                      {([['patient', 'Pay by Patient', 'The patient receives a secure payment request.'], ['clinic', 'Pay by Clinic', "Charge the clinic's saved payment method."]] as const).map(([value, title, description]) => (
-                        <button key={value} type="button" onClick={() => setPaymentMethod(value)} className={`flex min-h-[62px] w-full items-start gap-3 rounded-[9px] border bg-white px-4 py-3 text-left transition-all ${paymentMethod === value ? "border-[#2563eb] ring-1 ring-[#2563eb]" : "border-[#dfe2e6] hover:border-[#aeb9cf]"}`}>
-                          <span className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border ${paymentMethod === value ? "border-[#2563eb]" : "border-[#c4c8cf]"}`}>{paymentMethod === value && <span className="size-2 rounded-full bg-[#2563eb]" />}</span>
-                          <span><span className="block text-[11px] font-semibold text-[#202124]">{title}</span><span className="mt-1 block text-[9px] text-[#7d838d]">{description}</span></span>
-                        </button>
-                      ))}
+                    <p className="mb-3 text-[16px] font-medium text-[#181818]">Payment</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button type="button" onClick={() => setPaymentMethod("patient")} className={`relative inline-flex h-9 items-center gap-2 rounded-[7px] border px-3 text-[11px] font-semibold transition-colors ${paymentMethod === "patient" ? "border-2 border-[#2563EB] bg-white text-[#171a20]" : "border-[#d8dedd] bg-white text-[#6f7782] hover:border-[#9fa8b5]"}`}>
+                        {paymentMethod === "patient" && <CheckCircle2 size={16} strokeWidth={2.2} className="absolute -right-2 -top-2 fill-[#2563EB] text-white" />}
+                        <User size={13} strokeWidth={1.8} /> Pay by Patient
+                      </button>
+                      <button type="button" onClick={() => setPaymentMethod("clinic")} className={`relative inline-flex h-9 items-center gap-2 rounded-[7px] border px-3 text-[11px] font-semibold transition-colors ${paymentMethod === "clinic" ? "border-2 border-[#2563EB] bg-white text-[#171a20]" : "border-[#d8dedd] bg-white text-[#6f7782] hover:border-[#9fa8b5]"}`}>
+                        {paymentMethod === "clinic" && <CheckCircle2 size={16} strokeWidth={2.2} className="absolute -right-2 -top-2 fill-[#2563EB] text-white" />}
+                        <Building2 size={13} strokeWidth={1.8} /> Pay by Clinic
+                      </button>
                     </div>
-                    <button type="button" className="mt-2.5 text-[10px] font-medium text-[#2563eb] hover:text-[#1d4ed8]">+ Add credit card</button>
+                    <button type="button" className="mt-2.5 text-[10px] font-medium text-[#2563EB] transition-colors hover:text-[#1D4ED8]">+ Add credit card</button>
+                    <p className="mt-2 text-[10px] text-[#7a837f]">Choose who will pay for this order.</p>
                   </div>
                   <div>
-                    <p className="text-[16px] font-semibold leading-[20px] text-[#171717]">Where should we ship it?</p>
-                    <p className="mb-3 mt-1 text-[10px] text-[#7d838d]">Choose a delivery destination</p>
-                    <div className="space-y-2">
-                      {([['patient', 'Ship to Patient', "Deliver directly to the patient's address."], ['clinic', 'Ship to Clinic', 'Send the complete order to the clinic.']] as const).map(([value, title, description]) => (
-                        <button key={value} type="button" onClick={() => setShipTo(value)} className={`flex min-h-[62px] w-full items-start gap-3 rounded-[9px] border bg-white px-4 py-3 text-left transition-all ${shipTo === value ? "border-[#2563eb] ring-1 ring-[#2563eb]" : "border-[#dfe2e6] hover:border-[#aeb9cf]"}`}>
-                          <span className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border ${shipTo === value ? "border-[#2563eb]" : "border-[#c4c8cf]"}`}>{shipTo === value && <span className="size-2 rounded-full bg-[#2563eb]" />}</span>
-                          <span><span className="block text-[11px] font-semibold text-[#202124]">{title}</span><span className="mt-1 block text-[9px] text-[#7d838d]">{description}</span></span>
-                        </button>
-                      ))}
+                    <p className="mb-3 text-[16px] font-medium text-[#181818]">Shipping</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button type="button" onClick={() => setShipTo("patient")} className={`relative inline-flex h-9 items-center gap-2 rounded-[7px] border px-3 text-[11px] font-semibold transition-colors ${shipTo === "patient" ? "border-2 border-[#2563EB] bg-white text-[#171a20]" : "border-[#d8dedd] bg-white text-[#6f7782] hover:border-[#9fa8b5]"}`}>
+                        {shipTo === "patient" && <CheckCircle2 size={16} strokeWidth={2.2} className="absolute -right-2 -top-2 fill-[#2563EB] text-white" />}
+                        <User size={13} strokeWidth={1.8} /> Ship to Patient
+                      </button>
+                      <button type="button" onClick={() => setShipTo("clinic")} className={`relative inline-flex h-9 items-center gap-2 rounded-[7px] border px-3 text-[11px] font-semibold transition-colors ${shipTo === "clinic" ? "border-2 border-[#2563EB] bg-white text-[#171a20]" : "border-[#d8dedd] bg-white text-[#6f7782] hover:border-[#9fa8b5]"}`}>
+                        {shipTo === "clinic" && <CheckCircle2 size={16} strokeWidth={2.2} className="absolute -right-2 -top-2 fill-[#2563EB] text-white" />}
+                        <Building2 size={13} strokeWidth={1.8} /> Ship to Clinic
+                      </button>
                     </div>
+                    <p className="mt-2 text-[10px] text-[#7a837f]">{shipTo === "clinic" ? "You can select multiple patients for one clinic shipment." : "The order will be delivered to the patient address."}</p>
                   </div>
                 </div>
               )}
