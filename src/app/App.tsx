@@ -8916,7 +8916,6 @@ function SinglePatientCartPage({
                   <div className="space-y-2.5 text-[12px]">
                     <div className="flex justify-between"><span className="text-[#737373]">Subtotal</span><span className="text-[#202020]">${subtotal.toFixed(2)}</span></div>
                     <div className="flex justify-between"><span className="text-[#737373]">Shipping &amp; handling</span><span className="text-[#202020]">{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span></div>
-                    <div className="flex justify-between"><span className="text-[#737373]">Estimated tax</span><span className="text-[#202020]">—</span></div>
                   </div>
                   <div className="my-4 border-t border-dashed border-[#cfcfcf]" />
                   <div className="flex items-center justify-between text-[15px] font-semibold text-[#171717]">
@@ -10341,7 +10340,7 @@ function MultiPatientCartPage({
               </div>
             </section>
 
-            <section className={`py-5 ${reviewVariant === "v2" ? "border-b border-dashed border-[#cfcfcf]" : "border-b border-[#e8e8e8]"}`}>
+            <section className={`py-5 ${reviewVariant !== "v1" ? "border-b border-dashed border-[#cfcfcf]" : "border-b border-[#e8e8e8]"}`}>
               <div className="pb-1">
                 <p className="text-[16px] font-medium text-[#181818]">Prescriptions</p>
               </div>
@@ -10349,7 +10348,7 @@ function MultiPatientCartPage({
                 const supplies = patient.items.filter(candidate => candidate.kind === "supply" && !removed.has(candidate.id));
                 const quantity = quantities[item.id] ?? 1;
                 return (
-                  <div key={item.id} className={`mt-3 p-4 ${reviewVariant === "v2" ? "border-t border-dashed border-[#d6d6d6] bg-white px-0 shadow-none" : "rounded-[10px] border border-[#e3e5e8] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.035)]"}`}>
+                  <div key={item.id} className={`mt-3 p-4 ${reviewVariant !== "v1" ? "border-t border-dashed border-[#d6d6d6] bg-white px-0 shadow-none" : "rounded-[10px] border border-[#e3e5e8] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.035)]"}`}>
                     <div className="flex items-center gap-2 border-b border-[#ededed] pb-3">
                       <p className="min-w-0 truncate text-[11px] font-medium text-[#222]">Prescription {prescriptionNumber}</p>
                     </div>
@@ -10421,7 +10420,6 @@ function MultiPatientCartPage({
                     <div className="space-y-2.5 text-[12px]">
                       <div className="flex justify-between"><span className="text-[#737373]">Subtotal</span><span className="text-[#202020]">${subtotal.toFixed(2)}</span></div>
                       <div className="flex justify-between"><span className="text-[#737373]">Shipping &amp; handling</span><span className="text-[#202020]">{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span></div>
-                      <div className="flex justify-between"><span className="text-[#737373]">Estimated tax</span><span className="text-[#202020]">—</span></div>
                     </div>
                     <div className="my-4 border-t border-dashed border-[#cfcfcf]" />
                     <div className="flex items-center justify-between text-[15px] font-semibold text-[#171717]"><span>Total</span><span>${total.toFixed(2)}</span></div>
@@ -10571,7 +10569,6 @@ function MultiPatientCartPage({
               <div className="space-y-3 text-[13px]">
                 <div className="flex justify-between text-[#222]"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
                 <div className="flex justify-between text-[#222]"><span>Estimated Shipping &amp; Handling</span><span>{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span></div>
-                <div className="flex justify-between text-[#222]"><span>Estimated Tax <span className="ml-1 inline-flex size-3 items-center justify-center rounded-full bg-[#222] text-[8px] text-white">?</span></span><span>—</span></div>
                 <div className="flex justify-between border-y border-[#ededed] py-4 text-[14px] font-semibold text-[#1a1a1a]"><span>Total</span><span>${total.toFixed(2)}</span></div>
               </div>
             </section>
